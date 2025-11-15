@@ -1,17 +1,21 @@
-import { Box, Container, Typography } from '@mui/material'
+import { Box } from '@mui/material'
+import { HeroSection } from '../../components/website'
+import { AboutPage } from '../about'
 
-function HomePage() {
+interface HomePageProps {
+  dealerSidebarOpen: boolean
+  setDealerSidebarOpen: (open: boolean) => void
+}
+
+function HomePage({ dealerSidebarOpen, setDealerSidebarOpen }: HomePageProps) {
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Home Page
-        </Typography>
-        <Typography variant="body1">
-          Welcome to JS Car Wash & Detailing
-        </Typography>
-      </Box>
-    </Container>
+    <Box>
+      <HeroSection 
+        dealerSidebarOpen={dealerSidebarOpen}
+        setDealerSidebarOpen={setDealerSidebarOpen}
+      />
+      <AboutPage />
+    </Box>
   )
 }
 
