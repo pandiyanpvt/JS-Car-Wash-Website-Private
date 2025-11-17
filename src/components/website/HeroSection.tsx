@@ -2,6 +2,7 @@ import { Box, Typography, Button, IconButton, useMediaQuery, useTheme, Drawer, L
 import { PlayArrow, ArrowForward, ArrowBack, KeyboardArrowDown, Menu, Close, Home, Info, Build, PhotoLibrary, ContactMail } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import FindDealerSidebar from './FindDealerSidebar'
 
 interface HeroSectionProps {
@@ -17,12 +18,23 @@ function HeroSection({ dealerSidebarOpen, setDealerSidebarOpen }: HeroSectionPro
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
 
   const menuItems = [
-    { label: 'Home', href: '#home', icon: Home },
-    { label: 'About Us', href: '#about', icon: Info },
-    { label: 'Services', href: '#services', icon: Build },
-    { label: 'Gallery', href: '#gallery', icon: PhotoLibrary },
-    { label: 'Contact Us', href: '#contact', icon: ContactMail }
+    { label: 'Home', href: '#home', icon: Home, isRoute: false },
+    { label: 'About Us', href: '#about', icon: Info, isRoute: false },
+    { label: 'Services', href: '#services', icon: Build, isRoute: false },
+    { label: 'Gallery', href: '/gallery', icon: PhotoLibrary, isRoute: true },
+    { label: 'Contact Us', href: '#contact', icon: ContactMail, isRoute: false }
   ]
+
+  const handleNavClick = (href: string, isRoute: boolean) => {
+    setMenuOpen(false)
+    if (!isRoute && href.startsWith('#')) {
+      const elementId = href.substring(1)
+      const element = document.getElementById(elementId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+  }
 
   const handlePrev = () => {
     setCurrentPage((prev) => (prev > 1 ? prev - 1 : totalPages))
@@ -44,18 +56,22 @@ function HeroSection({ dealerSidebarOpen, setDealerSidebarOpen }: HeroSectionPro
         position: 'relative',
       }}
     >
-      {/* Hamburger Menu Button */}
+      {/* Hamburger Menu Button - Sticky */}
       <IconButton
         onClick={() => setMenuOpen(true)}
         sx={{
-          position: 'absolute',
+          position: 'fixed',
           top: { xs: 16, md: 24 },
           left: { xs: 16, md: 24 },
           zIndex: 1000,
           color: '#000',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          transition: 'all 0.3s ease',
           '&:hover': {
             backgroundColor: 'rgba(255, 255, 255, 1)',
+            transform: 'scale(1.05)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           },
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
         }}
@@ -158,9 +174,13 @@ function HeroSection({ dealerSidebarOpen, setDealerSidebarOpen }: HeroSectionPro
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <ListItem
-                  component="a"
-                  href={item.href}
-                  onClick={() => setMenuOpen(false)}
+                  component={item.isRoute ? Link : 'a'}
+                  to={item.isRoute ? item.href : undefined}
+                  href={item.isRoute ? undefined : item.href}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleNavClick(item.href, item.isRoute)
+                  }}
                   sx={{
                     py: { xs: 2, md: 2.5 },
                     px: { xs: 2.5, md: 3 },

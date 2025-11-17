@@ -24,7 +24,7 @@ function ContactUsPage() {
   }
 
   return (
-    <div className="contact-page">
+    <div className="contact-page" id="contact">
       <div className="container">
         {/* Contact Us Heading */}
         <div className="contact-heading-section">

@@ -1,6 +1,9 @@
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import './FooterPage.css'
 
 function FooterPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const services = [
     'Hand Polish',
     'Clay Bar',
@@ -18,15 +21,44 @@ function FooterPage() {
   ]
 
   const usefulLinks = [
-    'Home',
-    'About Us',
-    'Our Services',
-    'Faq',
-    'Gallery',
-    'Our Testimonial',
-    'Contact Us',
-    'Blog'
+    { label: 'Home', href: '#home', isRoute: false },
+    { label: 'About Us', href: '#about', isRoute: false },
+    { label: 'Our Services', href: '#services', isRoute: false },
+    { label: 'Faq', href: '#faq', isRoute: false },
+    { label: 'Gallery', href: '/gallery', isRoute: true },
+    { label: 'Our Testimonial', href: '#testimonial', isRoute: false },
+    { label: 'Contact Us', href: '#contact', isRoute: false },
+    { label: 'Blog', href: '#blog', isRoute: false }
   ]
+
+  const handleFooterLinkClick = (href: string, isRoute: boolean, e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isRoute && href.startsWith('#')) {
+      e.preventDefault()
+      const elementId = href.substring(1)
+      
+      // If not on home page, navigate to home first, then scroll
+      if (location.pathname !== '/') {
+        navigate('/')
+        // Wait for navigation and DOM update, then scroll
+        const scrollToElement = () => {
+          const element = document.getElementById(elementId)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          } else {
+            // Retry if element not found yet
+            setTimeout(scrollToElement, 50)
+          }
+        }
+        setTimeout(scrollToElement, 200)
+      } else {
+        // Already on home page, just scroll
+        const element = document.getElementById(elementId)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }
+    }
+  }
 
   return (
     <footer className="footer-page">
@@ -50,7 +82,17 @@ function FooterPage() {
             <ul className="footer-links-list">
               {usefulLinks.map((link, index) => (
                 <li key={index} className="footer-link-item">
-                  <a href="#" className="footer-link">{link}</a>
+                  {link.isRoute ? (
+                    <Link to={link.href} className="footer-link">{link.label}</Link>
+                  ) : (
+                    <a 
+                      href={link.href} 
+                      className="footer-link"
+                      onClick={(e) => handleFooterLinkClick(link.href, link.isRoute, e)}
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
