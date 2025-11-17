@@ -3,7 +3,7 @@ import './AboutPage.css'
 
 function AboutPage() {
   return (
-    <div className="about-page">
+    <div className="about-page" id="about">
       {/* Benefit of Service Section */}
       <section className="benefit-section">
         <div className="container">

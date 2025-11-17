@@ -63,7 +63,7 @@ function ServicePage() {
   })
 
   return (
-    <div className="service-page">
+    <div className="service-page" id="services">
       {/* Full-Service Detailing Section */}
       <section className="detailing-section">
         <div className="container">
