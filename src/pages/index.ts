@@ -1,6 +1,5 @@
 // Main Pages
 export { HomePage } from './home'
-export { AboutPage } from './about'
 export { ServicesPage, CarWash, CarDetailing } from './services'
 export { ProductsPage } from './products'
 export {

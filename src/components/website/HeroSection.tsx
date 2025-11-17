@@ -1,5 +1,5 @@
-import { Box, Typography, Button, IconButton, useMediaQuery, useTheme } from '@mui/material'
-import { PlayArrow, ArrowForward, ArrowBack, KeyboardArrowDown } from '@mui/icons-material'
+import { Box, Typography, Button, IconButton, useMediaQuery, useTheme, Drawer, List, ListItem, ListItemText } from '@mui/material'
+import { PlayArrow, ArrowForward, ArrowBack, KeyboardArrowDown, Menu, Close, Home, Info, Build, PhotoLibrary, ContactMail } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import FindDealerSidebar from './FindDealerSidebar'
@@ -11,9 +11,18 @@ interface HeroSectionProps {
 
 function HeroSection({ dealerSidebarOpen, setDealerSidebarOpen }: HeroSectionProps) {
   const [currentPage, setCurrentPage] = useState(1)
+  const [menuOpen, setMenuOpen] = useState(false)
   const totalPages = 6
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
+
+  const menuItems = [
+    { label: 'Home', href: '#home', icon: Home },
+    { label: 'About Us', href: '#about', icon: Info },
+    { label: 'Services', href: '#services', icon: Build },
+    { label: 'Gallery', href: '#gallery', icon: PhotoLibrary },
+    { label: 'Contact Us', href: '#contact', icon: ContactMail }
+  ]
 
   const handlePrev = () => {
     setCurrentPage((prev) => (prev > 1 ? prev - 1 : totalPages))
@@ -32,8 +41,259 @@ function HeroSection({ dealerSidebarOpen, setDealerSidebarOpen }: HeroSectionPro
         overflow: 'hidden',
         width: '100%',
         maxHeight: '100vh',
+        position: 'relative',
       }}
     >
+      {/* Hamburger Menu Button */}
+      <IconButton
+        onClick={() => setMenuOpen(true)}
+        sx={{
+          position: 'absolute',
+          top: { xs: 16, md: 24 },
+          left: { xs: 16, md: 24 },
+          zIndex: 1000,
+          color: '#000',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+          },
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <Menu sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }} />
+      </IconButton>
+
+      {/* Navigation Drawer */}
+      <Drawer
+        anchor="left"
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        PaperProps={{
+          className: 'dark-scrollbar',
+          sx: {
+            width: { xs: '320px', sm: '380px', md: '420px' },
+            background: 'linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%)',
+            color: '#ffffff',
+            boxShadow: '4px 0 24px rgba(0, 0, 0, 0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+        sx={{
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)',
+          },
+        }}
+      >
+        {/* Header with Logo and Close */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: { xs: 3, md: 4 },
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'linear-gradient(135deg, rgba(211, 47, 47, 0.1) 0%, transparent 100%)',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              sx={{
+                '& img': {
+                  maxHeight: { xs: '35px', md: '40px' },
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                },
+              }}
+            >
+              <img
+                src="/JS Car Wash Images/cropped-fghfthgf.png"
+                alt="Logo"
+              />
+            </Box>
+            <Typography
+              sx={{
+                fontSize: { xs: '1.125rem', md: '1.25rem' },
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                background: 'linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Navigation
+            </Typography>
+          </Box>
+          <IconButton
+            onClick={() => setMenuOpen(false)}
+            sx={{
+              color: '#ffffff',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                backgroundColor: 'rgba(211, 47, 47, 0.2)',
+                borderColor: '#d32f2f',
+                transform: 'rotate(90deg)',
+              },
+            }}
+          >
+            <Close />
+          </IconButton>
+        </Box>
+
+        {/* Navigation List */}
+        <List sx={{ pt: { xs: 2, md: 3 }, px: { xs: 1, md: 2 }, flex: 1, overflow: 'auto' }}>
+          {menuItems.map((item, index) => {
+            const IconComponent = item.icon
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <ListItem
+                  component="a"
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  sx={{
+                    py: { xs: 2, md: 2.5 },
+                    px: { xs: 2.5, md: 3 },
+                    mb: 1,
+                    cursor: 'pointer',
+                    borderRadius: '12px',
+                    border: '1px solid transparent',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: '4px',
+                      background: 'linear-gradient(180deg, #d32f2f 0%, #ff6b6b 100%)',
+                      transform: 'scaleY(0)',
+                      transformOrigin: 'bottom',
+                      transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(211, 47, 47, 0.15)',
+                      borderColor: 'rgba(211, 47, 47, 0.3)',
+                      transform: 'translateX(8px)',
+                      '&::before': {
+                        transform: 'scaleY(1)',
+                      },
+                      '& .menu-icon': {
+                        backgroundColor: 'rgba(211, 47, 47, 0.2)',
+                        borderColor: '#d32f2f',
+                        transform: 'scale(1.1)',
+                        '& .MuiSvgIcon-root': {
+                          color: '#d32f2f',
+                          transform: 'scale(1.2)',
+                        },
+                      },
+                      '& .MuiListItemText-primary': {
+                        color: '#ffffff',
+                        transform: 'translateX(4px)',
+                      },
+                      '& .menu-arrow': {
+                        color: '#d32f2f',
+                        transform: 'translateX(4px)',
+                      },
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      width: '100%',
+                    }}
+                  >
+                    <Box
+                      className="menu-icon"
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: { xs: '40px', md: '44px' },
+                        height: { xs: '40px', md: '44px' },
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                    >
+                      <IconComponent
+                        sx={{
+                          fontSize: { xs: '1.25rem', md: '1.375rem' },
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                      />
+                    </Box>
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontSize: { xs: '0.9375rem', md: '1rem' },
+                        fontWeight: 500,
+                        letterSpacing: '1.5px',
+                        textTransform: 'uppercase',
+                      }}
+                      sx={{
+                        '& .MuiListItemText-primary': {
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        },
+                      }}
+                    />
+                    <ArrowForward
+                      className="menu-arrow"
+                      sx={{
+                        fontSize: { xs: '1rem', md: '1.125rem' },
+                        color: 'rgba(255, 255, 255, 0.4)',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        ml: 'auto',
+                      }}
+                    />
+                  </Box>
+                </ListItem>
+              </motion.div>
+            )
+          })}
+        </List>
+
+        {/* Footer Section */}
+        <Box
+          sx={{
+            mt: 'auto',
+            p: { xs: 3, md: 4 },
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'linear-gradient(135deg, rgba(211, 47, 47, 0.05) 0%, transparent 100%)',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              color: 'rgba(255, 255, 255, 0.5)',
+              textAlign: 'center',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+            }}
+          >
+            JS Car Wash & Detailing
+          </Typography>
+        </Box>
+      </Drawer>
+
       {/* Left Section - White Background (2/3) */}
       <Box
         sx={{
