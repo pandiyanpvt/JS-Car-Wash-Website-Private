@@ -1,6 +1,9 @@
 import { Box } from '@mui/material'
 import { HeroSection } from '../../components/website'
 import { AboutPage } from '../about'
+import { ServicePage } from '../services'
+import { ContactUsPage } from '../contact'
+import { FooterPage } from '../footer'
 
 interface HomePageProps {
   dealerSidebarOpen: boolean
@@ -15,6 +18,9 @@ function HomePage({ dealerSidebarOpen, setDealerSidebarOpen }: HomePageProps) {
         setDealerSidebarOpen={setDealerSidebarOpen}
       />
       <AboutPage />
+      <ServicePage />
+      <ContactUsPage />
+      <FooterPage />
     </Box>
   )
 }
