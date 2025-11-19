@@ -1,11 +1,12 @@
 import { HomePage } from './pages/home'
 import { GalleryPage } from './pages/gallery'
+import { AboutPage } from './pages/about'
+import { ServicePage } from './pages/services'
+import { ContactUsPage } from './pages/contact'
 import { Box } from '@mui/material'
-import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
-  const [dealerSidebarOpen, setDealerSidebarOpen] = useState(false)
 
   return (
     <BrowserRouter>
@@ -23,11 +24,12 @@ function App() {
             path="/"
             element={
               <HomePage
-                dealerSidebarOpen={dealerSidebarOpen}
-                setDealerSidebarOpen={setDealerSidebarOpen}
               />
             }
           />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/services" element={<ServicePage />} />
+          <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
         </Routes>
       </Box>

@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion'
+import { FooterPage } from '../footer'
+import Navbar from '../../components/navbar/Navbar'
 import './ServicePage.css'
 
 function ServicePage() {
@@ -64,6 +66,7 @@ function ServicePage() {
 
   return (
     <div className="service-page" id="services">
+      <Navbar className="fixed-navbar" />
       {/* Full-Service Detailing Section */}
       <section className="detailing-section">
         <div className="container">
@@ -165,6 +168,7 @@ function ServicePage() {
           </div>
         </div>
       </section>
+      <FooterPage />
     </div>
   )
 }
