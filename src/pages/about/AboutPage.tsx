@@ -1,9 +1,12 @@
 import { motion } from 'framer-motion'
+import { FooterPage } from '../footer'
+import Navbar from '../../components/navbar/Navbar'
 import './AboutPage.css'
 
 function AboutPage() {
   return (
     <div className="about-page" id="about">
+      <Navbar className="fixed-navbar" />
       {/* Benefit of Service Section */}
       <section className="benefit-section">
         <div className="container">
@@ -156,6 +159,7 @@ function AboutPage() {
           </div>
         </div>
       </section>
+      <FooterPage />
     </div>
   )
 }

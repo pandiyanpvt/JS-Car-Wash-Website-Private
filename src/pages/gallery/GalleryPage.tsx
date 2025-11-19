@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
 import { FooterPage } from '../footer'
+import Navbar from '../../components/navbar/Navbar'
 import './GalleryPage.css'
 
 // Gallery page component with navbar, gallery cards, and footer
@@ -13,13 +13,6 @@ interface GalleryImage {
 }
 
 function GalleryPage() {
-  const menuItems = [
-    { label: 'Home', href: '/', isRoute: true },
-    { label: 'About Us', href: '#about', isRoute: false },
-    { label: 'Services', href: '#services', isRoute: false },
-    { label: 'Gallery', href: '/gallery', isRoute: true },
-    { label: 'Contact Us', href: '#contact', isRoute: false }
-  ]
 
   const galleryImages: GalleryImage[] = [
     { id: 1, src: '/JS Car Wash Images/02-min.jpg', alt: 'Car Wash Service 1' },
@@ -50,33 +43,7 @@ function GalleryPage() {
 
   return (
     <div className="gallery-page">
-      {/* Navbar */}
-      <nav className="gallery-navbar">
-        <div className="navbar-container">
-          <div className="navbar-logo">
-            <Link to="/">
-              <img src="/JS Car Wash Images/cropped-fghfthgf.png" alt="JS Car Wash Logo" className="logo-img" />
-            </Link>
-          </div>
-          
-          <ul className="navbar-menu">
-            {menuItems.map((item, index) => (
-              <li key={index} className="navbar-menu-item">
-                {item.isRoute ? (
-                  <Link to={item.href} className="navbar-link">
-                    {item.label}
-                  </Link>
-                ) : (
-                  <a href={item.href} className="navbar-link">
-                    {item.label}
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
-
+      <Navbar className="fixed-navbar" />
       {/* Gallery Header */}
       <section className="gallery-header">
         <div className="container">

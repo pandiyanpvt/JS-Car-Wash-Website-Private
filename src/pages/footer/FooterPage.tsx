@@ -21,13 +21,13 @@ function FooterPage() {
   ]
 
   const usefulLinks = [
-    { label: 'Home', href: '#home', isRoute: false },
-    { label: 'About Us', href: '#about', isRoute: false },
-    { label: 'Our Services', href: '#services', isRoute: false },
+    { label: 'Home', href: '/', isRoute: true },
+    { label: 'About Us', href: '/about', isRoute: true },
+    { label: 'Our Services', href: '/services', isRoute: true },
     { label: 'Faq', href: '#faq', isRoute: false },
     { label: 'Gallery', href: '/gallery', isRoute: true },
     { label: 'Our Testimonial', href: '#testimonial', isRoute: false },
-    { label: 'Contact Us', href: '#contact', isRoute: false },
+    { label: 'Contact Us', href: '/contact', isRoute: true },
     { label: 'Blog', href: '#blog', isRoute: false }
   ]
 
