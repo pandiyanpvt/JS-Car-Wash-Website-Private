@@ -28,22 +28,14 @@ function ContactUsPage() {
   return (
     <div className="contact-page" id="contact">
       <Navbar className="fixed-navbar" />
-      <div className="container">
-        {/* Contact Us Heading */}
-        <div className="contact-heading-section">
-          <div className="contact-heading-icon">
-            <img
-              src="/JS Car Wash Images/Icon-title-lager.svg"
-              alt="Icon"
-              className="heading-icon-img"
-            />
-          </div>
-          <h1 className="contact-main-heading">Contact Us</h1>
-          <p className="contact-heading-description">
-            Get in touch with us for any inquiries or feedback
-          </p>
+      {/* Page Heading Section */}
+      <section className="page-heading-section">
+        <div className="page-heading-overlay"></div>
+        <div className="page-heading-content">
+          <h1 className="page-heading-title">Contact Us</h1>
         </div>
-
+      </section>
+      <div className="container">
         {/* Contact Info Section */}
         <div className="contact-info-section">
           <div className="contact-info-grid">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link, useLocation } from 'react-router-dom'
 import { FooterPage } from '../footer'
-import Navbar from '../../components/navbar/Navbar'
 import './HomePage.css'
 
 interface HomePageProps {}
@@ -9,7 +9,94 @@ interface HomePageProps {}
 function HomePage({}: HomePageProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
+  const [modelsShow, setModelsShow] = useState(false)
+  const [dealersShow, setDealersShow] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+  const [faqClickedIndex, setFaqClickedIndex] = useState<number | null>(null)
+  const headerContainerRef = useRef<HTMLDivElement>(null)
+  const pageContainerRef = useRef<HTMLDivElement>(null)
+  const [containerPosition, setContainerPosition] = useState({ top: 0, left: 0, width: 0, height: 0 })
   const totalPages = 6
+  const location = useLocation()
+
+  // Branches data
+  const branches = [
+    {
+      name: 'JS CAR WASH',
+      subtitle: 'SERVICE DUBBO',
+      address: '66-72 Windsor parade, Dubbo, 2830, NSW',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
+    },
+    {
+      name: 'JS CAR WASH',
+      subtitle: 'SERVICE DUBBO',
+      address: '66-72 Windsor parade, Dubbo, 2830, NSW',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
+    }
+  ]
+
+  const navItems = [
+    { label: 'Home', href: '/', route: true },
+    { label: 'AboutUs', href: '/aboutus', route: true },
+    { label: 'Services', href: '/services', route: true, hasDropdown: true },
+    { label: 'Contact Us', href: '/contact', route: true },
+    { label: 'BOOK NOW', href: '/login', route: true }
+  ]
+
+  const servicesSubItems = [
+    { label: 'Car Wash', href: '/carwash', route: true },
+    { label: 'Car Detailing', href: '/cardetailing', route: true }
+  ]
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return location.pathname === '/'
+    }
+    return location.pathname === href
+  }
+
+  const isServicesActive = () => {
+    return location.pathname === '/services' || 
+           location.pathname === '/carwash' || 
+           location.pathname === '/cardetailing'
+  }
+
+  const isDropdownItemActive = (href: string) => {
+    return location.pathname === href
+  }
+
+  const handleNavClick = (href: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+    }
+    setMenuOpen(false)
+    setMobileServicesOpen(false)
+    window.location.href = href
+  }
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (menuOpen && !target.closest('.header-hamburger-btn') && !target.closest('.mobile-menu-overlay')) {
+        setMenuOpen(false)
+        setMobileServicesOpen(false)
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.body.style.overflow = 'unset'
+    }
+  }, [menuOpen])
 
   // Services data
   const services = [
@@ -96,6 +183,58 @@ function HomePage({}: HomePageProps) {
     }
   }, [services.length, scrollSpeed])
 
+
+  // Update container position for modelshow
+  useEffect(() => {
+    const updatePosition = () => {
+      if (pageContainerRef.current) {
+        const rect = pageContainerRef.current.getBoundingClientRect()
+        setContainerPosition({
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height
+        })
+      }
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition)
+
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition)
+    }
+  }, [modelsShow])
+
+  const handleDiscoverModels = () => {
+    if (headerContainerRef.current) {
+      const rect = headerContainerRef.current.getBoundingClientRect()
+      // Check if container is fully visible in viewport
+      const isVisible = rect.top >= 0 && rect.top < window.innerHeight && rect.bottom <= window.innerHeight
+      
+      if (!isVisible) {
+        // Scroll to the header container quickly
+        headerContainerRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        })
+        
+        // Reduced wait time for faster response
+        setTimeout(() => {
+          setModelsShow(true)
+        }, 300) // Faster response time
+      } else {
+        // Already visible, show overlay immediately
+        setModelsShow(true)
+      }
+    } else {
+      // Fallback if ref is not available
+      setModelsShow(true)
+    }
+  }
+
   const handlePrev = () => {
     setCurrentPage((prev) => (prev > 1 ? prev - 1 : totalPages))
   }
@@ -123,91 +262,188 @@ function HomePage({}: HomePageProps) {
 
   return (
     <div className="home-page">
-      {/* Merged Header and Main Container */}
-      <div className="home-header-container">
-        {/* Header with Hamburger and Logo - Split Design */}
-        <header className="home-header">
-        {/* Left 50% - White Background */}
-        <div className="header-left-section">
-          <button
-            className="header-hamburger-btn"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-          >
-            <svg className="header-menu-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d={getIconSVG('menu')} />
-            </svg>
-          </button>
-        </div>
+      {/* Fixed Hamburger Button - Only on Home Page */}
+      <button
+        className="header-hamburger-btn"
+        onClick={() => setMenuOpen(true)}
+        aria-label="Open menu"
+      >
+        <svg className="header-menu-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d={getIconSVG('menu')} />
+        </svg>
+      </button>
 
-        {/* Right 50% - Dark Background with Red Line */}
-        <div className="header-right-section">
-          <div className="header-red-line"></div>
-          <div className="header-brand">
-            <button className="header-dealers-btn">
-              DEALERS
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Navigation Navbar Modal */}
+      {/* Mobile Menu Overlay - HomePage Navigation */}
       <AnimatePresence>
         {menuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
+              className="mobile-menu-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="navbar-backdrop"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setMenuOpen(false)
+                setMobileServicesOpen(false)
+              }}
             />
-
-            {/* Navbar Container with Animation */}
             <motion.div
-              initial={{ scaleX: 0, opacity: 0, x: '-50%', y: 0 }}
-              animate={{ scaleX: 1, opacity: 1, x: '-50%', y: 0 }}
-              exit={{ scaleX: 0, opacity: 0, x: '-50%', y: 0 }}
-              transition={{ 
-                duration: 0.4,
-                ease: 'easeInOut'
-              }}
-              style={{
-                position: 'fixed',
-                left: '50%',
-                top: '20px',
-                transformOrigin: 'center center',
-                zIndex: 1200,
-                pointerEvents: 'auto'
-              }}
-              onClick={(e) => e.stopPropagation()}
+              className="mobile-menu-overlay"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <Navbar onNavigate={() => setMenuOpen(false)} />
+              <div className="mobile-menu-header">
+                <div className="mobile-menu-logo">
+                  <img
+                    src="/JS Car Wash Images/cropped-fghfthgf.png"
+                    alt="JS Car Wash Logo"
+                    className="mobile-logo-img"
+                  />
+                </div>
+                <button
+                  className="mobile-menu-close"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setMobileServicesOpen(false)
+                  }}
+                  aria-label="Close menu"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mobile-menu-content">
+                {navItems.map((item, index) => {
+                  const active = isActive(item.href)
+                  if (item.hasDropdown) {
+                    const servicesActive = isServicesActive()
+                    return (
+                      <div key={index} className="mobile-menu-item">
+                        <button
+                          className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
+                          onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                        >
+                          {item.label}
+                          <svg
+                            className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        {mobileServicesOpen && (
+                          <div className="mobile-submenu">
+                            {servicesSubItems.map((subItem, subIndex) => {
+                              const dropdownActive = isDropdownItemActive(subItem.href)
+                              return (
+                                <Link
+                                  key={subIndex}
+                                  to={subItem.href}
+                                  className={`mobile-submenu-item ${dropdownActive ? 'mobile-submenu-item-active' : ''}`}
+                                  onClick={(e) => handleNavClick(subItem.href, e)}
+                                >
+                                  {subItem.label}
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
+                  return (
+                    <Link
+                      key={index}
+                      to={item.href}
+                      className={`mobile-menu-link ${active ? 'mobile-menu-link-active' : ''}`}
+                      onClick={(e) => handleNavClick(item.href, e)}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                })}
+
+                <Link
+                  to="/register"
+                  className="mobile-cta-button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setMenuOpen(false)
+                    window.location.href = '/register'
+                  }}
+                >
+                  Create an Account
+                </Link>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
       {/* Main Container */}
-      <div className="home-page-container">
-        {/* Left Section - White Background (2/3) */}
-        <div className="home-left-section">
-          {/* Vertical Bar on Left Edge - Dark Panel */}
-          <div className="vertical-bar">
-            <div className="vertical-bar-content">
-              <p className="vertical-bar-text">DISCOVER MODELS</p>
-              <motion.div
-                animate={{ y: [0, 5, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
+      <motion.div 
+        ref={(el) => {
+          headerContainerRef.current = el
+          pageContainerRef.current = el
+        }}
+        className={`home-page-container ${dealersShow ? 'dealers-open' : ''}`}
+        style={{
+          opacity: modelsShow ? 0 : 1,
+          pointerEvents: modelsShow ? 'none' : 'auto'
+        }}
+      >
+        {/* Header with Hamburger and Logo - Split Design */}
+        <div className="home-page-header">
+          {/* Left 50% - White Background */}
+          <div className="header-left-section">
+          </div>
+
+          {/* Right 50% - Dark Background with Red Line */}
+          <div className="header-right-section">
+            <div className="header-red-line"></div>
+            <div className="header-brand">
+              <button 
+                className="header-dealers-btn"
+                onClick={() => setDealersShow(true)}
               >
-                <svg className="icon-keyboard-arrow-down" viewBox="0 0 24 24" fill="currentColor">
-                  <path d={getIconSVG('keyboardArrowDown')} />
-                </svg>
-              </motion.div>
+                DEALERS
+              </button>
             </div>
           </div>
+        </div>
+
+        {/* Content Wrapper */}
+        <div className="home-page-content-wrapper">
+          {/* Left Section - White Background (2/3) */}
+          <div className="home-left-section">
+          {/* Vertical Bar on Left Edge - Dark Panel */}
+          <motion.div 
+            className="vertical-bar"
+            animate={{ 
+              x: modelsShow ? '-100%' : 0 
+            }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+          >
+            <div className="vertical-bar-content" onClick={handleDiscoverModels} style={{ cursor: 'pointer' }}>
+              <div className="vertical-bar-text-wrapper">
+                <p className="vertical-bar-text">DISCOVER MODELS</p>
+                <motion.div
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="vertical-bar-arrow-wrapper"
+                >
+                  <span className="icon-chevron">{'>'}</span>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Main Content */}
           <div className="home-main-content">
@@ -299,9 +535,7 @@ function HomePage({}: HomePageProps) {
                     <p className="description-text">
                       JS Car Wash is Australia's premier professional hand wash and detailing provider. 
                       For over 10 years, JS Car Wash has been a family-owned, private company that thrives 
-                      in an atmosphere of determination and innovation. We take pride in offering unparalleled service, 
-                      ensuring that every customer leaves with that new car feeling. JS Car Wash is dedicated to making 
-                      car cleaning an affordable and convenient experience.
+                      in an atmosphere of determination and innovation.
                     </p>
                   </motion.div>
 
@@ -328,7 +562,7 @@ function HomePage({}: HomePageProps) {
                     transition={{ duration: 0.8, delay: 0.6 }}
                   >
                     <div className="configure-link">
-                      <span className="configure-text">CONFIGURE YOUR ROLL-ROYCE</span>
+                      <span className="configure-text">CONFIGURE YOUR SEDAN</span>
                       <svg className="arrow-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d={getIconSVG('arrowForward')} />
                       </svg>
@@ -356,7 +590,190 @@ function HomePage({}: HomePageProps) {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Models Show Overlay */}
+      <AnimatePresence>
+        {modelsShow && (
+          <motion.div
+            className="modelshow"
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute',
+              top: `${containerPosition.top}px`,
+              left: `${containerPosition.left}px`,
+              width: `${containerPosition.width}px`,
+              height: `${containerPosition.height}px`,
+              zIndex: 1300,
+              backgroundColor: '#ffffff',
+              overflowY: 'auto',
+              overflowX: 'hidden'
+            }}
+          >
+            {/* Header with Title and Close Button */}
+            <div className="modelshow-header">
+              {/* Navigation Row */}
+              <div className="modelshow-nav-row">
+                <h1 className="modelshow-title">CHOOSE YOUR MODEL</h1>
+                <button
+                  className="modelshow-close-btn"
+                  onClick={() => {
+                    setIsClosing(true)
+                    // Wait for cards to animate out, then close overlay
+                    setTimeout(() => {
+                      setModelsShow(false)
+                      setIsClosing(false)
+                    }, 600)
+                  }}
+                  aria-label="Close models"
+                >
+                  <svg className="modelshow-close-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d={getIconSVG('close')} />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Models Grid */}
+            <div className="modelshow-content">
+              <div className="modelshow-grid">
+                {[
+                  { name: 'SEDAN', slogan: 'Classic elegance meets modern comfort.', image: '/JS Car Wash Images/Sedan.png' },
+                  { name: 'X-LARGE', slogan: 'Spacious luxury for the whole family.', image: '/JS Car Wash Images/X-Large.png' },
+                  { name: 'SUV', slogan: 'Adventure ready, comfort guaranteed.', image: '/JS Car Wash Images/Suv.png' },
+                  { name: 'HATCHBACK', slogan: 'Compact style, maximum efficiency.', image: '/JS Car Wash Images/Hatchback.png' },
+                  { name: 'WAGON', slogan: 'Versatile space, refined design.', image: '/JS Car Wash Images/Wagon.png' },
+                  { name: 'SPORT', slogan: 'Performance meets precision engineering.', image: '/JS Car Wash Images/Sports.png' }
+                ].map((model, index) => (
+                  <motion.div
+                    key={index}
+                    className="modelshow-model-card"
+                    initial={{ opacity: 0 }}
+                    animate={isClosing ? { opacity: 0 } : { opacity: 1 }}
+                    transition={{ 
+                      duration: 0.3, 
+                      delay: isClosing ? (5 - index) * 0.1 : index * 0.15
+                    }}
+                  >
+                    <motion.div 
+                      className="modelshow-model-image"
+                      initial={{ opacity: 0, x: '100vw' }}
+                      animate={isClosing ? { opacity: 0, x: '-100%' } : { opacity: 1, x: 0 }}
+                      transition={{ 
+                        duration: 0.8, 
+                        delay: isClosing ? (5 - index) * 0.1 : index * 0.15,
+                        ease: [0.25, 0.1, 0.25, 1]
+                      }}
+                    >
+                      <img src={model.image} alt={model.name} />
+                    </motion.div>
+                    <h3 className="modelshow-model-name">{model.name}</h3>
+                    <p className="modelshow-model-slogan">{model.slogan}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Dealers Show Overlay */}
+      <AnimatePresence>
+        {dealersShow && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="dealersshow-backdrop"
+              onClick={() => setDealersShow(false)}
+              style={{
+                zIndex: 1299
+              }}
+            />
+            {/* Dealers Panel */}
+            <motion.div
+              className="dealersshow"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header with Title */}
+              <div className="dealersshow-header">
+                <div className="dealersshow-nav-row">
+                  <h1 className="dealersshow-title">FIND YOUR DEALER</h1>
+                  <button
+                    className="dealersshow-close-btn"
+                    onClick={() => setDealersShow(false)}
+                    aria-label="Close dealers"
+                  >
+                    <svg className="dealersshow-close-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+            {/* Dealers Content */}
+            <div className="dealersshow-content">
+              {branches.map((branch, index) => (
+                <div key={index} className="dealersshow-branch-item">
+                  {/* Branch Title */}
+                  <h3 className="dealersshow-branch-title">BRANCH {index + 1}</h3>
+
+                  {/* Map */}
+                  <div className="dealersshow-map">
+                    <iframe
+                      src={branch.mapUrl}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="dealersshow-map-iframe"
+                      title={`${branch.name} - ${branch.subtitle}`}
+                    ></iframe>
+                  </div>
+
+                  {/* Dealer Info */}
+                  <div className="dealersshow-dealer-info">
+                    <h2 className="dealersshow-dealer-name">{branch.name}</h2>
+                    <p className="dealersshow-dealer-subtitle">{branch.subtitle}</p>
+                    <div className="dealersshow-dealer-address">
+                      <svg className="location-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                      </svg>
+                      <p className="dealersshow-address-text">
+                        {branch.address.split(', ').map((line, idx, array) => (
+                          <span key={idx}>
+                            {line}
+                            {idx < array.length - 1 && <br />}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="dealersshow-actions">
+                    <button className="dealersshow-action-btn primary">GET DIRECTIONS</button>
+                    <button className="dealersshow-action-btn secondary">REQUEST CALLBACK</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Services Section */}
       <section className="home-services-section">
@@ -413,28 +830,19 @@ function HomePage({}: HomePageProps) {
         <div className="home-features-container">
           <div className="home-feature-item">
             <div className="home-feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <i className="fas fa-hand-sparkles"></i>
             </div>
             <p className="home-feature-text">100% Hand Washed</p>
           </div>
           <div className="home-feature-item">
             <div className="home-feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <i className="fas fa-award"></i>
             </div>
             <p className="home-feature-text">Quality Guaranteed</p>
           </div>
           <div className="home-feature-item">
             <div className="home-feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <i className="fas fa-car"></i>
             </div>
             <p className="home-feature-text">5K+ Cars Cleaned</p>
           </div>
@@ -476,6 +884,260 @@ function HomePage({}: HomePageProps) {
         </div>
       </section>
 
+      {/* Red Banner Section */}
+      <section className="home-red-banner-section">
+        <div className="home-red-banner-container">
+          <div className="home-red-banner">
+            <div className="home-red-banner-inner">
+              <div className="home-red-banner-scroll">
+                <div className="home-red-banner-scroll-content">
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">STICKER REMOVAL</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">INTERIOR</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">LEATHER CLEAN</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">HAND POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUFF POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUGS & TAR REMOVAL</span>
+                  {/* Duplicate for seamless loop */}
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">STICKER REMOVAL</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">INTERIOR</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">LEATHER CLEAN</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">HAND POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUFF POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUGS & TAR REMOVAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dark Grey Banner Section */}
+      <section className="home-dark-banner-section">
+        <div className="home-dark-banner-container">
+          <div className="home-dark-banner">
+            <div className="home-dark-banner-inner">
+              <div className="home-dark-banner-scroll">
+                <div className="home-dark-banner-scroll-content">
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">STICKER REMOVAL</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">INTERIOR</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">LEATHER CLEAN</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">HAND POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUFF POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUGS & TAR REMOVAL</span>
+                  {/* Duplicate for seamless loop */}
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">STICKER REMOVAL</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">INTERIOR</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">LEATHER CLEAN</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">HAND POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUFF POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUGS & TAR REMOVAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How To Book Online Section */}
       <section className="home-book-online-section">
         <div className="home-book-online-container">
@@ -492,33 +1154,392 @@ function HomePage({}: HomePageProps) {
           </div>
 
           <div className="home-book-online-steps">
-            <div className="home-book-online-step">
+            <div className="home-book-online-step-card">
               <div className="home-book-online-step-number">01</div>
-              <h3 className="home-book-online-step-title">Choose A Service</h3>
+              <h3 className="home-book-online-step-title">Choose Branch & Service</h3>
               <p className="home-book-online-step-description">
-                Explore our services, from basic washes to full detailing and paint protection.
+                Select your preferred branch location and the service you need.
               </p>
             </div>
 
-            <div className="home-book-online-step">
+            <div className="home-book-online-step-card">
               <div className="home-book-online-step-number">02</div>
-              <h3 className="home-book-online-step-title">Select Date & Time</h3>
+              <h3 className="home-book-online-step-title">Choose Model & Fill Details</h3>
               <p className="home-book-online-step-description">
-                Open 7 days a week (check location page for actual opening hours)
+                Enter your vehicle model and provide all necessary details for booking.
               </p>
             </div>
 
-            <div className="home-book-online-step">
+            <div className="home-book-online-step-card">
               <div className="home-book-online-step-number">03</div>
-              <h3 className="home-book-online-step-title">Arrive On Time</h3>
+              <h3 className="home-book-online-step-title">Select Package & Extras</h3>
               <p className="home-book-online-step-description">
-                Our staff will be ready and waiting to make your car look like new again.
+                Choose your preferred package and add any additional extras you need.
+              </p>
+            </div>
+
+            <div className="home-book-online-step-card">
+              <div className="home-book-online-step-number">04</div>
+              <h3 className="home-book-online-step-title">Confirmation</h3>
+              <p className="home-book-online-step-description">
+                Review your booking details and confirm your appointment.
               </p>
             </div>
           </div>
 
           <div className="home-book-online-actions">
             <button className="book-now-btn">BOOK NOW</button>
+          </div>
+        </div>
+      </section>
+
+      {/* Great Packages For Car Washing Section */}
+      <section className="home-packages-section">
+        <div className="home-packages-container">
+          <div className="home-packages-header">
+            <p className="home-packages-subtitle">PROVIDING ALL TYPES OF</p>
+            <h2 className="home-packages-title">
+              Great Packages <span className="home-packages-title-red">For Car Washing</span>
+            </h2>
+            <div className="home-packages-title-underline">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+
+          <div className="home-packages-grid">
+            {/* JS Polish Card */}
+            <div className="home-package-card">
+              <div className="home-package-header">
+                <div className="home-package-price">$149 <span className="home-package-price-suffix">/ start from</span></div>
+                <h3 className="home-package-name">JS Polish</h3>
+              </div>
+              <button className="home-package-book-btn">Book Now</button>
+              <div className="home-package-features">
+                <h4 className="home-package-features-title">Package includes</h4>
+                <ul className="home-package-features-list">
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>High - Pressure - rinse</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Exterior Wash with pH neutral shampoo</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Apply tyer shine</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Exterior windows and side mirrors clean</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Mag wheel wash process</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Vacuum interior floor mats and footwells</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Vacuum seats and boot</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Wipe door and boot jambs</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Interior windows and mirrors clean</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Clean and wipe dashboard and console</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Clean and wipe door trims</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Full duco hand wax polish</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* JS Platinum Card */}
+            <div className="home-package-card">
+              <div className="home-package-header">
+                <div className="home-package-price">$69 <span className="home-package-price-suffix">/ start from</span></div>
+                <h3 className="home-package-name">JS Platinum</h3>
+              </div>
+              <button className="home-package-book-btn">Book Now</button>
+              <div className="home-package-features">
+                <h4 className="home-package-features-title">Package includes</h4>
+                <ul className="home-package-features-list">
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>High - Pressure - rinse</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Exterior Wash with pH neutral shampoo</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Apply tyer shine</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Exterior windows and side mirrors clean</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Mag wheel wash process</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Vacuum interior floor mats and footwells</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Vacuum seats and boot</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Wipe door and boot jambs</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Interior windows and mirrors clean</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Clean and wipe dashboard and console</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Clean and wipe door trims</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Full duco hand wax polish</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* JS Express Card */}
+            <div className="home-package-card">
+              <div className="home-package-header">
+                <div className="home-package-price">$39 <span className="home-package-price-suffix">/ start from</span></div>
+                <h3 className="home-package-name">JS Express</h3>
+              </div>
+              <button className="home-package-book-btn">Book Now</button>
+              <div className="home-package-features">
+                <h4 className="home-package-features-title">Package includes</h4>
+                <ul className="home-package-features-list">
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>High - Pressure - rinse</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Exterior Wash with pH neutral shampoo</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Apply tyer shine</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-check-circle home-package-check-icon"></i>
+                    <span>Exterior windows and side mirrors clean</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Mag wheel wash process</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Vacuum interior floor mats and footwells</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Vacuum seats and boot</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Wipe door and boot jambs</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Interior windows and mirrors clean</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Clean and wipe dashboard and console</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Clean and wipe door trims</span>
+                  </li>
+                  <li className="home-package-feature-item">
+                    <i className="fas fa-times-circle home-package-x-icon"></i>
+                    <span>Full duco hand wax polish</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="home-faq-section">
+        <div className="home-faq-container">
+          <div className="home-faq-header">
+            <p className="home-faq-subtitle">JS CAR WASH</p>
+            <h2 className="home-faq-title">
+              Answers To Our Most Common Queries
+            </h2>
+            <div className="home-faq-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+
+          <div className="home-faq-list">
+            {[
+              {
+                question: 'How should I prepare my car to ensure the best possible wash outcome?',
+                answer: 'We advise removing as much "clutter" as possible from the boot, seats, side pockets & console area, and any valuables. Any rubbish left on the floor of the vehicle will be disposed of. Please take some time when you drop your car off to indicate any damaged areas of the vehicle and any areas you wish to pay particular attention to ensure you are satisfied.'
+              },
+              {
+                question: 'What should I do if I\'m not satisfied with the service I received?',
+                answer: 'Please ensure you check your car before you leave. If any area of the vehicle has been missed, please highlight this to the onsite manager and it will be rectified on the spot. Alternatively, please contact our Customer Service team on 02 5804 5720 or info@jscarwash.com.au',
+                hasHighlight: true
+              },
+              {
+                question: 'Why have I been asked to pay more because my car is dirty?',
+                answer: 'Hand Car Washing is a labour-based process which relies on time & labour to clean the cars. Pricing is therefore based on these components to clean a car. Cars with excessive soilage (whether interior or exterior) require additional time to clean and as such may be subject to a soilage surcharge. The onsite manager should always discuss and agree any additional charges before the wash commences, as such it is your decision whether to accept the surcharge and for the wash to proceed.'
+              },
+              {
+                question: 'Why does it cost more to wash larger vehicles?',
+                answer: 'JS Car Wash is a labour-based business, as such pricing is dependent on the time it takes to clean vehicles. Larger vehicles take longer to clean which is why the cost is high.'
+              },
+              {
+                question: 'What is considered an X-Large vehicle?',
+                answer: 'Examples of X-Large vehicles include (but are not limited to): Hyundai Palisade, Toyota Land Cruiser, Mitsubishi Pajero, KIA Sorento, BMW X7, Mercedes Van, Mercedes GLS, Land Rover Discovery, Mazda CX-9, Skoda Kodiaq, Volvo XC90, Ford Raptor, RAM 1500, GMC Yukon etc.'
+              },
+              {
+                question: 'How do I contact you?',
+                answer: 'You can find the contact details for each of our sites on their location page on our website. If you do not have a successful resolution, contact our Customer Service team through either:',
+                hasBulletPoints: true,
+                bulletPoints: [
+                  { label: 'Phone', value: '02 5804 5720' },
+                  { label: 'Email', value: 'info@jscarwash.com.au' }
+                ]
+              },
+              {
+                question: 'How long will it take?',
+                answer: 'An Express wash usually takes 25 – 45 minutes. A js Car wash usually takes 45 – 60 minutes. A Platinum wash usually takes around 60 – 90 minutes. JS Polish usually takes 75 – 110 minutes. However, these times will vary depending on your vehicle\'s specific requirements.'
+              },
+              {
+                question: 'Can I cancel my booking?',
+                answer: 'Yes, you can cancel your booking. However, it is recommended to do so within a reasonable time frame to avoid any cancellation fees.'
+              },
+              {
+                question: 'When is the latest time I can bring my car in?',
+                answer: 'We recommend bringing your car in no later than half an hour before closing time.'
+              },
+              {
+                question: 'How often should I get my car washed?',
+                answer: 'We recommend every two to three weeks if you drive regularly. However, how often you need your car washed will depend on many factors such as how often you drive, where you drive, and where you park.'
+              },
+              {
+                question: 'Can you provide an invoice?',
+                answer: 'We\'ll send you an email with your receipt after we\'ve processed your payment. We\'ll also email you after you\'ve made a booking to double-check you\'re being billed for the correct service.'
+              },
+              {
+                question: 'What is the difference between a wax and polish?',
+                answer: 'Car waxing and polishing serve distinct purposes in car care. Polishing is a process that uses abrasive compounds to remove imperfections like swirl marks and scratches, restoring the paint\'s clarity and smoothness. Waxing involves applying a protective layer over the paint to shield it from environmental elements and add a glossy shine. While polishing corrects imperfections, waxing primarily protects and enhances the paint\'s appearance. These two processes are often combined, with polishing preceding waxing in a typical car care routine to achieve corrective and protective benefits.'
+              },
+              {
+                question: 'Why choose JS Car Wash over traditional automated car washes?',
+                answer: 'We distinguish ourselves with our professional hand washing techniques, attention to detail and personalised care, ensuring your vehicle receives the best treatment possible. Automated car washes are unable to clean the entire vehicle and their brushes increase the risk of scratching paintwork.'
+              }
+            ].map((item, index) => {
+              const isOpen = faqClickedIndex === index
+
+              return (
+                <motion.div
+                  key={index}
+                  className={`home-faq-item ${isOpen ? 'home-faq-item-open' : ''}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.5) }}
+                >
+                  <div 
+                    className="home-faq-question" 
+                    onClick={() => {
+                      if (faqClickedIndex === index) {
+                        setFaqClickedIndex(null)
+                      } else {
+                        setFaqClickedIndex(index)
+                      }
+                    }}
+                  >
+                    <span className="home-faq-icon">{isOpen ? '−' : '+'}</span>
+                    <span className="home-faq-question-text">{item.question}</span>
+                  </div>
+                  <AnimatePresence mode="wait">
+                    {isOpen && (
+                      <motion.div
+                        className="home-faq-answer"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      >
+                        <p>
+                          {item.hasHighlight ? (
+                            <>
+                              {item.answer.split(/(02 5804 5720|info@jscarwash\.com\.au)/).map((part, idx) => 
+                                part === '02 5804 5720' || part === 'info@jscarwash.com.au' ? (
+                                  <span key={idx} className="home-faq-highlight">{part}</span>
+                                ) : (
+                                  <span key={idx}>{part}</span>
+                                )
+                              )}
+                            </>
+                          ) : item.hasBulletPoints ? (
+                            <>
+                              {item.answer}
+                              <ul className="home-faq-bullet-list">
+                                {item.bulletPoints?.map((point, idx) => (
+                                  <li key={idx}>
+                                    <span className="home-faq-bullet-label">{point.label}</span>
+                                    {' – '}
+                                    <span className="home-faq-highlight">{point.value}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          ) : (
+                            item.answer
+                          )}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>

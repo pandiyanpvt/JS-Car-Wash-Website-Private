@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
 import './GalleryPage.css'
@@ -13,65 +14,62 @@ interface GalleryImage {
 }
 
 function GalleryPage() {
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedImage(null)
+      }
+    }
+
+    if (selectedImage) {
+      document.addEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'unset'
+    }
+  }, [selectedImage])
 
   const galleryImages: GalleryImage[] = [
-    { id: 1, src: '/JS Car Wash Images/02-min.jpg', alt: 'Car Wash Service 1' },
-    { id: 2, src: '/JS Car Wash Images/03-min.jpg', alt: 'Car Wash Service 2' },
-    { id: 3, src: '/JS Car Wash Images/04-min.jpg', alt: 'Car Wash Service 3' },
-    { id: 4, src: '/JS Car Wash Images/05-min.jpg', alt: 'Car Wash Service 4' },
-    { id: 5, src: '/JS Car Wash Images/06-min.jpg', alt: 'Car Wash Service 5' },
-    { id: 6, src: '/JS Car Wash Images/07-min.jpg', alt: 'Car Wash Service 6' },
-    { id: 7, src: '/JS Car Wash Images/08-min.jpg', alt: 'Car Wash Service 7' },
-    { id: 8, src: '/JS Car Wash Images/10-min.jpg', alt: 'Car Wash Service 8' },
-    { id: 9, src: '/JS Car Wash Images/11-min.jpg', alt: 'Car Wash Service 9' },
-    { id: 10, src: '/JS Car Wash Images/12-min.jpg', alt: 'Car Wash Service 10' },
-    { id: 11, src: '/JS Car Wash Images/13-min.jpg', alt: 'Car Wash Service 11' },
-    { id: 12, src: '/JS Car Wash Images/14-min.jpg', alt: 'Car Wash Service 12' },
-    { id: 13, src: '/JS Car Wash Images/15-min.jpg', alt: 'Car Wash Service 13' },
-    { id: 14, src: '/JS Car Wash Images/16-min.jpg', alt: 'Car Wash Service 14' },
-    { id: 15, src: '/JS Car Wash Images/17-min.jpg', alt: 'Car Wash Service 15' },
-    { id: 16, src: '/JS Car Wash Images/18-min.jpg', alt: 'Car Wash Service 16' },
-    { id: 17, src: '/JS Car Wash Images/19-890x664-1.jpg', alt: 'Car Wash Service 17' },
-    { id: 18, src: '/JS Car Wash Images/20-890x664-1.jpg', alt: 'Car Wash Service 18' },
-    { id: 19, src: '/JS Car Wash Images/21-890x664-1.jpg', alt: 'Car Wash Service 19' },
-    { id: 20, src: '/JS Car Wash Images/23-890x664-1.jpg', alt: 'Car Wash Service 20' },
-    { id: 21, src: '/JS Car Wash Images/24-890x664-1.jpg', alt: 'Car Wash Service 21' },
-    { id: 22, src: '/JS Car Wash Images/25-890x664-1.jpg', alt: 'Car Wash Service 22' },
-    { id: 23, src: '/JS Car Wash Images/corvette-v100-1024x545-1.jpg', alt: 'Car Detailing' },
-    { id: 24, src: '/JS Car Wash Images/services2-890x664-1.jpg', alt: 'Car Services' }
+    { id: 1, src: '/Gallery/01-min.png', alt: 'Car Wash Service 1' },
+    { id: 2, src: '/Gallery/02-min.jpg', alt: 'Car Wash Service 2' },
+    { id: 3, src: '/Gallery/03-min.jpg', alt: 'Car Wash Service 3' },
+    { id: 4, src: '/Gallery/04-min.jpg', alt: 'Car Wash Service 4' },
+    { id: 5, src: '/Gallery/05-min.jpg', alt: 'Car Wash Service 5' },
+    { id: 6, src: '/Gallery/06-min.jpg', alt: 'Car Wash Service 6' },
+    { id: 7, src: '/Gallery/07-min.jpg', alt: 'Car Wash Service 7' },
+    { id: 8, src: '/Gallery/08-min.jpg', alt: 'Car Wash Service 8' },
+    { id: 9, src: '/Gallery/10-min.jpg', alt: 'Car Wash Service 9' },
+    { id: 10, src: '/Gallery/11-min.jpg', alt: 'Car Wash Service 10' },
+    { id: 11, src: '/Gallery/12-min.jpg', alt: 'Car Wash Service 11' },
+    { id: 12, src: '/Gallery/13-min.jpg', alt: 'Car Wash Service 12' },
+    { id: 13, src: '/Gallery/14-min.jpg', alt: 'Car Wash Service 13' },
+    { id: 14, src: '/Gallery/15-min.jpg', alt: 'Car Wash Service 14' },
+    { id: 15, src: '/Gallery/16-min.jpg', alt: 'Car Wash Service 15' },
+    { id: 16, src: '/Gallery/17-min.jpg', alt: 'Car Wash Service 16' },
+    { id: 17, src: '/Gallery/18-min.jpg', alt: 'Car Wash Service 17' }
   ]
 
   return (
     <div className="gallery-page">
       <Navbar className="fixed-navbar" />
-      {/* Gallery Header */}
-      <section className="gallery-header">
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="gallery-header-content"
-          >
-            <p className="gallery-subtitle">JS CAR WASH</p>
-            <h1 className="gallery-title">
-              Our <span className="gallery-title-accent">Gallery</span>
-            </h1>
-            <div className="gallery-lines">
-              <div className="gallery-line gallery-line-red"></div>
-              <div className="gallery-line gallery-line-red"></div>
-              <div className="gallery-line gallery-line-red"></div>
-            </div>
-            <p className="gallery-description">
-              Explore our collection of before & after photos showcasing our professional car wash and detailing services.
-            </p>
-          </motion.div>
+      {/* Page Heading Section */}
+      <section className="page-heading-section">
+        <div className="page-heading-overlay"></div>
+        <div className="page-heading-content">
+          <h1 className="page-heading-title">Gallery</h1>
         </div>
       </section>
 
       {/* Gallery Grid */}
       <section className="gallery-section">
-        <div className="container">
+        <div className="gallery-container-full">
           <div className="gallery-grid">
             {galleryImages.map((image, index) => (
               <motion.div
@@ -81,6 +79,7 @@ function GalleryPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 whileHover={{ scale: 1.05, zIndex: 10 }}
+                onClick={() => setSelectedImage(image)}
               >
                 <div className="gallery-card-image-wrapper">
                   <img
@@ -100,6 +99,46 @@ function GalleryPage() {
           </div>
         </div>
       </section>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            className="gallery-lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+          >
+            <motion.div
+              className="gallery-lightbox-content"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="gallery-lightbox-close"
+                onClick={() => setSelectedImage(null)}
+                aria-label="Close lightbox"
+              >
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <img
+                src={selectedImage.src}
+                alt={selectedImage.alt}
+                className="gallery-lightbox-image"
+              />
+              <div className="gallery-lightbox-title">
+                <h3>{selectedImage.alt}</h3>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <FooterPage />

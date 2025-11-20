@@ -7,6 +7,69 @@ function AboutPage() {
   return (
     <div className="about-page" id="about">
       <Navbar className="fixed-navbar" />
+      {/* Page Heading Section */}
+      <section className="page-heading-section">
+        <div className="page-heading-overlay"></div>
+        <div className="page-heading-content">
+          <h1 className="page-heading-title">About Us</h1>
+        </div>
+      </section>
+      {/* About JS Car Wash Section */}
+      <section className="about-js-section">
+        <div className="container">
+          <div className="about-js-content">
+            {/* Left Side - Text Content */}
+            <motion.div
+              className="about-js-text-wrapper"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <h2 className="about-js-heading">ABOUT JS CAR WASH</h2>
+              <div className="about-js-description">
+                <p>
+                  JS Car Wash is Australia's premier professional hand wash and detailing provider. 
+                  For over 10 years, JS Car Wash has been a family-owned, private company that thrives 
+                  in an atmosphere of determination and innovation. We take pride in offering unparalleled service, 
+                  ensuring that every customer leaves with that new car feeling. JS Car Wash is dedicated to making 
+                  car cleaning an affordable and convenient experience.
+                </p>
+              </div>
+              {/* Contact Information */}
+              <div className="about-js-contact">
+                <div className="about-js-contact-icon">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className="about-js-contact-info">
+                  <p className="about-js-contact-label">Contact now</p>
+                  <p className="about-js-contact-phone">02 5804 5720</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right Side - Image */}
+            <motion.div
+              className="about-js-images-wrapper"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <div className="about-js-images-container">
+                <div className="about-js-image-single">
+                  <img
+                    src="/JS Car Wash Images/5659.png"
+                    alt="JS Car Wash"
+                    className="about-js-img"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Benefit of Service Section */}
       <section className="benefit-section">
         <div className="container">
@@ -59,6 +122,260 @@ function AboutPage() {
         </div>
       </section>
 
+      {/* Red Banner Section */}
+      <section className="home-red-banner-section">
+        <div className="home-red-banner-container">
+          <div className="home-red-banner">
+            <div className="home-red-banner-inner">
+              <div className="home-red-banner-scroll">
+                <div className="home-red-banner-scroll-content">
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">STICKER REMOVAL</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">INTERIOR</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">LEATHER CLEAN</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">HAND POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUFF POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUGS & TAR REMOVAL</span>
+                  {/* Duplicate for seamless loop */}
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">STICKER REMOVAL</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">INTERIOR</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">LEATHER CLEAN</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">DETAILING</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">HAND POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUFF POLISH</span>
+                  <span className="home-red-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-red-banner-text">BUGS & TAR REMOVAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dark Grey Banner Section */}
+      <section className="home-dark-banner-section">
+        <div className="home-dark-banner-container">
+          <div className="home-dark-banner">
+            <div className="home-dark-banner-inner">
+              <div className="home-dark-banner-scroll">
+                <div className="home-dark-banner-scroll-content">
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">STICKER REMOVAL</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">INTERIOR</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">LEATHER CLEAN</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">HAND POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUFF POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUGS & TAR REMOVAL</span>
+                  {/* Duplicate for seamless loop */}
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">STICKER REMOVAL</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">INTERIOR</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">LEATHER CLEAN</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">DETAILING</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">HAND POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUFF POLISH</span>
+                  <span className="home-dark-banner-star">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                      <path d="M8 2L9.5 6L14 6L10.5 8.5L12 12.5L8 10L4 12.5L5.5 8.5L2 6L6.5 6L8 2Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                  <span className="home-dark-banner-text">BUGS & TAR REMOVAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Benefits Section with Car Image */}
       <section className="benefits-section">
         <div className="container">
@@ -73,9 +390,7 @@ function AboutPage() {
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <div className="feature-icon-container">
-                  <svg className="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
-                  </svg>
+                  <i className="fas fa-users feature-icon"></i>
                 </div>
                 <h3 className="feature-title">Professional Team</h3>
                 <p className="feature-description">
@@ -91,9 +406,7 @@ function AboutPage() {
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
                 <div className="feature-icon-container">
-                  <svg className="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"/>
-                  </svg>
+                  <i className="fas fa-shipping-fast feature-icon"></i>
                 </div>
                 <h3 className="feature-title">Delivery on Time</h3>
                 <p className="feature-description">
@@ -105,9 +418,10 @@ function AboutPage() {
             {/* Middle Column - Car Wireframe Image */}
             <motion.div
               className="car-wireframe-wrapper"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              initial={{ opacity: 0, y: 100 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             >
               <div className="car-wireframe-container">
                 <img
@@ -128,9 +442,7 @@ function AboutPage() {
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <div className="feature-icon-container">
-                  <svg className="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
-                  </svg>
+                  <i className="fas fa-award feature-icon"></i>
                 </div>
                 <h3 className="feature-title">Quality Products</h3>
                 <p className="feature-description">
@@ -146,9 +458,7 @@ function AboutPage() {
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
                 <div className="feature-icon-container">
-                  <svg className="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
-                  </svg>
+                  <i className="fas fa-industry feature-icon"></i>
                 </div>
                 <h3 className="feature-title">Manufacturing Unit</h3>
                 <p className="feature-description">

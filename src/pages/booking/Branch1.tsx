@@ -1,17 +1,11 @@
-import { Box, Container, Typography } from '@mui/material'
-
 function Branch1() {
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Branch 1 - Booking
-        </Typography>
-        <Typography variant="body1">
-          Book services at Branch 1
-        </Typography>
-      </Box>
-    </Container>
+    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+      <div>
+        <h1 style={{ marginBottom: '16px' }}>Branch 1 - Booking</h1>
+        <p>Book services at Branch 1</p>
+      </div>
+    </div>
   )
 }
 

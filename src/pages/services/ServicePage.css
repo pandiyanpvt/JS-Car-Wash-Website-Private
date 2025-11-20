@@ -5,6 +5,56 @@
   background-color: #ffffff;
 }
 
+/* Page Heading Section */
+.page-heading-section {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background-image: url('/JS Car Wash Images/bg-page-title1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-heading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.page-heading-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.page-heading-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+@media (min-width: 900px) {
+  .page-heading-section {
+    height: 400px;
+  }
+
+  .page-heading-title {
+    font-size: 4rem;
+  }
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -429,6 +479,190 @@
 @media (min-width: 1200px) {
   .services-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-heading-section {
+    height: 250px;
+    margin-top: 70px;
+  }
+
+  .page-heading-title {
+    font-size: 2rem;
+  }
+
+  .detailing-section {
+    padding: 50px 0;
+  }
+
+  .detailing-content {
+    gap: 32px;
+  }
+
+  .detailing-icon {
+    height: 20px;
+  }
+
+  .detailing-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .detailing-description {
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+  }
+
+  .detailing-secondary {
+    font-size: 0.8125rem;
+    margin-bottom: 24px;
+  }
+
+  .detailing-button-primary {
+    padding: 12px 28px;
+    font-size: 0.8125rem;
+    letter-spacing: 2px;
+  }
+
+  .products-section {
+    padding: 50px 0;
+  }
+
+  .products-title {
+    font-size: 1.75rem;
+    margin-bottom: 40px;
+  }
+
+  .products-image-wrapper {
+    padding: 40px;
+  }
+
+  .best-services-section {
+    padding: 50px 0;
+  }
+
+  .best-services-title {
+    font-size: 1.75rem;
+    margin-bottom: 32px;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .service-card-image {
+    height: 220px;
+  }
+
+  .service-card-content {
+    padding: 24px 20px;
+  }
+
+  .service-card-title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-heading-section {
+    height: 200px;
+    margin-top: 60px;
+  }
+
+  .page-heading-title {
+    font-size: 1.5rem;
+  }
+
+  .detailing-section {
+    padding: 40px 0;
+  }
+
+  .detailing-content {
+    gap: 24px;
+  }
+
+  .detailing-icon {
+    height: 18px;
+    margin-bottom: 12px;
+  }
+
+  .detailing-title {
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+  }
+
+  .detailing-description {
+    font-size: 0.8125rem;
+    margin-bottom: 12px;
+  }
+
+  .detailing-secondary {
+    font-size: 0.75rem;
+    margin-bottom: 20px;
+  }
+
+  .detailing-button-primary {
+    padding: 10px 24px;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+  }
+
+  .chevron-arrows {
+    top: 10px;
+    right: -20px;
+    gap: 4px;
+  }
+
+  .chevron-arrow {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 15px solid #d32f2f;
+  }
+
+  .products-section {
+    padding: 40px 0;
+  }
+
+  .products-title {
+    font-size: 1.5rem;
+    margin-bottom: 32px;
+  }
+
+  .products-image-wrapper {
+    padding: 30px 20px;
+  }
+
+  .best-services-section {
+    padding: 40px 0;
+  }
+
+  .best-services-title {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .service-card-image {
+    height: 200px;
+  }
+
+  .service-card-content {
+    padding: 20px 16px;
+  }
+
+  .service-card-title {
+    font-size: 0.9375rem;
+  }
+
+  .service-card-icon span {
+    width: 4px;
+    height: 20px;
   }
 }
 

@@ -1,17 +1,11 @@
-import { Box, Container, Typography } from '@mui/material'
-
 function TermsPage() {
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Terms & Conditions / Privacy Policy
-        </Typography>
-        <Typography variant="body1">
-          Read our terms and conditions and privacy policy
-        </Typography>
-      </Box>
-    </Container>
+    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+      <div>
+        <h1 style={{ marginBottom: '16px' }}>Terms & Conditions / Privacy Policy</h1>
+        <p>Read our terms and conditions and privacy policy</p>
+      </div>
+    </div>
   )
 }
 

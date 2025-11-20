@@ -1,17 +1,11 @@
-import { Box, Container, Typography } from '@mui/material'
-
 function BookingPage() {
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Booking / Schedule
-        </Typography>
-        <Typography variant="body1">
-          Book your car wash or detailing service
-        </Typography>
-      </Box>
-    </Container>
+    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+      <div>
+        <h1 style={{ marginBottom: '16px' }}>Booking / Schedule</h1>
+        <p>Book your car wash or detailing service</p>
+      </div>
+    </div>
   )
 }
 
