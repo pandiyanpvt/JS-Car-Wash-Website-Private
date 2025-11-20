@@ -1,8 +1,7 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import './FooterPage.css'
 
 function FooterPage() {
-  const navigate = useNavigate()
   const location = useLocation()
   const services = [
     'Hand Polish',
@@ -22,23 +21,27 @@ function FooterPage() {
 
   const usefulLinks = [
     { label: 'Home', href: '/', isRoute: true },
-    { label: 'About Us', href: '/about', isRoute: true },
+    { label: 'About Us', href: '/aboutus', isRoute: true },
     { label: 'Our Services', href: '/services', isRoute: true },
-    { label: 'Faq', href: '#faq', isRoute: false },
+    { label: 'Faq', href: '/faq', isRoute: true },
     { label: 'Gallery', href: '/gallery', isRoute: true },
-    { label: 'Our Testimonial', href: '#testimonial', isRoute: false },
-    { label: 'Contact Us', href: '/contact', isRoute: true },
-    { label: 'Blog', href: '#blog', isRoute: false }
+    { label: 'Our Testimonial', href: '/testimonial', isRoute: true },
+    { label: 'Contact Us', href: '/contact', isRoute: true }
   ]
 
   const handleFooterLinkClick = (href: string, isRoute: boolean, e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!isRoute && href.startsWith('#')) {
+    if (isRoute) {
+      // For route links, force a full page refresh
+      e.preventDefault()
+      window.location.href = href
+    } else if (href.startsWith('#')) {
+      // For anchor links, handle smooth scroll
       e.preventDefault()
       const elementId = href.substring(1)
       
       // If not on home page, navigate to home first, then scroll
       if (location.pathname !== '/') {
-        navigate('/')
+        window.location.href = '/'
         // Wait for navigation and DOM update, then scroll
         const scrollToElement = () => {
           const element = document.getElementById(elementId)
@@ -65,15 +68,24 @@ function FooterPage() {
       <div className="footer-container">
         <div className="footer-content">
           {/* Our Services Section */}
-          <div className="footer-section">
+          <div className="footer-section footer-services-section">
             <h3 className="footer-title">Our Services</h3>
-            <ul className="footer-services-list">
-              {services.map((service, index) => (
+            <div className="footer-services-wrapper">
+              <ul className="footer-services-list footer-services-left">
+                {services.slice(0, 7).map((service, index) => (
                 <li key={index} className="footer-service-item">
                   <span className="footer-service-text">{service}</span>
                 </li>
               ))}
             </ul>
+              <ul className="footer-services-list footer-services-right">
+                {services.slice(7).map((service, index) => (
+                  <li key={index + 7} className="footer-service-item">
+                    <span className="footer-service-text">{service}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Useful Links Section */}
@@ -82,17 +94,13 @@ function FooterPage() {
             <ul className="footer-links-list">
               {usefulLinks.map((link, index) => (
                 <li key={index} className="footer-link-item">
-                  {link.isRoute ? (
-                    <Link to={link.href} className="footer-link">{link.label}</Link>
-                  ) : (
-                    <a 
-                      href={link.href} 
-                      className="footer-link"
-                      onClick={(e) => handleFooterLinkClick(link.href, link.isRoute, e)}
-                    >
-                      {link.label}
-                    </a>
-                  )}
+                  <a 
+                    href={link.href} 
+                    className="footer-link"
+                    onClick={(e) => handleFooterLinkClick(link.href, link.isRoute, e)}
+                  >
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>

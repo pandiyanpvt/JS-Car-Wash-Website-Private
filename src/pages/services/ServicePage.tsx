@@ -67,6 +67,13 @@ function ServicePage() {
   return (
     <div className="service-page" id="services">
       <Navbar className="fixed-navbar" />
+      {/* Page Heading Section */}
+      <section className="page-heading-section">
+        <div className="page-heading-overlay"></div>
+        <div className="page-heading-content">
+          <h1 className="page-heading-title">Services</h1>
+        </div>
+      </section>
       {/* Full-Service Detailing Section */}
       <section className="detailing-section">
         <div className="container">

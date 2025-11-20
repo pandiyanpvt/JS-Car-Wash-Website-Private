@@ -1,17 +1,11 @@
-import { Box, Container, Typography } from '@mui/material'
-
 function BookCarWash() {
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Book Car Wash
-        </Typography>
-        <Typography variant="body1">
-          Schedule your car wash service
-        </Typography>
-      </Box>
-    </Container>
+    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+      <div>
+        <h1 style={{ marginBottom: '16px' }}>Book Car Wash</h1>
+        <p>Schedule your car wash service</p>
+      </div>
+    </div>
   )
 }
 

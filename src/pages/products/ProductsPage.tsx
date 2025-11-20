@@ -1,17 +1,11 @@
-import { Box, Container, Typography } from '@mui/material'
-
 function ProductsPage() {
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Products
-        </Typography>
-        <Typography variant="body1">
-          Browse our car care products
-        </Typography>
-      </Box>
-    </Container>
+    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+      <div>
+        <h1 style={{ marginBottom: '16px' }}>Products</h1>
+        <p>Browse our car care products</p>
+      </div>
+    </div>
   )
 }
 

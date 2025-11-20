@@ -1,17 +1,11 @@
-import { Box, Container, Typography } from '@mui/material'
-
 function OffersPage() {
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Offers / Promotions
-        </Typography>
-        <Typography variant="body1">
-          Check out our current offers and promotions
-        </Typography>
-      </Box>
-    </Container>
+    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+      <div>
+        <h1 style={{ marginBottom: '16px' }}>Offers / Promotions</h1>
+        <p>Check out our current offers and promotions</p>
+      </div>
+    </div>
   )
 }
 
