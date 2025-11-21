@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import './Navbar.css'
 
@@ -10,6 +10,7 @@ interface NavbarProps {
 
 function Navbar({ onNavigate, className = '' }: NavbarProps) {
   const location = useLocation()
+  const navigate = useNavigate()
   const [servicesHover, setServicesHover] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
@@ -18,8 +19,10 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
     { label: 'Home', href: '/', route: true },
     { label: 'AboutUs', href: '/aboutus', route: true },
     { label: 'Services', href: '/services', route: true, hasDropdown: true },
+    { label: 'Product', href: '/products', route: true },
+    { label: 'Gallery', href: '/gallery', route: true },
     { label: 'Contact Us', href: '/contact', route: true },
-    { label: 'BOOK NOW', href: '/login', route: true }
+    { label: 'BOOK NOW', href: '/booking', route: true }
   ]
 
   const servicesSubItems = [
@@ -51,7 +54,7 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
     if (onNavigate) {
       onNavigate()
     }
-    window.location.href = href
+    navigate(href)
   }
 
   // Close mobile menu when clicking outside
@@ -157,7 +160,7 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
               if (onNavigate) {
                 onNavigate()
               }
-              window.location.href = '/register'
+              navigate('/login', { state: { fromRegister: true } })
             }}
           >
             Create an Account
@@ -231,20 +234,33 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
                     const servicesActive = isServicesActive()
                     return (
                       <div key={index} className="mobile-menu-item">
-                        <button
-                          className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
-                          onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                        >
-                          {item.label}
-                          <svg
-                            className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                        <div className="mobile-menu-link-wrapper">
+                          <Link
+                            to={item.href}
+                            className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
+                            onClick={(e) => handleClick(item.href, e)}
                           >
-                            <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
+                            {item.label}
+                          </Link>
+                          <button
+                            className={`mobile-dropdown-toggle ${mobileServicesOpen ? 'mobile-dropdown-toggle-open' : ''}`}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setMobileServicesOpen(!mobileServicesOpen)
+                            }}
+                            aria-label="Toggle services submenu"
+                          >
+                            <svg
+                              className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
                         {mobileServicesOpen && (
                           <div className="mobile-submenu">
                             {servicesSubItems.map((subItem, subIndex) => {
@@ -286,7 +302,7 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
                     if (onNavigate) {
                       onNavigate()
                     }
-                    window.location.href = '/register'
+                    navigate('/login', { state: { fromRegister: true } })
                   }}
                 >
                   Create an Account

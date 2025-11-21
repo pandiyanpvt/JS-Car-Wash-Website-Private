@@ -1,9 +1,12 @@
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
 import './CarWash.css'
 
 function CarWash() {
+  const navigate = useNavigate()
+  
   const jsPolishFeatures = [
     'High - Pressure - rinse',
     'Exterior Wash with pH neutral shampoo',
@@ -88,7 +91,7 @@ function CarWash() {
                 <div className="pricing-price">$149 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">JS Polish</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">
@@ -113,7 +116,7 @@ function CarWash() {
                 <div className="pricing-price">$69 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">JS Platinum</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">
@@ -138,7 +141,7 @@ function CarWash() {
                 <div className="pricing-price">$39 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">JS Express</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">

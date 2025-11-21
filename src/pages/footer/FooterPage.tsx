@@ -23,6 +23,7 @@ function FooterPage() {
     { label: 'Home', href: '/', isRoute: true },
     { label: 'About Us', href: '/aboutus', isRoute: true },
     { label: 'Our Services', href: '/services', isRoute: true },
+    { label: 'Product', href: '/products', isRoute: true },
     { label: 'Faq', href: '/faq', isRoute: true },
     { label: 'Gallery', href: '/gallery', isRoute: true },
     { label: 'Our Testimonial', href: '/testimonial', isRoute: true },

@@ -372,21 +372,23 @@
   flex-direction: column;
 }
 
-.mobile-menu-link {
+.mobile-menu-link-wrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.mobile-menu-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
   padding: 16px 20px;
   color: #000;
   text-decoration: none;
   font-size: 0.9375rem;
   font-weight: 500;
   transition: all 0.3s ease;
-  background: none;
-  border: none;
-  width: 100%;
   text-align: left;
-  cursor: pointer;
   font-family: inherit;
 }
 
@@ -400,6 +402,24 @@
 .mobile-menu-link-active {
   font-weight: 600;
   border-left: 3px solid #d32f2f;
+}
+
+.mobile-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.mobile-dropdown-toggle:hover {
+  background-color: #f5f5f5;
+  color: #d32f2f;
 }
 
 .mobile-dropdown-arrow {

@@ -7,7 +7,10 @@ import CarDetailing from './pages/services/CarDetailing'
 import { ContactUsPage } from './pages/contact'
 import FAQPage from './pages/faq/FAQPage'
 import TestimonialsPage from './pages/testimonials/TestimonialsPage'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { ProductPage } from './pages/products'
+import { BookingPage } from './pages/booking'
+import { LoginPage } from './pages/login'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './styles/index.css'
 
 function App() {
@@ -40,6 +43,10 @@ function App() {
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/testimonial" element={<TestimonialsPage />} />
+          <Route path="/products" element={<ProductPage />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
     </BrowserRouter>

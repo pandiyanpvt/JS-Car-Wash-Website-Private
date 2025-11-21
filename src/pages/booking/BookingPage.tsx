@@ -1,13 +1,1104 @@
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import './BookingPage.css'
+import '../home/HomePage.css'
+import '../about/AboutPage.css'
+
+interface Branch {
+  id: string
+  name: string
+  location: string
+  mapUrl: string
+}
+
+interface VehicleModel {
+  id: string
+  name: string
+  image: string
+}
+
+interface Package {
+  id: string
+  name: string
+  price: number
+  serviceType: 'carwash' | 'cardetailing'
+  features: string[]
+  excludedFeatures?: string[]
+}
+
+interface Extra {
+  id: string
+  name: string
+  price: number
+}
+
+interface Product {
+  id: string
+  name: string
+  price: number
+}
+
 function BookingPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
+
+  // Navigation items
+  const navItems = useMemo(() => [
+    { label: 'Home', href: '/', route: true },
+    { label: 'AboutUs', href: '/aboutus', route: true },
+    { label: 'Services', href: '/services', route: true, hasDropdown: true },
+    { label: 'Product', href: '/products', route: true },
+    { label: 'Gallery', href: '/gallery', route: true },
+    { label: 'Contact Us', href: '/contact', route: true },
+    { label: 'BOOK NOW', href: '/booking', route: true }
+  ], [])
+
+  const servicesSubItems = useMemo(() => [
+    { label: 'Car Wash', href: '/carwash', route: true },
+    { label: 'Car Detailing', href: '/cardetailing', route: true }
+  ], [])
+
+  const isActive = useCallback((href: string) => {
+    if (href === '/') {
+      return location.pathname === '/'
+    }
+    return location.pathname === href
+  }, [location.pathname])
+
+  const isServicesActive = useCallback(() => {
+    return location.pathname === '/services' || 
+           location.pathname === '/carwash' || 
+           location.pathname === '/cardetailing'
+  }, [location.pathname])
+
+  const isDropdownItemActive = useCallback((href: string) => {
+    return location.pathname === href
+  }, [location.pathname])
+
+  const handleNavClick = useCallback((href: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+    }
+    setMenuOpen(false)
+    setMobileServicesOpen(false)
+    navigate(href)
+  }, [navigate])
+
+  const getIconSVG = useCallback((iconName: string) => {
+    const icons: { [key: string]: string } = {
+      menu: 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',
+      close: 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'
+    }
+    return icons[iconName] || icons.menu
+  }, [])
+
+
+  // Step management
+  const [currentStep, setCurrentStep] = useState(1)
+  const [packageStep, setPackageStep] = useState(0) // For handling multiple package selections
+
+  // Form data
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null)
+  const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(null)
+  const [carNumber, setCarNumber] = useState('')
+  const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
+  const [selectedExtras, setSelectedExtras] = useState<string[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedTime, setSelectedTime] = useState<string>('')
+
+  // Animation refs
+  const leftCarModelRef = useRef<HTMLDivElement>(null)
+
+  // Branches
+  const branches: Branch[] = [
+    {
+      id: 'australia',
+      name: 'Australia',
+      location: '66-72 Windsor parade, Dubbo, 2830, NSW',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
+    },
+    {
+      id: 'srilanka',
+      name: 'Sri Lanka',
+      location: 'Colombo, Sri Lanka',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126748.60912437247!2d79.7854488!3d6.9270786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae253d10f7a7003%3A0x320b2e4d32d3838d!2sColombo!5e0!3m2!1sen!2sus!4v1234567890!5m2!1sen!2sus'
+    }
+  ]
+
+  // Vehicle models
+  const vehicleModels: VehicleModel[] = [
+    { id: 'hatchback', name: 'Hatchback', image: '/Model/Hatchback.png' },
+    { id: 'sedan', name: 'Sedan', image: '/Model/Sedan.png' },
+    { id: 'sports', name: 'Sports', image: '/Model/Sports.png' },
+    { id: 'suv', name: 'SUV', image: '/Model/Suv.png' },
+    { id: 'wagon', name: 'Wagon', image: '/Model/Wagon.png' },
+    { id: 'xlarge', name: 'X-Large', image: '/Model/X-Large.png' }
+  ]
+
+  // Car Wash Packages
+  const carWashPackages: Package[] = [
+    { 
+      id: 'js-polish', 
+      name: 'JS Polish', 
+      price: 149, 
+      serviceType: 'carwash',
+      features: [
+        'High - Pressure - rinse',
+        'Exterior Wash with pH neutral shampoo',
+        'Apply tyer shine',
+        'Exterior windows and side mirrirs clean',
+        'Mag wheel wash process',
+        'Vacuum interior floor mats and footwells',
+        'Vacuum seats and boot',
+        'Wipe door and boot jambs',
+        'Interior windows and mirrors clean',
+        'Clean and wipe dashboard and console',
+        'Clean and wipe door trims',
+        'Full Duco Hand Wax Polish'
+      ]
+    },
+    { 
+      id: 'js-platinum', 
+      name: 'JS Platinum', 
+      price: 69, 
+      serviceType: 'carwash',
+      features: [
+        'High - Pressure - rinse',
+        'Exterior Wash with pH neutral shampoo',
+        'Apply tyer shine',
+        'Exterior windows and side mirrirs clean',
+        'Mag wheel wash process',
+        'Vacuum interior floor mats and footwells',
+        'Vacuum seats and boot',
+        'Wipe door and boot jambs',
+        'Interior windows and mirrors clean',
+        'Clean and wipe dashboard and console',
+        'Clean and wipe door trims'
+      ]
+    },
+    { 
+      id: 'js-express', 
+      name: 'JS Express', 
+      price: 39, 
+      serviceType: 'carwash',
+      features: [
+        'High - Pressure - rinse',
+        'Exterior Wash with pH neutral shampoo',
+        'Apply tyer shine',
+        'Exterior windows and side mirrirs clean'
+      ],
+      excludedFeatures: [
+        'Mag wheel wash process',
+        'Vacuum interior floor mats and footwells',
+        'Vacuum seats and boot',
+        'Wipe door and boot jambs',
+        'Interior windows and mirrors clean',
+        'Clean and wipe dashboard and console',
+        'Clean and wipe door trims'
+      ]
+    }
+  ]
+
+  // Car Detailing Packages
+  const carDetailingPackages: Package[] = [
+    { 
+      id: 'js-mini-detail', 
+      name: 'JS Mini Detail', 
+      price: 189, 
+      serviceType: 'cardetailing',
+      features: [
+        'Include JS police',
+        'Interior Polish'
+      ]
+    },
+    { 
+      id: 'js-exterior-detail', 
+      name: 'JS Exterior Detail', 
+      price: 185, 
+      serviceType: 'cardetailing',
+      features: [
+        'Include Exterior wash',
+        'Clay bar/ Spot buff',
+        'Exterior Hand Polish',
+        'Wheel & Tyres',
+        'Engine clean (Upon request)'
+      ]
+    },
+    { 
+      id: 'js-interior-detail', 
+      name: 'JS Interior Detail', 
+      price: 259, 
+      serviceType: 'cardetailing',
+      features: [
+        'Include Js platinum',
+        'interior plastic Clean',
+        'Leather seat Clean',
+        'fabric Seats Steam Clean',
+        'Carpets & Matts Steam Clean',
+        'Leather polish'
+      ]
+    },
+    { 
+      id: 'js-full-detail', 
+      name: 'JS Full detail', 
+      price: 350, 
+      serviceType: 'cardetailing',
+      features: [
+        'Include JS Polish',
+        'JS Interior Details',
+        'Engine Clean (Upon request)',
+        'Buff (Additional charge)'
+      ]
+    },
+    { 
+      id: 'paint-protection', 
+      name: 'Paint protection & Ceramic Coding', 
+      price: 799, 
+      serviceType: 'cardetailing',
+      features: [
+        'Include JS Full Detail',
+        'JS Paint Protection Treatment',
+        'Buff & Cut (Additional charge)'
+      ]
+    }
+  ]
+
+  // Extras
+  const extras: Extra[] = [
+    { id: 'engine-clean', name: 'Engine Clean', price: 50 },
+    { id: 'buff-cut', name: 'Buff & Cut', price: 100 },
+    { id: 'interior-protection', name: 'Interior Protection', price: 75 },
+    { id: 'headlight-restoration', name: 'Headlight Restoration', price: 120 }
+  ]
+
+  // Products
+  const products: Product[] = [
+    { id: 'wax', name: 'Premium Wax', price: 25 },
+    { id: 'shampoo', name: 'Car Shampoo', price: 15 },
+    { id: 'tire-shine', name: 'Tire Shine', price: 20 },
+    { id: 'interior-cleaner', name: 'Interior Cleaner', price: 30 }
+  ]
+
+  // Time slots
+  const timeSlots = [
+    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+    '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
+    '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM',
+    '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM'
+  ]
+
+  // Handle service selection
+  const handleServiceToggle = (service: string) => {
+    setSelectedServices(prev => 
+      prev.includes(service) 
+        ? prev.filter(s => s !== service)
+        : [...prev, service]
+    )
+  }
+
+  // Handle vehicle model selection
+  const handleVehicleModelSelect = (model: VehicleModel) => {
+    setSelectedVehicleModel(model)
+  }
+
+  // Handle package selection
+  const handlePackageSelect = (pkg: Package) => {
+    setSelectedPackages(prev => {
+      const exists = prev.find(p => p.id === pkg.id)
+      if (exists) {
+        return prev.filter(p => p.id !== pkg.id)
+      }
+      return [...prev, pkg]
+    })
+  }
+
+  // Get available packages based on selected services
+  const getAvailablePackages = (): Package[] => {
+    const packages: Package[] = []
+    if (selectedServices.includes('carwash')) {
+      packages.push(...carWashPackages)
+    }
+    if (selectedServices.includes('cardetailing')) {
+      packages.push(...carDetailingPackages)
+    }
+    return packages
+  }
+
+  // Get packages to show in current package step
+  const getCurrentPackageSet = (): Package[] => {
+    const allPackages = getAvailablePackages()
+    if (selectedServices.length === 1) {
+      return allPackages
+    }
+    if (selectedServices.includes('carwash') && packageStep === 0) {
+      return carWashPackages
+    }
+    if (selectedServices.includes('cardetailing') && packageStep === 1) {
+      return carDetailingPackages
+    }
+    return []
+  }
+
+  // Handle next step
+  const handleNext = () => {
+    if (currentStep === 1) {
+      // Validate step 1
+      if (!selectedBranch || selectedServices.length === 0 || !selectedVehicleModel || !carNumber) {
+        alert('Please fill all required fields')
+        return
+      }
+      setCurrentStep(2)
+      setPackageStep(0)
+    } else if (currentStep === 2) {
+      // Check if we need to show more packages
+      const hasCarWash = selectedServices.includes('carwash')
+      const hasCarDetailing = selectedServices.includes('cardetailing')
+      
+      if (hasCarWash && hasCarDetailing && packageStep === 0) {
+        // Show car detailing packages next
+        setPackageStep(1)
+      } else {
+        // Move to step 3
+        if (selectedPackages.length === 0) {
+          alert('Please select at least one package')
+          return
+        }
+        setCurrentStep(3)
+      }
+    } else if (currentStep === 3) {
+      // Validate step 3
+      if (!selectedDate || !selectedTime) {
+        alert('Please select date and time')
+        return
+      }
+      setCurrentStep(4) // Show order summary
+    }
+  }
+
+  // Handle back step
+  const handleBack = () => {
+    if (currentStep === 2 && packageStep === 1) {
+      setPackageStep(0)
+    } else if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  // Calendar helpers
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    return { daysInMonth, startingDayOfWeek, year, month }
+  }
+
+  const [calendarDate, setCalendarDate] = useState(new Date())
+
+  const handleDateSelect = (day: number) => {
+    const newDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), day)
+    setSelectedDate(newDate)
+  }
+
+  const handleCalendarPrevMonth = () => {
+    setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))
+  }
+
+  const handleCalendarNextMonth = () => {
+    setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))
+  }
+
+  // Calculate total
+  const calculateTotal = () => {
+    let total = 0
+    selectedPackages.forEach(pkg => total += pkg.price)
+    selectedExtras.forEach(extraId => {
+      const extra = extras.find(e => e.id === extraId)
+      if (extra) total += extra.price
+    })
+    selectedProducts.forEach(productId => {
+      const product = products.find(p => p.id === productId)
+      if (product) total += product.price
+    })
+    return total
+  }
+
+  // Get service text
+  const getServiceText = () => {
+    if (selectedServices.includes('carwash') && selectedServices.includes('cardetailing')) {
+      return 'Car Wash, Car Detailing'
+    } else if (selectedServices.includes('carwash')) {
+      return 'Car Wash'
+    } else if (selectedServices.includes('cardetailing')) {
+      return 'Car Detailing'
+    }
+    return ''
+  }
+
   return (
-    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
-      <div>
-        <h1 style={{ marginBottom: '16px' }}>Booking / Schedule</h1>
-        <p>Book your car wash or detailing service</p>
+    <div className="booking-page">
+      {/* Fixed Hamburger Button */}
+      <button
+        className="header-hamburger-btn"
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          setMenuOpen(true)
+        }}
+        onMouseEnter={() => setMenuOpen(true)}
+        aria-label="Open menu"
+      >
+        <svg className="header-menu-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d={getIconSVG('menu')} />
+        </svg>
+      </button>
+
+      {/* Mobile Menu Overlay - HomePage Navigation */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <motion.div
+              className="mobile-menu-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => {
+                setMenuOpen(false)
+                setMobileServicesOpen(false)
+              }}
+            />
+            <motion.div
+              className="mobile-menu-overlay"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => setMenuOpen(false)}
+            >
+              <div className="mobile-menu-header">
+                <div className="mobile-menu-logo">
+                  <img
+                    src="/JS Car Wash Images/cropped-fghfthgf.png"
+                    alt="JS Car Wash Logo"
+                    className="mobile-logo-img"
+                  />
+                </div>
+                <button
+                  className="mobile-menu-close"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setMobileServicesOpen(false)
+                  }}
+                  aria-label="Close menu"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mobile-menu-content">
+                {navItems.map((item, index) => {
+                  const active = isActive(item.href)
+                  if (item.hasDropdown) {
+                    const servicesActive = isServicesActive()
+                    return (
+                      <div 
+                        key={index} 
+                        className="mobile-menu-item"
+                        onMouseEnter={() => setMobileServicesOpen(true)}
+                        onMouseLeave={() => setMobileServicesOpen(false)}
+                      >
+                        <div className="mobile-menu-link-with-dropdown">
+                          <Link
+                            to={item.href}
+                            className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
+                            onClick={(e) => handleNavClick(item.href, e)}
+                          >
+                            {item.label}
+                          </Link>
+                          <button
+                            className="mobile-dropdown-toggle"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setMobileServicesOpen(!mobileServicesOpen)
+                            }}
+                            aria-label="Toggle services menu"
+                          >
+                            <svg
+                              className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
+                        {mobileServicesOpen && (
+                          <div className="mobile-submenu">
+                            {servicesSubItems.map((subItem, subIndex) => {
+                              const dropdownActive = isDropdownItemActive(subItem.href)
+                              return (
+                                <Link
+                                  key={subIndex}
+                                  to={subItem.href}
+                                  className={`mobile-submenu-item ${dropdownActive ? 'mobile-submenu-item-active' : ''}`}
+                                  onClick={(e) => handleNavClick(subItem.href, e)}
+                                >
+                                  {subItem.label}
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
+                  return (
+                    <Link
+                      key={index}
+                      to={item.href}
+                      className={`mobile-menu-link ${active ? 'mobile-menu-link-active' : ''}`}
+                      onClick={(e) => handleNavClick(item.href, e)}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Page Heading Section */}
+      <section className="page-heading-section">
+        <div className="page-heading-overlay"></div>
+        <div className="page-heading-content">
+          <h1 className="page-heading-title">Booking</h1>
+        </div>
+      </section>
+      
+      <div className="booking-container">
+        <div className="booking-container-inner">
+          {/* Left Sticky Sidebar */}
+          <div className="booking-left-sidebar">
+          <div className="booking-user-section">
+            <div className="booking-user-img">
+              <img src="/JS Car Wash Images/cropped-fghfthgf.png" alt="User" />
+            </div>
+            <h3 className="booking-user-name">Alex Suprun</h3>
+            <p className="booking-user-role">Founder & Head of IT</p>
+          </div>
+
+          <div className="booking-info-section">
+            <div className="booking-info-item">
+              <label>Branch Location</label>
+              {selectedBranch && (
+                <div className="booking-branch-map">
+                  <iframe
+                    src={selectedBranch.mapUrl}
+                    width="100%"
+                    height="200"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                  ></iframe>
+                  <p className="booking-branch-name">{selectedBranch.name}</p>
+                  <p className="booking-branch-address">{selectedBranch.location}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="booking-info-item">
+              <label>Service</label>
+              <div className="booking-service-text">
+                {getServiceText()}
+              </div>
+            </div>
+
+            <div className="booking-info-item">
+              <label>Car Model</label>
+              <div className="booking-car-model" ref={leftCarModelRef}>
+                {selectedVehicleModel && (
+                  <p className="booking-car-model-name">{selectedVehicleModel.name}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="booking-info-item">
+              <label>Car Number</label>
+              <p className="booking-car-number">
+                {carNumber}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Content Area */}
+        <div className="booking-right-content">
+          <AnimatePresence mode="wait">
+            {/* Step 1: Branch, Service, Vehicle, Car Number */}
+            {currentStep === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="booking-step"
+              >
+                <h2 className="booking-step-title">Select Branch & Service</h2>
+
+                {/* Branch and Service in One Row */}
+                <div className="booking-branch-service-row">
+                  {/* Branch Selection */}
+                  <div className="booking-form-section booking-form-section-half">
+                    <h3>Select Branch</h3>
+                    <div className="booking-branch-buttons">
+                      {branches.map(branch => (
+                        <button
+                          key={branch.id}
+                          className={`booking-branch-btn ${selectedBranch?.id === branch.id ? 'active' : ''}`}
+                          onClick={() => setSelectedBranch(branch)}
+                        >
+                          {branch.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Service Selection */}
+                  <div className="booking-form-section booking-form-section-half">
+                    <h3>Select Service</h3>
+                    <div className="booking-service-checkboxes">
+                      <label className="booking-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.includes('carwash')}
+                          onChange={() => handleServiceToggle('carwash')}
+                        />
+                        <span>Car Wash</span>
+                      </label>
+                      <label className="booking-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.includes('cardetailing')}
+                          onChange={() => handleServiceToggle('cardetailing')}
+                        />
+                        <span>Car Detailing</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vehicle Model Selection */}
+                <div className="booking-form-section">
+                  <h3>Select Vehicle Model</h3>
+                  <div className="booking-vehicle-models">
+                    {vehicleModels.map(model => (
+                      <motion.div
+                        key={model.id}
+                        className={`booking-vehicle-card ${selectedVehicleModel?.id === model.id ? 'selected' : ''}`}
+                        onClick={() => handleVehicleModelSelect(model)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <img src={model.image} alt={model.name} />
+                        <p>{model.name}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Car Number */}
+                <div className="booking-form-section">
+                  <h3>Enter Car Number</h3>
+                  <input
+                    type="text"
+                    className="booking-input"
+                    placeholder="Enter your car number"
+                    value={carNumber}
+                    onChange={(e) => setCarNumber(e.target.value.toUpperCase())}
+                  />
+                </div>
+
+                <button className="booking-next-btn" onClick={handleNext}>
+                  Next
+                </button>
+              </motion.div>
+            )}
+
+            {/* Step 2: Package Selection */}
+            {currentStep === 2 && (
+              <motion.div
+                key={`step2-${packageStep}`}
+                initial={{ opacity: 0, rotateY: -90 }}
+                animate={{ opacity: 1, rotateY: 0 }}
+                exit={{ opacity: 0, rotateY: 90 }}
+                transition={{ duration: 0.5 }}
+                className="booking-step"
+              >
+                <h2 className="booking-step-title">
+                  {selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 0
+                    ? 'Select Car Wash Package'
+                    : selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 1
+                    ? 'Select Car Detailing Package'
+                    : 'Select Package'}
+                </h2>
+
+                <div className="booking-packages-grid">
+                  {getCurrentPackageSet().map(pkg => (
+                    <motion.div
+                      key={pkg.id}
+                      className={`booking-package-card ${selectedPackages.find(p => p.id === pkg.id) ? 'selected' : ''}`}
+                      onClick={() => handlePackageSelect(pkg)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <div className="booking-package-card-header">
+                        <div className="booking-package-price">
+                          ${pkg.price} <span className="booking-package-price-suffix">/ start from</span>
+                        </div>
+                        <h3 className="booking-package-card-title">{pkg.name}</h3>
+                      </div>
+                      <div className="booking-package-check">
+                        {selectedPackages.find(p => p.id === pkg.id) && '✓'}
+                      </div>
+                      <div className="booking-package-features">
+                        <h4 className="booking-package-features-title">Package includes</h4>
+                        <ul className="booking-package-features-list">
+                          {pkg.features.map((feature, index) => (
+                            <li key={index} className="booking-package-feature-item">
+                              <i className="fas fa-check-circle booking-package-check-icon"></i>
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                          {pkg.excludedFeatures && pkg.excludedFeatures.map((feature, index) => (
+                            <li key={`excluded-${index}`} className="booking-package-feature-item booking-package-feature-excluded">
+                              <i className="fas fa-times-circle booking-package-x-icon"></i>
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="booking-step-buttons">
+                  <button className="booking-back-btn" onClick={handleBack}>
+                    Back
+                  </button>
+                  <button className="booking-next-btn" onClick={handleNext}>
+                    {selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 0
+                      ? 'Next: Car Detailing Packages'
+                      : 'Next'}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3: Extras, Products, Date & Time */}
+            {currentStep === 3 && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="booking-step"
+              >
+                <h2 className="booking-step-title">Extras & Schedule</h2>
+
+                {/* Extras */}
+                <div className="booking-form-section">
+                  <h3>Extras (Optional)</h3>
+                  <div className="booking-extras-grid">
+                    {extras.map(extra => (
+                      <label key={extra.id} className="booking-extra-item">
+                        <input
+                          type="checkbox"
+                          checked={selectedExtras.includes(extra.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedExtras([...selectedExtras, extra.id])
+                            } else {
+                              setSelectedExtras(selectedExtras.filter(id => id !== extra.id))
+                            }
+                          }}
+                        />
+                        <div>
+                          <span>{extra.name}</span>
+                          <span className="booking-extra-price">+${extra.price}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Products */}
+                <div className="booking-form-section">
+                  <h3>Products (Optional)</h3>
+                  <div className="booking-products-grid">
+                    {products.map(product => (
+                      <label key={product.id} className="booking-product-item">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProducts([...selectedProducts, product.id])
+                            } else {
+                              setSelectedProducts(selectedProducts.filter(id => id !== product.id))
+                            }
+                          }}
+                        />
+                        <div>
+                          <span>{product.name}</span>
+                          <span className="booking-product-price">+${product.price}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Date & Time Selection */}
+                <div className="booking-form-section">
+                  <h3>Select Arrival Date & Time</h3>
+                  
+                  <div className="booking-date-time-container">
+                    {/* Calendar */}
+                    <div className="booking-calendar">
+                    <div className="booking-calendar-header">
+                      <button onClick={handleCalendarPrevMonth} className="booking-calendar-nav">
+                        ‹
+                      </button>
+                      <h4>
+                        {calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </h4>
+                      <button onClick={handleCalendarNextMonth} className="booking-calendar-nav active">
+                        ›
+                      </button>
+                    </div>
+                    
+                    <div className="booking-calendar-weekdays">
+                      {['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'].map(day => (
+                        <div key={day} className="booking-calendar-weekday">{day}.</div>
+                      ))}
+                    </div>
+                    
+                    <div className="booking-calendar-days">
+                      {(() => {
+                        const { daysInMonth, startingDayOfWeek } = getDaysInMonth(calendarDate)
+                        const days = []
+                        
+                        // Empty cells for days before month starts
+                        for (let i = 0; i < startingDayOfWeek; i++) {
+                          days.push(<div key={`empty-${i}`} className="booking-calendar-day empty"></div>)
+                        }
+                        
+                        // Days of the month
+                        for (let day = 1; day <= daysInMonth; day++) {
+                          const date = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), day)
+                          const isSelected = selectedDate && 
+                            date.getDate() === selectedDate.getDate() &&
+                            date.getMonth() === selectedDate.getMonth() &&
+                            date.getFullYear() === selectedDate.getFullYear()
+                          const isToday = date.toDateString() === new Date().toDateString()
+                          const isPast = date < new Date() && !isToday
+                          const isSelectable = !isPast
+                          
+                          days.push(
+                            <div
+                              key={day}
+                              className={`booking-calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${isPast ? 'past' : ''} ${isSelectable && !isPast ? 'selectable' : ''}`}
+                              onClick={() => !isPast && handleDateSelect(day)}
+                            >
+                              {day}
+                            </div>
+                          )
+                        }
+                        
+                        return days
+                      })()}
+                    </div>
+                  </div>
+
+                    {/* Time Slots */}
+                    <div className="booking-time-slots">
+                      {selectedDate ? (
+                        <>
+                          <h4 className="booking-selected-date">
+                            {selectedDate.toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              day: 'numeric', 
+                              month: 'long' 
+                            })}
+                          </h4>
+                          <div className="booking-time-grid">
+                            {timeSlots.map(time => (
+                              <button
+                                key={time}
+                                className={`booking-time-btn ${selectedTime === time ? 'selected' : ''}`}
+                                onClick={() => setSelectedTime(time)}
+                              >
+                                {time}
+                              </button>
+                            ))}
+                          </div>
+                          {selectedTime && (
+                            <button className="booking-continue-btn" onClick={handleNext}>
+                              Continue
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                          Select a date to view available times
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+              </motion.div>
+            )}
+
+            {/* Step 4: Order Summary */}
+            {currentStep === 4 && (
+              <motion.div
+                key="step4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="booking-step"
+              >
+                <h2 className="booking-step-title">Order Summary</h2>
+
+                <div className="booking-summary">
+                  {/* Row 1: Branch, Service, Vehicle */}
+                  <div className="booking-summary-row">
+                    <div className="booking-summary-section">
+                      <h3>Branch</h3>
+                      <p>{selectedBranch?.name}</p>
+                      <p className="booking-summary-subtext">{selectedBranch?.location}</p>
+                    </div>
+
+                    <div className="booking-summary-section">
+                      <h3>Services</h3>
+                      <p>{selectedServices.map(s => s === 'carwash' ? 'Car Wash' : 'Car Detailing').join(', ')}</p>
+                    </div>
+
+                    <div className="booking-summary-section">
+                      <h3>Vehicle</h3>
+                      <p>{selectedVehicleModel?.name}</p>
+                      <p className="booking-summary-subtext">Car Number: {carNumber}</p>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Packages */}
+                  <div className="booking-summary-row">
+                    <div className="booking-summary-section booking-summary-section-full">
+                      <h3>Packages</h3>
+                      {selectedPackages.map(pkg => (
+                        <div key={pkg.id} className="booking-summary-item">
+                          <span>{pkg.name}</span>
+                          <span>${pkg.price}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Row 3: Extras and Products */}
+                  {(selectedExtras.length > 0 || selectedProducts.length > 0) && (
+                    <div className={`booking-summary-row ${selectedExtras.length > 0 && selectedProducts.length > 0 ? 'booking-summary-row-two' : 'booking-summary-row-one'}`}>
+                      {selectedExtras.length > 0 && (
+                        <div className="booking-summary-section">
+                          <h3>Extras</h3>
+                          {selectedExtras.map(extraId => {
+                            const extra = extras.find(e => e.id === extraId)
+                            return extra ? (
+                              <div key={extra.id} className="booking-summary-item">
+                                <span>{extra.name}</span>
+                                <span>${extra.price}</span>
+                              </div>
+                            ) : null
+                          })}
+                        </div>
+                      )}
+
+                      {selectedProducts.length > 0 && (
+                        <div className="booking-summary-section">
+                          <h3>Products</h3>
+                          {selectedProducts.map(productId => {
+                            const product = products.find(p => p.id === productId)
+                            return product ? (
+                              <div key={product.id} className="booking-summary-item">
+                                <span>{product.name}</span>
+                                <span>${product.price}</span>
+                              </div>
+                            ) : null
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Row 4: Schedule */}
+                  <div className="booking-summary-row">
+                    <div className="booking-summary-section booking-summary-section-full">
+                      <h3>Schedule</h3>
+                      <p>
+                        {selectedDate?.toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </p>
+                      <p className="booking-summary-subtext">Time: {selectedTime}</p>
+                    </div>
+                  </div>
+
+                  <div className="booking-summary-total">
+                    <h3>Total</h3>
+                    <h2>${calculateTotal()}</h2>
+                  </div>
+
+                  <div className="booking-confirmation-note">
+                    <h3>Order Confirmation</h3>
+                    <p>Your booking has been confirmed! You will receive a confirmation email shortly.</p>
+                    <p>Please arrive on time for your appointment.</p>
+                  </div>
+
+                  <button className="booking-confirm-btn" onClick={() => alert('Booking confirmed!')}>
+                    Confirm Booking
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        </div>
       </div>
+
     </div>
   )
 }
 
 export default BookingPage
-

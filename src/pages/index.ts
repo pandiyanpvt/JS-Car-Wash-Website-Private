@@ -1,6 +1,6 @@
 // Main Pages
 export { HomePage } from './home'
-export { ServicesPage, CarWash, CarDetailing } from './services'
+export { ServicePage } from './services'
 export { ProductsPage } from './products'
 export {
   BookingPage,
@@ -9,10 +9,8 @@ export {
   BookCarWash,
   BookCarDetailing,
 } from './booking'
-export { OffersPage } from './offers'
 export { GalleryPage } from './gallery'
 export { TestimonialsPage } from './testimonials'
 export { FAQPage } from './faq'
-export { ContactPage } from './contact'
-export { TermsPage } from './terms'
+export { ContactUsPage } from './contact'
 

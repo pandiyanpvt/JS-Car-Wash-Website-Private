@@ -307,20 +307,64 @@
 }
 
 .about-js-heading {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #000;
-  margin-bottom: 24px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.about-js-subtitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #d32f2f;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  text-align: left;
 }
 
 @media (min-width: 900px) {
-  .about-js-heading {
-    font-size: 2.5rem;
-    margin-bottom: 32px;
+  .about-js-subtitle {
+    font-size: 0.875rem;
+    margin-bottom: 12px;
   }
+}
+
+.about-js-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  .about-js-title {
+    font-size: 2.5rem;
+  }
+}
+
+.about-js-title-accent {
+  color: #d32f2f;
+}
+
+.about-js-lines {
+  display: flex;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.about-js-line {
+  width: 30px;
+  height: 2px;
+  background-color: #000;
+}
+
+.about-js-line-red {
+  background-color: #d32f2f;
 }
 
 .about-js-description {
@@ -572,7 +616,21 @@
   }
 
   .about-js-heading {
-    font-size: 1.75rem;
+    margin-bottom: 24px;
+  }
+
+  .about-js-subtitle {
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+  }
+
+  .about-js-title {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+  }
+
+  .about-js-lines {
+    margin-top: 6px;
     margin-bottom: 20px;
   }
 
@@ -602,6 +660,20 @@
 
   .about-js-images-container {
     min-height: 300px;
+  }
+
+  .about-js-images-wrapper {
+    display: none !important;
+  }
+
+  .home-red-banner-section,
+  .home-dark-banner-section {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
   }
 
   .benefit-section {
@@ -700,7 +772,21 @@
   }
 
   .about-js-heading {
-    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .about-js-subtitle {
+    font-size: 0.65rem;
+    margin-bottom: 4px;
+  }
+
+  .about-js-title {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+
+  .about-js-lines {
+    margin-top: 4px;
     margin-bottom: 16px;
   }
 
@@ -986,6 +1072,19 @@
   margin-top: -80px;
   z-index: 3;
   overflow: visible !important;
+}
+
+/* Hide banner sections on mobile */
+@media (max-width: 768px) {
+  .home-red-banner-section,
+  .home-dark-banner-section {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
 }
 
 .home-dark-banner-container {

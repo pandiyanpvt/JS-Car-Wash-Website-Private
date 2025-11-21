@@ -168,11 +168,12 @@
   justify-content: center;
   color: #000000;
   transition: transform 0.2s ease, opacity 0.2s ease;
-  z-index: 1001;
+  z-index: 1002;
   background-color: rgba(245, 245, 245, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
 }
 
 .header-hamburger-btn:hover {
@@ -276,6 +277,12 @@
     padding-top: 20px;
     padding-bottom: 20px;
   }
+
+  .home-red-banner-section,
+  .home-dark-banner-section {
+    display: none !important;
+  }
+}
 
   .logo-wrapper img {
     max-height: 50px;
@@ -564,7 +571,7 @@
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   z-index: 1400;
-  display: none;
+  display: block;
 }
 
 /* Mobile Menu Overlay - HomePage */
@@ -578,20 +585,9 @@
   background-color: #ffffff;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
   z-index: 1401;
-  display: none;
+  display: flex;
   flex-direction: column;
   overflow-y: auto;
-}
-
-/* Show mobile menu only on mobile devices */
-@media (max-width: 768px) {
-  .mobile-menu-backdrop {
-    display: block;
-  }
-
-  .mobile-menu-overlay {
-    display: flex;
-  }
 }
 
 .mobile-menu-header {
@@ -650,6 +646,43 @@
 .mobile-menu-item {
   display: flex;
   flex-direction: column;
+}
+
+.mobile-menu-link-with-dropdown {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.mobile-menu-link-with-dropdown .mobile-menu-link {
+  flex: 1;
+  padding: 16px 20px;
+  color: #000;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mobile-dropdown-toggle {
+  background: none;
+  border: none;
+  padding: 16px 12px;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.mobile-dropdown-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .mobile-menu-link {
@@ -3411,6 +3444,19 @@
   margin-top: -80px;
   z-index: 3;
   overflow: visible !important;
+}
+
+/* Hide banner sections on mobile */
+@media (max-width: 768px) {
+  .home-red-banner-section,
+  .home-dark-banner-section {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
 }
 
 .home-dark-banner-container {

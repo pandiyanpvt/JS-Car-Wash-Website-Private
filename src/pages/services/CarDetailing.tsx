@@ -1,9 +1,12 @@
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
 import './CarDetailing.css'
 
 function CarDetailing() {
+  const navigate = useNavigate()
+  
   const jsMiniDetailFeatures = [
     'Include JS police',
     'Interior Polish'
@@ -77,7 +80,7 @@ function CarDetailing() {
                 <div className="pricing-price">$189 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">JS Mini Detail</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">
@@ -102,7 +105,7 @@ function CarDetailing() {
                 <div className="pricing-price">$185 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">JS Exterior Detail</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">
@@ -127,7 +130,7 @@ function CarDetailing() {
                 <div className="pricing-price">$259 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">JS Interior Detail</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">
@@ -152,7 +155,7 @@ function CarDetailing() {
                 <div className="pricing-price">$350 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">JS Full detail</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">
@@ -177,7 +180,7 @@ function CarDetailing() {
                 <div className="pricing-price">$799 <span className="pricing-price-suffix">/ start from</span></div>
                 <h3 className="pricing-card-title">Paint protection & Ceramic Coding</h3>
               </div>
-              <button className="pricing-book-btn">Book Now</button>
+              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="pricing-features">
                 <h4 className="pricing-features-title">Package includes</h4>
                 <ul className="pricing-features-list">
