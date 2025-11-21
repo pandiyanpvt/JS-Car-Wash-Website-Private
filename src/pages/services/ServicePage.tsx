@@ -1,9 +1,27 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
 import './ServicePage.css'
 
 function ServicePage() {
+  const [visibleCount, setVisibleCount] = useState(4)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 4)
+  }
   const services = [
     'Hand Polish',
     'Clay Bar',
@@ -148,9 +166,19 @@ function ServicePage() {
       {/* Our Best Services Section */}
       <section className="best-services-section">
         <div className="container">
-          <h2 className="best-services-title">Our Best Services</h2>
+          <div className="best-services-heading">
+            <p className="best-services-subtitle">JS CAR WASH</p>
+            <h2 className="best-services-title">
+              Our Best <span className="best-services-title-accent">Services</span>
+            </h2>
+            <div className="best-services-lines">
+              <div className="best-services-line best-services-line-red"></div>
+              <div className="best-services-line best-services-line-red"></div>
+              <div className="best-services-line best-services-line-red"></div>
+            </div>
+          </div>
           <div className="services-grid">
-            {featuredServices.map((service, index) => (
+            {featuredServices.slice(0, isMobile ? visibleCount : featuredServices.length).map((service, index) => (
               <motion.div
                 key={index}
                 className="service-card"
@@ -161,6 +189,9 @@ function ServicePage() {
               >
                 <div className="service-card-image">
                   <img src={service.image} alt={service.name} />
+                  <div className="service-card-overlay">
+                    <p className="service-card-description">{service.name}</p>
+                  </div>
                 </div>
                 <div className="service-card-content">
                   <h3 className="service-card-title">{service.name}</h3>
@@ -173,6 +204,13 @@ function ServicePage() {
               </motion.div>
             ))}
           </div>
+          {isMobile && visibleCount < featuredServices.length && (
+            <div className="load-more-container">
+              <button className="load-more-button" onClick={handleLoadMore}>
+                Load More
+              </button>
+            </div>
+          )}
         </div>
       </section>
       <FooterPage />

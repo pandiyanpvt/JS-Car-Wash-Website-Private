@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FooterPage } from '../footer'
 import './HomePage.css'
 
@@ -19,9 +19,10 @@ function HomePage({}: HomePageProps) {
   const [containerPosition, setContainerPosition] = useState({ top: 0, left: 0, width: 0, height: 0 })
   const totalPages = 6
   const location = useLocation()
+  const navigate = useNavigate()
 
-  // Branches data
-  const branches = [
+  // Branches data - memoized
+  const branches = useMemo(() => [
     {
       name: 'JS CAR WASH',
       subtitle: 'SERVICE DUBBO',
@@ -34,72 +35,82 @@ function HomePage({}: HomePageProps) {
       address: '66-72 Windsor parade, Dubbo, 2830, NSW',
       mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
     }
-  ]
+  ], [])
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { label: 'Home', href: '/', route: true },
     { label: 'AboutUs', href: '/aboutus', route: true },
     { label: 'Services', href: '/services', route: true, hasDropdown: true },
+    { label: 'Product', href: '/products', route: true },
+    { label: 'Gallery', href: '/gallery', route: true },
     { label: 'Contact Us', href: '/contact', route: true },
-    { label: 'BOOK NOW', href: '/login', route: true }
-  ]
+    { label: 'BOOK NOW', href: '/booking', route: true }
+  ], [])
 
-  const servicesSubItems = [
+  const servicesSubItems = useMemo(() => [
     { label: 'Car Wash', href: '/carwash', route: true },
     { label: 'Car Detailing', href: '/cardetailing', route: true }
-  ]
+  ], [])
 
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     if (href === '/') {
       return location.pathname === '/'
     }
     return location.pathname === href
-  }
+  }, [location.pathname])
 
-  const isServicesActive = () => {
+  const isServicesActive = useCallback(() => {
     return location.pathname === '/services' || 
            location.pathname === '/carwash' || 
            location.pathname === '/cardetailing'
-  }
+  }, [location.pathname])
 
-  const isDropdownItemActive = (href: string) => {
+  const isDropdownItemActive = useCallback((href: string) => {
     return location.pathname === href
-  }
+  }, [location.pathname])
 
-  const handleNavClick = (href: string, e?: React.MouseEvent) => {
+  const handleNavClick = useCallback((href: string, e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault()
     }
     setMenuOpen(false)
     setMobileServicesOpen(false)
     window.location.href = href
-  }
+  }, [])
 
   // Close mobile menu when clicking outside
   useEffect(() => {
+    if (!menuOpen) {
+      document.body.style.overflow = 'unset'
+      return
+    }
+
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
-      if (menuOpen && !target.closest('.header-hamburger-btn') && !target.closest('.mobile-menu-overlay')) {
-        setMenuOpen(false)
-        setMobileServicesOpen(false)
+      // Don't close if clicking on hamburger button or menu overlay
+      if (target.closest('.header-hamburger-btn') || target.closest('.mobile-menu-overlay')) {
+        return
       }
+      setMenuOpen(false)
+      setMobileServicesOpen(false)
     }
 
-    if (menuOpen) {
+    // Use a small delay to prevent immediate closure when opening
+    const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside)
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
+    }, 100)
+
+    document.body.style.overflow = 'hidden'
 
     return () => {
+      clearTimeout(timeoutId)
       document.removeEventListener('mousedown', handleClickOutside)
       document.body.style.overflow = 'unset'
     }
   }, [menuOpen])
 
-  // Services data
-  const services = [
+  // Services data - memoized
+  const services = useMemo(() => [
     'Hand Polish',
     'Clay Bar',
     'Headlight Restoration',
@@ -123,9 +134,9 @@ function HomePage({}: HomePageProps) {
     'Exterior windows and side mirrors clean',
     'High – Pressure – rinse',
     'Exterior Wash with pH neutral shampoo and Tyre Shine'
-  ]
+  ], [])
 
-  const serviceImageMap: { [key: string]: string } = {
+  const serviceImageMap: { [key: string]: string } = useMemo(() => ({
     'Hand Polish': 'Hand Polish.jpg',
     'Clay Bar': 'Clay Bar.jpg',
     'Headlight Restoration': 'Headlight Restoration.jpg',
@@ -149,28 +160,42 @@ function HomePage({}: HomePageProps) {
     'Exterior windows and side mirrors clean': 'Exterior windows and side mirrors clean.jpg',
     'High – Pressure – rinse': 'High – Pressure – rinse.png',
     'Exterior Wash with pH neutral shampoo and Tyre Shine': 'Exterior Wash with pH neutral shampoo.png'
-  }
+  }), [])
 
-  // Carousel state
-  const [scrollPosition, setScrollPosition] = useState(0)
+  // Carousel state - use ref to avoid state updates
+  const scrollPositionRef = useRef(0)
   const carouselRef = useRef<HTMLDivElement>(null)
   const scrollSpeed = 2 // pixels per frame
   const animationFrameRef = useRef<number | undefined>(undefined)
+  const lastUpdateTimeRef = useRef(0)
+  const throttleDelay = 16 // ~60fps
 
-  // Create duplicated services for seamless loop
-  const duplicatedServices = [...services, ...services, ...services]
+  // Create duplicated services for seamless loop - memoized
+  const duplicatedServices = useMemo(() => [...services, ...services, ...services], [services])
 
+  // Optimized carousel animation using direct DOM manipulation instead of state updates
   useEffect(() => {
-    const animate = () => {
-      setScrollPosition((prev) => {
-        const cardWidth = 280 + 32 // card width + gap
-        const totalWidth = services.length * cardWidth
+    const cardWidth = 280 + 32 // card width + gap
+    const totalWidth = services.length * cardWidth
+
+    const animate = (currentTime: number) => {
+      // Throttle updates to ~60fps
+      if (currentTime - lastUpdateTimeRef.current >= throttleDelay) {
+        scrollPositionRef.current += scrollSpeed
+        
         // Reset position when we've scrolled through one full set
-        if (prev >= totalWidth) {
-          return 0
+        if (scrollPositionRef.current >= totalWidth) {
+          scrollPositionRef.current = 0
         }
-        return prev + scrollSpeed
-      })
+
+        // Direct DOM manipulation for better performance
+        if (carouselRef.current) {
+          carouselRef.current.style.transform = `translateX(-${scrollPositionRef.current}px)`
+        }
+        
+        lastUpdateTimeRef.current = currentTime
+      }
+      
       animationFrameRef.current = requestAnimationFrame(animate)
     }
 
@@ -184,8 +209,11 @@ function HomePage({}: HomePageProps) {
   }, [services.length, scrollSpeed])
 
 
-  // Update container position for modelshow
+  // Update container position for modelshow - with throttling
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    let rafId: number | null = null
+
     const updatePosition = () => {
       if (pageContainerRef.current) {
         const rect = pageContainerRef.current.getBoundingClientRect()
@@ -198,13 +226,38 @@ function HomePage({}: HomePageProps) {
       }
     }
 
+    // Throttled update function
+    const throttledUpdate = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(() => {
+        updatePosition()
+        rafId = null
+      })
+    }
+
+    // Debounced resize handler
+    const debouncedResize = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      timeoutId = setTimeout(updatePosition, 150)
+    }
+
     updatePosition()
-    window.addEventListener('resize', updatePosition)
-    window.addEventListener('scroll', updatePosition)
+    window.addEventListener('resize', debouncedResize, { passive: true })
+    window.addEventListener('scroll', throttledUpdate, { passive: true })
 
     return () => {
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+      }
+      window.removeEventListener('resize', debouncedResize)
+      window.removeEventListener('scroll', throttledUpdate)
     }
   }, [modelsShow])
 
@@ -243,7 +296,7 @@ function HomePage({}: HomePageProps) {
     setCurrentPage((prev) => (prev < totalPages ? prev + 1 : 1))
   }
 
-  const getIconSVG = (iconName: string) => {
+  const getIconSVG = useCallback((iconName: string) => {
     const icons: { [key: string]: string } = {
       home: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
       info: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
@@ -258,14 +311,20 @@ function HomePage({}: HomePageProps) {
       keyboardArrowDown: 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'
     }
     return icons[iconName] || icons.home
-  }
+  }, [])
+
 
   return (
     <div className="home-page">
       {/* Fixed Hamburger Button - Only on Home Page */}
       <button
         className="header-hamburger-btn"
-        onClick={() => setMenuOpen(true)}
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          setMenuOpen(true)
+        }}
+        onMouseEnter={() => setMenuOpen(true)}
         aria-label="Open menu"
       >
         <svg className="header-menu-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -294,6 +353,8 @@ function HomePage({}: HomePageProps) {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => setMenuOpen(false)}
             >
               <div className="mobile-menu-header">
                 <div className="mobile-menu-logo">
@@ -323,21 +384,38 @@ function HomePage({}: HomePageProps) {
                   if (item.hasDropdown) {
                     const servicesActive = isServicesActive()
                     return (
-                      <div key={index} className="mobile-menu-item">
-                        <button
-                          className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
-                          onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                        >
-                          {item.label}
-                          <svg
-                            className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                      <div 
+                        key={index} 
+                        className="mobile-menu-item"
+                        onMouseEnter={() => setMobileServicesOpen(true)}
+                        onMouseLeave={() => setMobileServicesOpen(false)}
+                      >
+                        <div className="mobile-menu-link-with-dropdown">
+                          <Link
+                            to={item.href}
+                            className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
+                            onClick={(e) => handleNavClick(item.href, e)}
                           >
-                            <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
+                            {item.label}
+                          </Link>
+                          <button
+                            className="mobile-dropdown-toggle"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setMobileServicesOpen(!mobileServicesOpen)
+                            }}
+                            aria-label="Toggle services menu"
+                          >
+                            <svg
+                              className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
                         {mobileServicesOpen && (
                           <div className="mobile-submenu">
                             {servicesSubItems.map((subItem, subIndex) => {
@@ -376,7 +454,7 @@ function HomePage({}: HomePageProps) {
                   onClick={(e) => {
                     e.preventDefault()
                     setMenuOpen(false)
-                    window.location.href = '/register'
+                    navigate('/login', { state: { fromRegister: true } })
                   }}
                 >
                   Create an Account
@@ -491,6 +569,7 @@ function HomePage({}: HomePageProps) {
                 src="/JS Car Wash Images/kindpng_4272437.png"
                 alt="Car"
                 className="car-image"
+                loading="lazy"
               />
             </motion.div>
 
@@ -500,7 +579,7 @@ function HomePage({}: HomePageProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <button className="book-now-btn">BOOK NOW</button>
+              <button className="book-now-btn" onClick={() => navigate('/booking')}>BOOK NOW</button>
             </motion.div>
           </div>
         </div>
@@ -668,7 +747,7 @@ function HomePage({}: HomePageProps) {
                         ease: [0.25, 0.1, 0.25, 1]
                       }}
                     >
-                      <img src={model.image} alt={model.name} />
+                      <img src={model.image} alt={model.name} loading="lazy" />
                     </motion.div>
                     <h3 className="modelshow-model-name">{model.name}</h3>
                     <p className="modelshow-model-slogan">{model.slogan}</p>
@@ -796,28 +875,21 @@ function HomePage({}: HomePageProps) {
             <div 
               className="home-services-cards-carousel"
               ref={carouselRef}
-              style={{
-                transform: `translateX(-${scrollPosition}px)`
-              }}
             >
               {duplicatedServices.map((serviceName, index) => {
                 const imageFile = serviceImageMap[serviceName] || `${serviceName.toLowerCase().replace(/\s+/g, '-').replace(/[&()]/g, '').replace(/,/g, '')}.jpg`
                 const imagePath = `/JS Car Wash Images/${imageFile}`
 
                 return (
-                  <motion.div
+                  <div
                     key={`${serviceName}-${index}`}
                     className="home-service-card"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 * (index % services.length) }}
-                    whileHover={{ y: -5 }}
                   >
                     <div className="home-service-card-image">
-                      <img src={imagePath} alt={serviceName} />
+                      <img src={imagePath} alt={serviceName} loading="lazy" />
                     </div>
                     <h3 className="home-service-card-title">{serviceName}</h3>
-                  </motion.div>
+                  </div>
                 )
               })}
             </div>
@@ -856,7 +928,7 @@ function HomePage({}: HomePageProps) {
           <div className="home-detailing-left">
             <div className="home-detailing-image-wrapper">
               <div className="home-detailing-photo">
-                <img src="/JS Car Wash Images/5659.png" alt="Car Detailing" />
+                <img src="/JS Car Wash Images/5659.png" alt="Car Detailing" loading="lazy" />
               </div>
             </div>
           </div>
@@ -1188,7 +1260,7 @@ function HomePage({}: HomePageProps) {
           </div>
 
           <div className="home-book-online-actions">
-            <button className="book-now-btn">BOOK NOW</button>
+            <button className="book-now-btn" onClick={() => navigate('/booking')}>BOOK NOW</button>
           </div>
         </div>
       </section>
@@ -1215,7 +1287,7 @@ function HomePage({}: HomePageProps) {
                 <div className="home-package-price">$149 <span className="home-package-price-suffix">/ start from</span></div>
                 <h3 className="home-package-name">JS Polish</h3>
               </div>
-              <button className="home-package-book-btn">Book Now</button>
+              <button className="home-package-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="home-package-features">
                 <h4 className="home-package-features-title">Package includes</h4>
                 <ul className="home-package-features-list">
@@ -1277,7 +1349,7 @@ function HomePage({}: HomePageProps) {
                 <div className="home-package-price">$69 <span className="home-package-price-suffix">/ start from</span></div>
                 <h3 className="home-package-name">JS Platinum</h3>
               </div>
-              <button className="home-package-book-btn">Book Now</button>
+              <button className="home-package-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="home-package-features">
                 <h4 className="home-package-features-title">Package includes</h4>
                 <ul className="home-package-features-list">
@@ -1339,7 +1411,7 @@ function HomePage({}: HomePageProps) {
                 <div className="home-package-price">$39 <span className="home-package-price-suffix">/ start from</span></div>
                 <h3 className="home-package-name">JS Express</h3>
               </div>
-              <button className="home-package-book-btn">Book Now</button>
+              <button className="home-package-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
               <div className="home-package-features">
                 <h4 className="home-package-features-title">Package includes</h4>
                 <ul className="home-package-features-list">

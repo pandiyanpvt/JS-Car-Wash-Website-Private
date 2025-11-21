@@ -25,7 +25,17 @@ function AboutPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h2 className="about-js-heading">ABOUT JS CAR WASH</h2>
+              <div className="about-js-heading">
+                <p className="about-js-subtitle">JS CAR WASH</p>
+                <h2 className="about-js-title">
+                  About <span className="about-js-title-accent">JS Car Wash</span>
+                </h2>
+                <div className="about-js-lines">
+                  <div className="about-js-line about-js-line-red"></div>
+                  <div className="about-js-line about-js-line-red"></div>
+                  <div className="about-js-line about-js-line-red"></div>
+                </div>
+              </div>
               <div className="about-js-description">
                 <p>
                   JS Car Wash is Australia's premier professional hand wash and detailing provider. 

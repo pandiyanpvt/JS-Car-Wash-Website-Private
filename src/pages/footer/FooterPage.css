@@ -331,6 +331,7 @@
   .footer-services-section {
     padding: 24px 20px;
     border-radius: 8px;
+    display: none !important;
   }
 
   .footer-services-section .footer-title {
@@ -412,6 +413,7 @@
   .footer-services-section {
     padding: 20px 16px;
     border-radius: 8px;
+    display: none !important;
   }
 
   .footer-services-section .footer-title {

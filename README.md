@@ -1,65 +1,65 @@
-# React + Vite + Material UI + Framer Motion
+# JS Car Wash & Detailing Website
 
-A modern React application built with Vite, Material UI (MUI), Emotion, and Framer Motion.
+A modern, responsive website for JS Car Wash & Detailing services built with React, TypeScript, and Vite. The website features a comprehensive booking system, service information, product catalog, and customer testimonials.
 
-## Installation Commands
+## 🚗 Features
 
-The project has been set up with the following packages:
+- **Home Page** - Hero section with car wash services overview
+- **About Us** - Company information and benefits
+- **Services** - Detailed car wash and detailing service information
+  - Car Wash Services
+  - Car Detailing Services
+- **Products** - Product catalog with pricing and descriptions
+- **Booking System** - Multi-step booking form with:
+  - Branch selection (Australia & Sri Lanka)
+  - Service selection (Car Wash & Car Detailing)
+  - Vehicle model selection
+  - Package selection
+  - Extras and products
+  - Date and time scheduling
+  - Order summary
+- **Gallery** - Before and after photos showcase
+- **Testimonials** - Customer reviews and feedback
+- **FAQ** - Frequently asked questions
+- **Contact Us** - Contact information and inquiry form
+- **Login/Register** - User authentication system
 
-### Initial Setup
-```bash
-# Create React project with Vite
-npm create vite@latest . -- --template react
+## 🛠️ Technologies Used
 
-# Install base dependencies
-npm install
-```
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **React Router DOM** - Client-side routing
+- **Framer Motion** - Smooth animations and transitions
 
-### Install Material UI, Emotion, and Framer Motion
-```bash
-# Install MUI and required dependencies
-npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
+## 📦 Installation
 
-# Install Framer Motion
-npm install framer-motion
-```
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
 
-### Install React and TypeScript dependencies
-```bash
-# Install React and React DOM
-npm install react react-dom
+### Setup Steps
 
-# Install TypeScript types and Vite React plugin
-npm install -D @types/react @types/react-dom @vitejs/plugin-react
-```
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd JS-Car-Wash-Website-Private
+   ```
 
-## Project Structure
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```
-js-fd/
-├── public/                 # Static assets
-│   └── vite.svg
-├── src/
-│   ├── assets/            # Images, fonts, and other static files
-│   ├── components/        # Reusable React components
-│   │   └── website/       # Website components
-│   │       └── Navbar.tsx # Main navigation bar
-│   ├── hooks/             # Custom React hooks
-│   ├── pages/             # Page components
-│   ├── styles/            # Global styles and theme
-│   │   ├── theme.ts       # MUI theme configuration
-│   │   └── index.css      # Global CSS
-│   ├── types/             # TypeScript type definitions
-│   ├── utils/             # Utility functions
-│   ├── App.tsx            # Main App component
-│   └── main.tsx           # Application entry point
-├── index.html             # HTML template
-├── package.json           # Dependencies and scripts
-├── tsconfig.json          # TypeScript configuration
-└── vite.config.ts         # Vite configuration
-```
+3. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-## Available Scripts
+4. **Open your browser**
+   Navigate to `http://localhost:5173` (or the port shown in terminal)
+
+## 📜 Available Scripts
 
 ```bash
 # Start development server
@@ -72,109 +72,130 @@ npm run build
 npm run preview
 ```
 
-## Technologies Used
+## 📁 Project Structure
 
-- **React 19** - UI library
-- **Vite** - Build tool and dev server
-- **TypeScript** - Type safety
-- **Material UI (MUI)** - Component library
-- **Emotion** - CSS-in-JS styling (required by MUI)
-- **Framer Motion** - Animation library
-
-## Features
-
-- ✅ React with TypeScript
-- ✅ Material UI theme provider setup
-- ✅ Framer Motion animations
-- ✅ Clean folder structure
-- ✅ Emotion styling support
-- ✅ Hot module replacement (HMR)
-- ✅ Responsive navigation bar
-- ✅ Mobile-friendly design
-
-## Getting Started
-
-1. Install dependencies (already done):
-   ```bash
-   npm install
-   ```
-
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-3. Open your browser and navigate to the URL shown in the terminal (usually `http://localhost:5173`)
-
-## Navigation Bar Features
-
-The website includes a comprehensive navigation bar with:
-
-- **Top Promotional Bar** - Red banner for special offers
-- **Contact & Social Media Bar** - Contact information and social links
-- **Main Navigation** - Full navigation menu with all pages:
-  - Home
-  - About Us
-  - Services
-  - Products
-  - Booking/Schedule
-  - Offers / Promotions
-  - Gallery / Before & After
-  - Testimonials / Reviews
-  - FAQ
-  - Contact Us
-  - Terms & Conditions / Privacy Policy
-
-## Usage Examples
-
-### Using Material UI Components
-```tsx
-import { Button, Card, Typography } from '@mui/material'
-
-function MyComponent() {
-  return (
-    <Card>
-      <Typography variant="h5">Hello MUI</Typography>
-      <Button variant="contained">Click me</Button>
-    </Card>
-  )
-}
+```
+JS-Car-Wash-Website-Private/
+├── public/
+│   ├── Gallery/              # Gallery images
+│   ├── JS Car Wash Images/   # Service and product images
+│   └── Model/                # Vehicle model images
+├── src/
+│   ├── components/
+│   │   └── navbar/           # Navigation bar component
+│   ├── pages/
+│   │   ├── about/            # About Us page
+│   │   ├── booking/          # Booking system pages
+│   │   ├── contact/          # Contact Us page
+│   │   ├── faq/              # FAQ page
+│   │   ├── footer/           # Footer component
+│   │   ├── gallery/          # Gallery page
+│   │   ├── home/             # Home page
+│   │   ├── login/            # Login/Register page
+│   │   ├── products/         # Products page
+│   │   ├── services/         # Services pages
+│   │   └── testimonials/     # Testimonials page
+│   ├── styles/               # Global styles
+│   ├── App.tsx               # Main App component with routes
+│   └── main.tsx              # Application entry point
+├── index.html
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
 ```
 
-### Using Framer Motion
-```tsx
-import { motion } from 'framer-motion'
+## 🗺️ Routes
 
-function AnimatedComponent() {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      Animated content
-    </motion.div>
-  )
-}
+- `/` - Home page
+- `/about` or `/aboutus` - About Us page
+- `/services` - Services overview
+- `/carwash` - Car Wash services
+- `/cardetailing` - Car Detailing services
+- `/products` - Products catalog
+- `/booking` - Booking system
+- `/gallery` - Photo gallery
+- `/testimonial` - Customer testimonials
+- `/faq` - Frequently asked questions
+- `/contact` - Contact information
+- `/login` - Login/Register page
+- `/register` - Redirects to login page
+
+## 🎨 Key Features
+
+### Responsive Design
+- Mobile-first approach
+- Optimized for all screen sizes
+- Touch-friendly interface
+- Mobile menu with hamburger navigation
+
+### Booking System
+- Multi-step form with validation
+- Branch selection (Australia & Sri Lanka)
+- Service and package selection
+- Vehicle model selection (Hatchback, Sedan, Sports, SUV, Wagon, X-Large)
+- Calendar date picker
+- Time slot selection
+- Order summary with total calculation
+
+### Animations
+- Smooth page transitions
+- Framer Motion animations
+- Hover effects
+- Loading states
+
+## 🚀 Building for Production
+
+```bash
+# Build the project
+npm run build
+
+# The build output will be in the 'dist' directory
+# Preview the production build
+npm run preview
 ```
 
-## Customization
+## 📝 Dependencies
 
-### Theme Configuration
-Edit `src/styles/theme.ts` to customize your Material UI theme:
-- Colors
-- Typography
-- Spacing
-- Breakpoints
-- And more...
+### Runtime Dependencies
+- `react@^19.2.0`
+- `react-dom@^19.2.0`
+- `react-router-dom@^7.9.6`
+- `framer-motion@^12.23.24`
 
-### Adding New Components
-Place reusable components in `src/components/`
+### Dev Dependencies
+- `@types/react@^19.2.4`
+- `@types/react-dom@^19.2.3`
+- `@vitejs/plugin-react@^5.1.1`
+- `typescript@~5.9.3`
+- `vite@^7.2.2`
 
-### Adding New Pages
-Place page components in `src/pages/`
+## 🎯 Services Offered
 
-## License
+### Car Wash Packages
+- **JS Express** - Quick exterior wash
+- **JS Platinum** - Standard wash with interior cleaning
+- **JS Polish** - Premium wash with hand wax polish
 
-MIT
+### Car Detailing Packages
+- **JS Mini Detail** - Basic detailing package
+- **JS Exterior Detail** - Exterior-focused detailing
+- **JS Interior Detail** - Interior-focused detailing
+- **JS Full Detail** - Complete detailing service
+- **Paint Protection & Ceramic Coating** - Premium protection package
 
+## 📞 Contact Information
+
+- **Australia Branch**: 66-72 Windsor parade, Dubbo, 2830, NSW
+- **Sri Lanka Branch**: Colombo, Sri Lanka
+
+## 📄 License
+
+This project is private and proprietary.
+
+## 👨‍💻 Development
+
+For detailed setup instructions, see [SETUP.md](./SETUP.md)
+
+---
+
+Built with ❤️ for JS Car Wash & Detailing

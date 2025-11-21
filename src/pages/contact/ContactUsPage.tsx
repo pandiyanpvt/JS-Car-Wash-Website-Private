@@ -41,29 +41,41 @@ function ContactUsPage() {
           <div className="contact-info-grid">
             {/* Call Us Anytime */}
             <div className="contact-info-card">
-              <div className="contact-icon">📞</div>
-              <h3 className="contact-info-title">Call Us Anytime</h3>
-              <p className="contact-info-value">
-                <a href="tel:0258045720" className="contact-link">02 5804 5720</a>
-              </p>
+              <div className="contact-icon">
+                <i className="fas fa-phone"></i>
+              </div>
+              <div className="contact-info-content">
+                <h3 className="contact-info-title">Call Us Anytime</h3>
+                <p className="contact-info-value">
+                  <a href="tel:0258045720" className="contact-link">02 5804 5720</a>
+                </p>
+              </div>
             </div>
 
             {/* Send Us Mail */}
             <div className="contact-info-card">
-              <div className="contact-icon">✉️</div>
-              <h3 className="contact-info-title">SEND US MAIL</h3>
-              <p className="contact-info-value">
-                <a href="mailto:info@jscarwash.com.au" className="contact-link">info@jscarwash.com.au</a>
-              </p>
+              <div className="contact-icon">
+                <i className="fas fa-envelope"></i>
+              </div>
+              <div className="contact-info-content">
+                <h3 className="contact-info-title">SEND US MAIL</h3>
+                <p className="contact-info-value">
+                  <a href="mailto:info@jscarwash.com.au" className="contact-link">info@jscarwash.com.au</a>
+                </p>
+              </div>
             </div>
 
             {/* Visit Us */}
             <div className="contact-info-card">
-              <div className="contact-icon">📍</div>
-              <h3 className="contact-info-title">VISIT US</h3>
-              <p className="contact-info-value">
-                66-72 Windsor parade, Dubbo, 2830, NSW
-              </p>
+              <div className="contact-icon">
+                <i className="fas fa-map-marker-alt"></i>
+              </div>
+              <div className="contact-info-content">
+                <h3 className="contact-info-title">VISIT US</h3>
+                <p className="contact-info-value">
+                  66-72 Windsor parade, Dubbo, 2830, NSW
+                </p>
+              </div>
             </div>
           </div>
         </div>

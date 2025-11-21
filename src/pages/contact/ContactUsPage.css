@@ -152,8 +152,8 @@
 
 .contact-info-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
 @media (min-width: 768px) {
@@ -164,8 +164,11 @@
 }
 
 .contact-info-card {
-  text-align: center;
-  padding: 48px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 24px 20px;
   background: #ffffff;
   border-radius: 24px;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -199,34 +202,47 @@
 }
 
 .contact-icon {
-  font-size: 3.5rem;
-  margin-bottom: 24px;
-  display: inline-block;
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: grayscale(0.3);
+  color: #d32f2f;
+}
+
+.contact-icon i {
+  display: block;
 }
 
 .contact-info-card:hover .contact-icon {
-  transform: scale(1.15) rotate(5deg);
-  filter: grayscale(0);
+  transform: scale(1.1);
+  color: #b71c1c;
+}
+
+.contact-info-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .contact-info-title {
   font-size: 1.125rem;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .contact-info-value {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   color: #666;
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .contact-link {
@@ -475,25 +491,30 @@
   }
 
   .contact-info-grid {
-    gap: 24px;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .contact-info-card {
-    padding: 32px 24px;
+    padding: 16px 12px;
+    gap: 12px;
   }
 
   .contact-icon {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
   }
 
   .contact-info-title {
-    font-size: 1rem;
-    margin-bottom: 12px;
+    font-size: 0.875rem;
+    margin-bottom: 6px;
   }
 
   .contact-info-value {
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
   }
 
   .map-section {
@@ -506,6 +527,11 @@
 
   .contact-form-section {
     max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .contact-form {
+    padding: 32px 20px;
   }
 
   .contact-form-header {
@@ -580,25 +606,30 @@
   }
 
   .contact-info-grid {
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .contact-info-card {
-    padding: 24px 20px;
+    padding: 14px 10px;
+    gap: 10px;
   }
 
   .contact-icon {
-    font-size: 2rem;
-    margin-bottom: 16px;
+    font-size: 1.25rem;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
   }
 
   .contact-info-title {
-    font-size: 0.9375rem;
-    margin-bottom: 10px;
+    font-size: 0.8125rem;
+    margin-bottom: 4px;
   }
 
   .contact-info-value {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
   }
 
   .map-section {
@@ -608,6 +639,15 @@
 
   .contact-map {
     height: 300px;
+  }
+
+  .contact-form-section {
+    max-width: 100%;
+    padding: 0 12px;
+  }
+
+  .contact-form {
+    padding: 28px 16px;
   }
 
   .contact-form-header {
