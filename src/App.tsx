@@ -11,6 +11,7 @@ import { ProductPage } from './pages/products'
 import { BookingPage } from './pages/booking'
 import { LoginPage } from './pages/login'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop'
 import './styles/index.css'
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<Navigate to="/login" replace />} />
         </Routes>
+        <ScrollToTop />
       </div>
     </BrowserRouter>
   )

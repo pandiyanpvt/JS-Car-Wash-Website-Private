@@ -105,7 +105,7 @@ function ServicePage() {
             >
               <div className="detailing-image-container">
                 <img
-                  src="/JS Car Wash Images/banner-2-1.png"
+                  src="/JS Car Wash Images/banner-2-1.jpg"
                   alt="Car Detailing"
                   className="detailing-image"
                 />

@@ -93,7 +93,7 @@ function AboutPage() {
             >
               <div className="benefit-image-container">
                 <img
-                  src="/JS Car Wash Images/zas-890x664-1.png"
+                  src="/JS Car Wash Images/Clean and Wipe Dashboard and Console.png"
                   alt="Car Interior Cleaning"
                   className="benefit-image"
                 />

@@ -8,29 +8,6 @@
   overflow-x: hidden;
 }
 
-@keyframes glassFloat {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  33% {
-    transform: translate(30px, -30px) scale(1.1);
-    opacity: 0.8;
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-    opacity: 0.9;
-  }
-}
-
-@keyframes glassMove {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  100% {
-    transform: translate(50px, 50px) rotate(360deg);
-  }
-}
 
 /* Page Heading Section - Uses AboutPage styles */
 .booking-page .page-heading-section {
@@ -44,42 +21,20 @@
   min-height: auto;
   z-index: 1;
   background: #8b0000;
+  background-image: url('/JS Car Wash Images/bg-scoll-1.png');
+  background-repeat: repeat-x;
+  background-position: 0 0;
+  background-size: auto 100%;
+  animation: backgroundScroll 20s linear infinite;
 }
 
-.booking-container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
-  animation: glassFloat 20s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.booking-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(255, 255, 255, 0.03) 2px,
-      rgba(255, 255, 255, 0.03) 4px
-    );
-  animation: glassMove 30s linear infinite;
-  pointer-events: none;
-  z-index: 1;
+@keyframes backgroundScroll {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }
 
 .booking-container-inner {
@@ -113,7 +68,6 @@
   padding: 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
 }
 
 .booking-user-section {
@@ -274,7 +228,6 @@
   align-self: flex-start;
   height: fit-content;
   border: 1px solid rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -765,7 +718,6 @@
   flex: 1;
   max-width: 320px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
@@ -898,7 +850,6 @@
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
 }
 
 .booking-selected-date {
