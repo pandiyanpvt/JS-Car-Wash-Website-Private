@@ -737,3 +737,13 @@
     font-size: 1.75rem;
   }
 }
+
+@media (max-width: 375px) {
+  .login-form-panel {
+    padding-top: 80px;
+  }
+
+  .login-welcome-panel {
+    padding-top: 80px;
+  }
+}
