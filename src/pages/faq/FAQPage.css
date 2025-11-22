@@ -18,6 +18,12 @@
   margin-top: 80px;
 }
 
+@media (max-width: 1346px) {
+  .page-heading-section {
+    margin-top: 0;
+  }
+}
+
 .page-heading-overlay {
   position: absolute;
   top: 0;
@@ -308,6 +314,18 @@
     font-size: 0.8125rem;
     padding-left: 16px;
     margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 414px) {
+  .page-heading-section {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 375px) {
+  .page-heading-section {
+    margin-top: 0;
   }
 }
 

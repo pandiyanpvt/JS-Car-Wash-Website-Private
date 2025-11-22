@@ -18,6 +18,12 @@
   margin-top: 80px;
 }
 
+@media (max-width: 1346px) {
+  .page-heading-section {
+    margin-top: 0;
+  }
+}
+
 .page-heading-overlay {
   position: absolute;
   top: 0;
@@ -216,6 +222,17 @@
   }
 
   .pricing-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .pricing-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pricing-cards-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
@@ -304,6 +321,18 @@
   .pricing-check-icon,
   .pricing-x-icon {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 414px) {
+  .page-heading-section {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 375px) {
+  .page-heading-section {
+    margin-top: 0;
   }
 }
 
