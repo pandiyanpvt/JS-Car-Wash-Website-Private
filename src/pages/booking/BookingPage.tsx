@@ -39,6 +39,11 @@ interface Product {
   price: number
 }
 
+interface SelectedProduct {
+  productId: string
+  quantity: number
+}
+
 function BookingPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -107,12 +112,10 @@ function BookingPage() {
   const [carNumber, setCarNumber] = useState('')
   const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
   const [selectedExtras, setSelectedExtras] = useState<string[]>([])
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string>('')
-
-  // Animation refs
-  const leftCarModelRef = useRef<HTMLDivElement>(null)
+  const [showConfirmationPopup, setShowConfirmationPopup] = useState(false)
 
   // Branches
   const branches: Branch[] = [
@@ -311,9 +314,13 @@ function BookingPage() {
     setSelectedPackages(prev => {
       const exists = prev.find(p => p.id === pkg.id)
       if (exists) {
+        // If clicking the same package, deselect it
         return prev.filter(p => p.id !== pkg.id)
       }
-      return [...prev, pkg]
+      // Remove any existing package from the same service type
+      const filtered = prev.filter(p => p.serviceType !== pkg.serviceType)
+      // Add the new package
+      return [...filtered, pkg]
     })
   }
 
@@ -424,9 +431,9 @@ function BookingPage() {
       const extra = extras.find(e => e.id === extraId)
       if (extra) total += extra.price
     })
-    selectedProducts.forEach(productId => {
-      const product = products.find(p => p.id === productId)
-      if (product) total += product.price
+    selectedProducts.forEach(selectedProduct => {
+      const product = products.find(p => p.id === selectedProduct.productId)
+      if (product) total += product.price * selectedProduct.quantity
     })
     return total
   }
@@ -592,62 +599,9 @@ function BookingPage() {
       
       <div className="booking-container">
         <div className="booking-container-inner">
-          {/* Left Sticky Sidebar */}
-          <div className="booking-left-sidebar">
-          <div className="booking-user-section">
-            <div className="booking-user-img">
-              <img src="/JS Car Wash Images/cropped-fghfthgf.png" alt="User" />
-            </div>
-            <h3 className="booking-user-name">Alex Suprun</h3>
-            <p className="booking-user-role">Founder & Head of IT</p>
-          </div>
-
-          <div className="booking-info-section">
-            <div className="booking-info-item">
-              <label>Branch Location</label>
-              {selectedBranch && (
-                <div className="booking-branch-map">
-                  <iframe
-                    src={selectedBranch.mapUrl}
-                    width="100%"
-                    height="200"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                  ></iframe>
-                  <p className="booking-branch-name">{selectedBranch.name}</p>
-                  <p className="booking-branch-address">{selectedBranch.location}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="booking-info-item">
-              <label>Service</label>
-              <div className="booking-service-text">
-                {getServiceText()}
-              </div>
-            </div>
-
-            <div className="booking-info-item">
-              <label>Car Model</label>
-              <div className="booking-car-model" ref={leftCarModelRef}>
-                {selectedVehicleModel && (
-                  <p className="booking-car-model-name">{selectedVehicleModel.name}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="booking-info-item">
-              <label>Car Number</label>
-              <p className="booking-car-number">
-                {carNumber}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Content Area */}
-        <div className="booking-right-content">
+          {/* Right Content Area */}
+          <div className="booking-right-content-wrapper">
+          <div className="booking-right-content">
           <AnimatePresence mode="wait">
             {/* Step 1: Branch, Service, Vehicle, Car Number */}
             {currentStep === 1 && (
@@ -855,25 +809,50 @@ function BookingPage() {
                 <div className="booking-form-section">
                   <h3>Products (Optional)</h3>
                   <div className="booking-products-grid">
-                    {products.map(product => (
-                      <label key={product.id} className="booking-product-item">
-                        <input
-                          type="checkbox"
-                          checked={selectedProducts.includes(product.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedProducts([...selectedProducts, product.id])
-                            } else {
-                              setSelectedProducts(selectedProducts.filter(id => id !== product.id))
-                            }
-                          }}
-                        />
-                        <div>
-                          <span>{product.name}</span>
-                          <span className="booking-product-price">+${product.price}</span>
+                    {products.map(product => {
+                      const selectedProduct = selectedProducts.find(sp => sp.productId === product.id)
+                      const isSelected = !!selectedProduct
+                      return (
+                        <div key={product.id} className={`booking-product-item-wrapper ${isSelected ? 'selected' : ''}`}>
+                          <label className="booking-product-item">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedProducts([...selectedProducts, { productId: product.id, quantity: 1 }])
+                                } else {
+                                  setSelectedProducts(selectedProducts.filter(sp => sp.productId !== product.id))
+                                }
+                              }}
+                            />
+                            <div>
+                              <span>{product.name}</span>
+                              <span className="booking-product-price">+${product.price}</span>
+                            </div>
+                          </label>
+                          {isSelected && (
+                            <div className="booking-product-quantity">
+                              <label>Quantity:</label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={selectedProduct.quantity}
+                                onChange={(e) => {
+                                  const quantity = parseInt(e.target.value) || 1
+                                  setSelectedProducts(selectedProducts.map(sp => 
+                                    sp.productId === product.id 
+                                      ? { ...sp, quantity: Math.max(1, quantity) }
+                                      : sp
+                                  ))
+                                }}
+                                className="booking-quantity-input"
+                              />
+                            </div>
+                          )}
                         </div>
-                      </label>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -976,6 +955,12 @@ function BookingPage() {
                   </div>
                 </div>
 
+                <div className="booking-step-buttons">
+                  <button className="booking-back-btn" onClick={handleBack}>
+                    Back
+                  </button>
+                </div>
+
               </motion.div>
             )}
 
@@ -1045,12 +1030,12 @@ function BookingPage() {
                       {selectedProducts.length > 0 && (
                         <div className="booking-summary-section">
                           <h3>Products</h3>
-                          {selectedProducts.map(productId => {
-                            const product = products.find(p => p.id === productId)
+                          {selectedProducts.map(selectedProduct => {
+                            const product = products.find(p => p.id === selectedProduct.productId)
                             return product ? (
                               <div key={product.id} className="booking-summary-item">
-                                <span>{product.name}</span>
-                                <span>${product.price}</span>
+                                <span>{product.name} {selectedProduct.quantity > 1 ? `(x${selectedProduct.quantity})` : ''}</span>
+                                <span>${(product.price * selectedProduct.quantity).toFixed(2)}</span>
                               </div>
                             ) : null
                           })}
@@ -1086,7 +1071,7 @@ function BookingPage() {
                     <p>Please arrive on time for your appointment.</p>
                   </div>
 
-                  <button className="booking-confirm-btn" onClick={() => alert('Booking confirmed!')}>
+                  <button className="booking-confirm-btn" onClick={() => setShowConfirmationPopup(true)}>
                     Confirm Booking
                   </button>
                 </div>
@@ -1094,8 +1079,207 @@ function BookingPage() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Right Summary Sidebar */}
+        <div className="booking-right-summary">
+          <div className="booking-total-summary">
+            <div className="booking-total-summary-header">
+              <h2 className="booking-total-summary-title">Total Summary</h2>
+              <svg className="booking-total-summary-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+
+            <div className="booking-total-summary-table">
+              <div className="booking-total-summary-header-row">
+                <span className="booking-total-summary-header-name">Name</span>
+                <span className="booking-total-summary-header-total">Total</span>
+              </div>
+
+              <div className="booking-total-summary-row">
+                <span className="booking-total-summary-name">Vehicle Type</span>
+                <span className="booking-total-summary-total">
+                  {selectedVehicleModel ? selectedVehicleModel.name.toUpperCase() : '-'}
+                </span>
+              </div>
+
+              <div className="booking-total-summary-divider"></div>
+
+              <div className="booking-total-summary-row">
+                <div className="booking-total-summary-name-col">
+                  <span className="booking-total-summary-name">Package Name</span>
+                  {selectedPackages.length > 0 ? (
+                    <div className="booking-total-summary-package-list">
+                      {selectedPackages.map(pkg => (
+                        <div key={pkg.id} className="booking-total-summary-package-item">
+                          {pkg.name}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="booking-total-summary-total-col">
+                  {selectedPackages.length > 0 ? (
+                    <>
+                      <span className="booking-total-summary-total">
+                        From $ {selectedPackages.reduce((sum, pkg) => sum + pkg.price, 0).toFixed(2)}
+                      </span>
+                      <div className="booking-total-summary-package-price-list">
+                        {selectedPackages.map(pkg => (
+                          <div key={pkg.id} className="booking-total-summary-package-price">
+                            $ {pkg.price.toFixed(2)}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="booking-total-summary-total">From $ 0.00</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="booking-total-summary-divider"></div>
+
+              <div className="booking-total-summary-row">
+                <div className="booking-total-summary-name-col">
+                  <span className="booking-total-summary-name">Extras (Optional)</span>
+                  {selectedExtras.length > 0 ? (
+                    <div className="booking-total-summary-package-list">
+                      {selectedExtras.map(extraId => {
+                        const extra = extras.find(e => e.id === extraId)
+                        return extra ? (
+                          <div key={extra.id} className="booking-total-summary-package-item">
+                            {extra.name}
+                          </div>
+                        ) : null
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="booking-total-summary-total-col">
+                  {selectedExtras.length > 0 ? (
+                    <>
+                      <span className="booking-total-summary-total">
+                        From $ {selectedExtras.reduce((sum, extraId) => {
+                          const extra = extras.find(e => e.id === extraId)
+                          return sum + (extra ? extra.price : 0)
+                        }, 0).toFixed(2)}
+                      </span>
+                      <div className="booking-total-summary-package-price-list">
+                        {selectedExtras.map(extraId => {
+                          const extra = extras.find(e => e.id === extraId)
+                          return extra ? (
+                            <div key={extra.id} className="booking-total-summary-package-price">
+                              $ {extra.price.toFixed(2)}
+                            </div>
+                          ) : null
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="booking-total-summary-total">From $ 0.00</span>
+                  )}
+                </div>
+              </div>
+
+              {selectedProducts.length > 0 && (
+                <>
+                  <div className="booking-total-summary-divider"></div>
+
+                  <div className="booking-total-summary-row">
+                    <div className="booking-total-summary-name-col">
+                      <span className="booking-total-summary-name">Products</span>
+                      <div className="booking-total-summary-package-list">
+                        {selectedProducts.map(selectedProduct => {
+                          const product = products.find(p => p.id === selectedProduct.productId)
+                          return product ? (
+                            <div key={product.id} className="booking-total-summary-package-item">
+                              <span className="booking-total-summary-product-name-text">{product.name}</span>
+                              {selectedProduct.quantity > 1 && <span className="booking-total-summary-quantity"> (x{selectedProduct.quantity})</span>}
+                            </div>
+                          ) : null
+                        })}
+                      </div>
+                    </div>
+                    <div className="booking-total-summary-total-col">
+                      <span className="booking-total-summary-total">
+                        From $ {selectedProducts.reduce((sum, selectedProduct) => {
+                          const product = products.find(p => p.id === selectedProduct.productId)
+                          return sum + (product ? product.price * selectedProduct.quantity : 0)
+                        }, 0).toFixed(2)}
+                      </span>
+                      <div className="booking-total-summary-package-price-list">
+                        {selectedProducts.map(selectedProduct => {
+                          const product = products.find(p => p.id === selectedProduct.productId)
+                          return product ? (
+                            <div key={product.id} className="booking-total-summary-package-price">
+                              $ {(product.price * selectedProduct.quantity).toFixed(2)}
+                            </div>
+                          ) : null
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="booking-total-summary-divider"></div>
+
+              <div className="booking-total-summary-row booking-total-summary-row-final">
+                <span className="booking-total-summary-name booking-total-summary-name-final">Total</span>
+                <span className="booking-total-summary-total booking-total-summary-total-final">
+                  $ {calculateTotal().toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
         </div>
       </div>
+
+      {/* Confirmation Popup */}
+      <AnimatePresence>
+        {showConfirmationPopup && (
+          <>
+            <motion.div
+              className="booking-popup-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => setShowConfirmationPopup(false)}
+            />
+            <motion.div
+              className="booking-confirmation-popup"
+              initial={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
+              animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+              exit={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
+              transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+            >
+              <div className="booking-popup-icon">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="32" cy="32" r="32" fill="#4caf50" opacity="0.1"/>
+                  <path d="M32 16C23.163 16 16 23.163 16 32C16 40.837 23.163 48 32 48C40.837 48 48 40.837 48 32C48 23.163 40.837 16 32 16ZM28 38L20 30L22.83 27.17L28 32.34L41.17 19.17L44 22L28 38Z" fill="#4caf50"/>
+                </svg>
+              </div>
+              <h2 className="booking-popup-title">Booking Confirmed!</h2>
+              <p className="booking-popup-message">
+                Your booking has been confirmed successfully. You will receive a confirmation email shortly.
+              </p>
+              <button 
+                className="booking-popup-ok-btn"
+                onClick={() => {
+                  setShowConfirmationPopup(false)
+                  navigate('/')
+                }}
+              >
+                OK
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
     </div>
   )
