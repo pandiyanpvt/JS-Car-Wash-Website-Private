@@ -6,9 +6,10 @@ import './Navbar.css'
 interface NavbarProps {
   onNavigate?: () => void
   className?: string
+  hideLogo?: boolean
 }
 
-function Navbar({ onNavigate, className = '' }: NavbarProps) {
+function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [servicesHover, setServicesHover] = useState(false)
@@ -85,15 +86,17 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
       <nav className={`modern-navbar ${className}`}>
         <div className="navbar-wrapper">
           {/* Logo Section */}
-          <div className="navbar-logo-section">
-            <div className="navbar-logo-icon">
-              <img
-                src="/JS Car Wash Images/cropped-fghfthgf.png"
-                alt="JS Car Wash Logo"
-                className="navbar-logo-img"
-              />
+          {!hideLogo && (
+            <div className="navbar-logo-section">
+              <div className="navbar-logo-icon">
+                <img
+                  src="/JS Car Wash Images/cropped-fghfthgf.png"
+                  alt="JS Car Wash Logo"
+                  className="navbar-logo-img"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Desktop Navigation Links */}
           <div className="navbar-links desktop-nav-links">
@@ -206,13 +209,15 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
               <div className="mobile-menu-header">
-                <div className="mobile-menu-logo">
-                  <img
-                    src="/JS Car Wash Images/cropped-fghfthgf.png"
-                    alt="JS Car Wash Logo"
-                    className="mobile-logo-img"
-                  />
-                </div>
+                {!hideLogo && (
+                  <div className="mobile-menu-logo">
+                    <img
+                      src="/JS Car Wash Images/cropped-fghfthgf.png"
+                      alt="JS Car Wash Logo"
+                      className="mobile-logo-img"
+                    />
+                  </div>
+                )}
                 <button
                   className="mobile-menu-close"
                   onClick={() => {

@@ -68,7 +68,7 @@
 .pricing-subtitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #d32f2f;
+  color: #1e3a8a;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0 0 10px 0;
@@ -83,7 +83,7 @@
 }
 
 .pricing-title-red {
-  color: #d32f2f;
+  color: #1e3a8a;
 }
 
 .pricing-lines {
@@ -96,7 +96,7 @@
 .pricing-lines span {
   width: 60px;
   height: 3px;
-  background-color: #d32f2f;
+  background-color: #1e3a8a;
   display: block;
 }
 
@@ -136,7 +136,7 @@
 .pricing-price-suffix {
   font-size: 1rem;
   font-weight: 400;
-  color: #666666;
+  color: #475569;
 }
 
 .pricing-card-title {
@@ -195,7 +195,7 @@
 
 .pricing-check-icon {
   font-size: 1.125rem;
-  color: #d32f2f;
+  color: #1e3a8a;
   flex-shrink: 0;
   margin-top: 2px;
 }

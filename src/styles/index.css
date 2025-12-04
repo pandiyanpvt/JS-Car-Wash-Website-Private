@@ -44,14 +44,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d32f2f;
+  background: #1e3a8a;
   border-radius: 10px;
   border: none;
   transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b71c1c;
+  background: #0f172a;
 }
 
 ::-webkit-scrollbar-corner {
@@ -62,7 +62,7 @@ body {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d32f2f #e0e0e0;
+  scrollbar-color: #1e3a8a #e0e0e0;
 }
 
 /* For dark backgrounds */
@@ -71,11 +71,11 @@ body {
 }
 
 .dark-scrollbar::-webkit-scrollbar-thumb {
-  background: #d32f2f;
+  background: #1e3a8a;
   border: none;
 }
 
 .dark-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #b71c1c;
+  background: #0f172a;
 }
 

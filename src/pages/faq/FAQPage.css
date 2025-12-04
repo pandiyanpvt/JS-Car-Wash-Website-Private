@@ -68,7 +68,7 @@
 .faq-subtitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #d32f2f;
+  color: #1e3a8a;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0 0 10px 0;
@@ -83,7 +83,7 @@
 }
 
 .faq-title-red {
-  color: #d32f2f;
+  color: #1e3a8a;
 }
 
 .faq-lines {
@@ -96,7 +96,7 @@
 .faq-lines span {
   width: 60px;
   height: 3px;
-  background-color: #d32f2f;
+  background-color: #1e3a8a;
   display: block;
 }
 
@@ -121,7 +121,7 @@
 .faq-item:hover,
 .faq-item.faq-item-open {
   background-color: #ffffff;
-  border-color: #d32f2f;
+  border-color: #1e3a8a;
   box-shadow: 0 4px 12px rgba(211, 47, 47, 0.15);
   transform: translateY(-2px);
 }
@@ -138,13 +138,13 @@
 
 .faq-item:hover .faq-question,
 .faq-item.faq-item-open .faq-question {
-  color: #d32f2f;
+  color: #1e3a8a;
 }
 
 .faq-icon {
   font-size: 1.5rem;
   font-weight: 300;
-  color: #d32f2f;
+  color: #1e3a8a;
   width: 24px;
   height: 24px;
   display: flex;
@@ -170,7 +170,7 @@
 }
 
 .faq-answer p {
-  color: #666666;
+  color: #475569;
   font-size: 0.9375rem;
   line-height: 1.7;
   margin: 0;
@@ -178,7 +178,7 @@
 }
 
 .faq-highlight {
-  color: #d32f2f;
+  color: #1e3a8a;
   font-weight: 600;
 }
 
@@ -192,7 +192,7 @@
   position: relative;
   padding-left: 20px;
   margin-bottom: 8px;
-  color: #666666;
+  color: #475569;
   font-size: 0.9375rem;
   line-height: 1.7;
 }
@@ -201,7 +201,7 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: #d32f2f;
+  color: #1e3a8a;
   font-weight: bold;
   font-size: 1.2rem;
 }
