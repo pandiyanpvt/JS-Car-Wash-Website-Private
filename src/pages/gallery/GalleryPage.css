@@ -125,7 +125,7 @@
 }
 
 .navbar-link:hover {
-  color: #d32f2f;
+  color: #1e3a8a;
   background-color: rgba(211, 47, 47, 0.05);
 }
 
@@ -137,7 +137,7 @@
   transform: translateX(-50%);
   width: 0;
   height: 2px;
-  background-color: #d32f2f;
+  background-color: #1e3a8a;
   transition: width 0.3s ease;
 }
 
@@ -197,7 +197,7 @@
 .gallery-subtitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #d32f2f;
+  color: #1e3a8a;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-bottom: 12px;
@@ -226,7 +226,7 @@
 }
 
 .gallery-title-accent {
-  color: #d32f2f;
+  color: #1e3a8a;
 }
 
 .gallery-lines {
@@ -243,7 +243,7 @@
 }
 
 .gallery-line-red {
-  background-color: #d32f2f;
+  background-color: #1e3a8a;
 }
 
 .gallery-description {
@@ -414,7 +414,7 @@
 
 .gallery-lightbox-close:hover {
   background: rgba(255, 255, 255, 0.2);
-  border-color: #d32f2f;
+  border-color: #1e3a8a;
   transform: rotate(90deg);
 }
 

@@ -100,7 +100,7 @@
 .contact-main-heading {
   font-size: 3rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1e3a8a;
   margin: 0 0 16px 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -0.02em;
@@ -225,7 +225,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #d32f2f 0%, #ff6b6b 100%);
+  background: linear-gradient(90deg, #1e3a8a 0%, #475569 100%);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -250,7 +250,7 @@
   width: 60px;
   height: 60px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #d32f2f;
+  color: #1e3a8a;
 }
 
 .contact-icon i {
@@ -259,7 +259,7 @@
 
 .contact-info-card:hover .contact-icon {
   transform: scale(1.1);
-  color: #b71c1c;
+  color: #0f172a;
 }
 
 .contact-info-content {
@@ -270,7 +270,7 @@
 .contact-info-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1e3a8a;
   margin-bottom: 8px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   text-transform: uppercase;
@@ -286,14 +286,14 @@
 }
 
 .contact-link {
-  color: #d32f2f;
+  color: #1e3a8a;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .contact-link:hover {
-  color: #b71c1c;
+  color: #0f172a;
   text-decoration: underline;
 }
 
@@ -348,14 +348,14 @@
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background: linear-gradient(90deg, #d32f2f 0%, #ff6b6b 100%);
+  background: linear-gradient(90deg, #1e3a8a 0%, #475569 100%);
   border-radius: 2px;
 }
 
 .contact-form-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1e3a8a;
   margin-bottom: 12px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   text-transform: uppercase;
@@ -371,7 +371,7 @@
 .contact-form-subtitle {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #d32f2f;
+  color: #1e3a8a;
   margin-bottom: 16px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
@@ -403,7 +403,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #d32f2f 0%, #ff6b6b 100%);
+  background: linear-gradient(90deg, #1e3a8a 0%, #475569 100%);
 }
 
 @media (min-width: 768px) {
@@ -433,7 +433,7 @@
   display: block;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #1e3a8a;
   margin-bottom: 8px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
@@ -444,7 +444,7 @@
   padding: 18px 24px;
   font-size: 1rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  color: #1a1a1a;
+  color: #1e3a8a;
   background: #f8f9fa;
   border: 2px solid transparent;
   border-radius: 12px;
@@ -460,7 +460,7 @@
 
 .form-input:focus,
 .form-textarea:focus {
-  border-color: #d32f2f;
+  border-color: #1e3a8a;
   box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.1);
   background: #ffffff;
   transform: translateY(-2px);
@@ -480,7 +480,7 @@
 .form-submit-button {
   width: 100%;
   padding: 18px 40px;
-  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
   color: #ffffff;
   border: none;
   border-radius: 50px;
@@ -496,7 +496,7 @@
 }
 
 .form-submit-button:hover {
-  background: linear-gradient(135deg, #b71c1c 0%, #8b0000 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #0f172a 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
 }
