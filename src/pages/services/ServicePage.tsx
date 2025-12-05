@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FooterPage } from '../footer'
-import PageHeading from '../../components/PageHeading'
+import Navbar from '../../components/navbar/Navbar'
 import './ServicePage.css'
 
 function ServicePage() {
@@ -84,7 +84,14 @@ function ServicePage() {
 
   return (
     <div className="service-page" id="services">
-      <PageHeading title="Services" />
+      <Navbar className="fixed-navbar" />
+      {/* Page Heading Section */}
+      <section className="page-heading-section">
+        <div className="page-heading-overlay"></div>
+        <div className="page-heading-content">
+          <h1 className="page-heading-title">Services</h1>
+        </div>
+      </section>
       {/* Full-Service Detailing Section */}
       <section className="detailing-section">
         <div className="container">

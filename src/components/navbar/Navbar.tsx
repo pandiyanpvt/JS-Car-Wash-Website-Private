@@ -1,64 +1,41 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useNavbar } from '../../contexts/NavbarContext'
+import { useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import './Navbar.css'
 
-function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isServicesOpen, setIsServicesOpen] = useState(false)
+interface NavbarProps {
+  onNavigate?: () => void
+  className?: string
+  hideLogo?: boolean
+}
+
+function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
   const location = useLocation()
-  const menuRef = useRef<HTMLDivElement>(null)
-  const servicesRef = useRef<HTMLDivElement>(null)
-  const { isVisible } = useNavbar()
+  const navigate = useNavigate()
+  const [servicesHover, setServicesHover] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false)
-      }
-      if (servicesRef.current && !servicesRef.current.contains(event.target as Node)) {
-        setIsServicesOpen(false)
-      }
-    }
+  const navItems = [
+    { label: 'Home', href: '/', route: true },
+    { label: 'AboutUs', href: '/aboutus', route: true },
+    { label: 'Services', href: '/services', route: true, hasDropdown: true },
+    { label: 'Product', href: '/products', route: true },
+    { label: 'Gallery', href: '/gallery', route: true },
+    { label: 'Contact Us', href: '/contact', route: true },
+    { label: 'BOOK NOW', href: '/booking', route: true }
+  ]
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
+  const servicesSubItems = [
+    { label: 'Car Wash', href: '/carwash', route: true },
+    { label: 'Car Detailing', href: '/cardetailing', route: true }
+  ]
 
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMenuOpen(false)
-    setIsServicesOpen(false)
-  }, [location.pathname])
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isMenuOpen])
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
-
-  const toggleServices = () => {
-    setIsServicesOpen(!isServicesOpen)
-  }
-
-  const isActive = (path: string) => {
-    if (path === '/') {
+  const isActive = (href: string) => {
+    if (href === '/') {
       return location.pathname === '/'
     }
-    return location.pathname === path || location.pathname.startsWith(path + '/')
+    return location.pathname === href
   }
 
   const isServicesActive = () => {
@@ -67,210 +44,281 @@ function Navbar() {
            location.pathname === '/cardetailing'
   }
 
-  // Don't render navbar if not visible
-  if (!isVisible) {
-    return null
+  const isDropdownItemActive = (href: string) => {
+    return location.pathname === href
   }
 
+  const handleClick = (href: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    setMobileMenuOpen(false)
+    setMobileServicesOpen(false)
+    if (onNavigate) {
+      onNavigate()
+    }
+    navigate(href)
+  }
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (mobileMenuOpen && !target.closest('.modern-navbar') && !target.closest('.mobile-menu-overlay')) {
+        setMobileMenuOpen(false)
+        setMobileServicesOpen(false)
+      }
+    }
+
+    if (mobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.body.style.overflow = 'unset'
+    }
+  }, [mobileMenuOpen])
+
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        {/* Desktop Navigation */}
-        <div className="navbar-menu desktop-menu">
-          <Link 
-            to="/" 
-            className={`navbar-link ${isActive('/') ? 'active' : ''}`}
+    <>
+      <nav className={`modern-navbar ${className}`}>
+        <div className="navbar-wrapper">
+          {/* Logo Section */}
+          {!hideLogo && (
+            <div className="navbar-logo-section">
+              <div className="navbar-logo-icon">
+                <img
+                  src="/JS Car Wash Images/cropped-fghfthgf.png"
+                  alt="JS Car Wash Logo"
+                  className="navbar-logo-img"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Desktop Navigation Links */}
+          <div className="navbar-links desktop-nav-links">
+            {navItems.map((item, index) => {
+              const active = isActive(item.href)
+              if (item.hasDropdown) {
+                const servicesActive = isServicesActive()
+                return (
+                  <div
+                    key={index}
+                    className="navbar-dropdown-wrapper"
+                    onMouseEnter={() => setServicesHover(true)}
+                    onMouseLeave={() => setServicesHover(false)}
+                  >
+                    <Link
+                      to={item.href}
+                      className={`navbar-link ${servicesActive ? 'navbar-link-active' : ''}`}
+                      onClick={(e) => handleClick(item.href, e)}
+                    >
+                      {item.label}
+                      <svg className="navbar-dropdown-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Link>
+                    {servicesHover && (
+                      <div className="navbar-dropdown-menu">
+                        {servicesSubItems.map((subItem, subIndex) => {
+                          const dropdownActive = isDropdownItemActive(subItem.href)
+                          return (
+                            <Link
+                              key={subIndex}
+                              to={subItem.href}
+                              className={`navbar-dropdown-item ${dropdownActive ? 'navbar-dropdown-item-active' : ''}`}
+                              onClick={(e) => handleClick(subItem.href, e)}
+                            >
+                              {subItem.label}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+              return (
+                <Link
+                  key={index}
+                  to={item.href}
+                  className={`navbar-link ${active ? 'navbar-link-active' : ''}`}
+                  onClick={(e) => handleClick(item.href, e)}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Desktop Create Account Button */}
+          <Link
+            to="/register"
+            className="navbar-cta-button desktop-cta-button"
+            onClick={(e) => {
+              e.preventDefault()
+              if (onNavigate) {
+                onNavigate()
+              }
+              navigate('/login', { state: { fromRegister: true } })
+            }}
           >
-            Home
-          </Link>
-          
-          <Link 
-            to="/aboutus" 
-            className={`navbar-link ${isActive('/aboutus') ? 'active' : ''}`}
-          >
-            AboutUs
+            Create an Account
           </Link>
 
-          {/* Services Dropdown */}
-          <div 
-            className={`navbar-dropdown ${isServicesActive() ? 'active' : ''}`}
-            ref={servicesRef}
-            onMouseEnter={() => setIsServicesOpen(true)}
-            onMouseLeave={() => setIsServicesOpen(false)}
+          {/* Mobile Hamburger Button */}
+          <button
+            className="mobile-hamburger-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle mobile menu"
           >
-            <Link 
-              to="/services"
-              className={`navbar-link dropdown-toggle ${isServicesActive() ? 'active' : ''}`}
+            <svg className="hamburger-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {mobileMenuOpen ? (
+                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              )}
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              className="mobile-menu-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => {
+                setMobileMenuOpen(false)
+                setMobileServicesOpen(false)
+              }}
+            />
+            <motion.div
+              className="mobile-menu-overlay"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              Services
-              <span className="dropdown-arrow">▼</span>
-            </Link>
-            {isServicesOpen && (
-              <div className="dropdown-menu">
-                <Link 
-                  to="/services" 
-                  className={`dropdown-item ${location.pathname === '/services' ? 'active' : ''}`}
+              <div className="mobile-menu-header">
+                {!hideLogo && (
+                  <div className="mobile-menu-logo">
+                    <img
+                      src="/JS Car Wash Images/cropped-fghfthgf.png"
+                      alt="JS Car Wash Logo"
+                      className="mobile-logo-img"
+                    />
+                  </div>
+                )}
+                <button
+                  className="mobile-menu-close"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    setMobileServicesOpen(false)
+                  }}
+                  aria-label="Close menu"
                 >
-                  All Services
-                </Link>
-                <Link 
-                  to="/carwash" 
-                  className={`dropdown-item ${location.pathname === '/carwash' ? 'active' : ''}`}
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mobile-menu-content">
+                {navItems.map((item, index) => {
+                  const active = isActive(item.href)
+                  if (item.hasDropdown) {
+                    const servicesActive = isServicesActive()
+                    return (
+                      <div key={index} className="mobile-menu-item">
+                        <div className="mobile-menu-link-wrapper">
+                          <Link
+                            to={item.href}
+                            className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
+                            onClick={(e) => handleClick(item.href, e)}
+                          >
+                            {item.label}
+                          </Link>
+                          <button
+                            className={`mobile-dropdown-toggle ${mobileServicesOpen ? 'mobile-dropdown-toggle-open' : ''}`}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setMobileServicesOpen(!mobileServicesOpen)
+                            }}
+                            aria-label="Toggle services submenu"
+                          >
+                            <svg
+                              className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
+                        {mobileServicesOpen && (
+                          <div className="mobile-submenu">
+                            {servicesSubItems.map((subItem, subIndex) => {
+                              const dropdownActive = isDropdownItemActive(subItem.href)
+                              return (
+                                <Link
+                                  key={subIndex}
+                                  to={subItem.href}
+                                  className={`mobile-submenu-item ${dropdownActive ? 'mobile-submenu-item-active' : ''}`}
+                                  onClick={(e) => handleClick(subItem.href, e)}
+                                >
+                                  {subItem.label}
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
+                  return (
+                    <Link
+                      key={index}
+                      to={item.href}
+                      className={`mobile-menu-link ${active ? 'mobile-menu-link-active' : ''}`}
+                      onClick={(e) => handleClick(item.href, e)}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                })}
+
+                <Link
+                  to="/register"
+                  className="mobile-cta-button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setMobileMenuOpen(false)
+                    if (onNavigate) {
+                      onNavigate()
+                    }
+                    navigate('/login', { state: { fromRegister: true } })
+                  }}
                 >
-                  Car Wash
-                </Link>
-                <Link 
-                  to="/cardetailing" 
-                  className={`dropdown-item ${location.pathname === '/cardetailing' ? 'active' : ''}`}
-                >
-                  Car Detailing
+                  Create an Account
                 </Link>
               </div>
-            )}
-          </div>
-
-          <Link 
-            to="/products" 
-            className={`navbar-link ${isActive('/products') ? 'active' : ''}`}
-          >
-            Product
-          </Link>
-
-          <Link 
-            to="/gallery" 
-            className={`navbar-link ${isActive('/gallery') ? 'active' : ''}`}
-          >
-            Gallery
-          </Link>
-
-          <Link 
-            to="/contact" 
-            className={`navbar-link ${isActive('/contact') ? 'active' : ''}`}
-          >
-            Contact Us
-          </Link>
-
-          <Link 
-            to="/booking" 
-            className={`navbar-link navbar-cta ${isActive('/booking') ? 'active' : ''}`}
-          >
-            Book Now
-          </Link>
-
-          <Link 
-            to="/login" 
-            className={`navbar-link navbar-account ${isActive('/login') ? 'active' : ''}`}
-          >
-            Create An Account
-          </Link>
-        </div>
-
-        {/* Mobile Hamburger Button */}
-        <button 
-          className={`hamburger ${isMenuOpen ? 'active' : ''}`}
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
-        <Link 
-          to="/" 
-          className={`mobile-link ${isActive('/') ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Home
-        </Link>
-        
-        <Link 
-          to="/aboutus" 
-          className={`mobile-link ${isActive('/aboutus') ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          AboutUs
-        </Link>
-
-        {/* Mobile Services Dropdown */}
-        <div className="mobile-dropdown">
-          <button 
-            className={`mobile-link mobile-dropdown-toggle ${isServicesActive() ? 'active' : ''}`}
-            onClick={toggleServices}
-          >
-            Services
-            <span className={`mobile-dropdown-arrow ${isServicesOpen ? 'open' : ''}`}>▼</span>
-          </button>
-          <div className={`mobile-dropdown-menu ${isServicesOpen ? 'open' : ''}`}>
-            <Link 
-              to="/carwash" 
-              className={`mobile-dropdown-item ${location.pathname === '/carwash' ? 'active' : ''}`}
-              onClick={() => {
-                setIsMenuOpen(false)
-                setIsServicesOpen(false)
-              }}
-            >
-              Car Wash
-            </Link>
-            <Link 
-              to="/cardetailing" 
-              className={`mobile-dropdown-item ${location.pathname === '/cardetailing' ? 'active' : ''}`}
-              onClick={() => {
-                setIsMenuOpen(false)
-                setIsServicesOpen(false)
-              }}
-            >
-              Car Detailing
-            </Link>
-          </div>
-        </div>
-
-        <Link 
-          to="/products" 
-          className={`mobile-link ${isActive('/products') ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Product
-        </Link>
-
-        <Link 
-          to="/gallery" 
-          className={`mobile-link ${isActive('/gallery') ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Gallery
-        </Link>
-
-        <Link 
-          to="/contact" 
-          className={`mobile-link ${isActive('/contact') ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Contact Us
-        </Link>
-
-        <Link 
-          to="/booking" 
-          className={`mobile-link mobile-cta ${isActive('/booking') ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Book Now
-        </Link>
-
-        <Link 
-          to="/login" 
-          className={`mobile-link mobile-account ${isActive('/login') ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Create An Account
-        </Link>
-      </div>
-    </nav>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
 export default Navbar
-

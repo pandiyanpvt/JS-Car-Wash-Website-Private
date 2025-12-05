@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FooterPage } from '../footer'
-import PageHeading from '../../components/PageHeading'
+import Navbar from '../../components/navbar/Navbar'
 import './GalleryPage.css'
 
 // Gallery page component with navbar, gallery cards, and footer
@@ -58,7 +58,14 @@ function GalleryPage() {
 
   return (
     <div className="gallery-page">
-      <PageHeading title="Gallery" />
+      <Navbar className="fixed-navbar" />
+      {/* Page Heading Section */}
+      <section className="page-heading-section">
+        <div className="page-heading-overlay"></div>
+        <div className="page-heading-content">
+          <h1 className="page-heading-title">Gallery</h1>
+        </div>
+      </section>
 
       {/* Gallery Grid */}
       <section className="gallery-section">
