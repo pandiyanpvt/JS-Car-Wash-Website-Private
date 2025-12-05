@@ -1304,3 +1304,70 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
+.dark-mode .service-page {
+  background-color: #0a0a0a !important;
+  color: #ffffff;
+}
+
+.dark-mode .service-section,
+.dark-mode .detailing-section,
+.dark-mode .products-section,
+.dark-mode .best-services-section {
+  background-color: #0a0a0a !important;
+}
+
+.dark-mode .service-title,
+.dark-mode .all-service-name,
+.dark-mode .detailing-title,
+.dark-mode .detailing-description,
+.dark-mode .detailing-secondary,
+.dark-mode .products-title,
+.dark-mode .best-services-title,
+.dark-mode .best-services-subtitle,
+.dark-mode .service-card-title,
+.dark-mode .service-card-description {
+  color: #ffffff !important;
+}
+
+.dark-mode .service-card {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .service-card:hover {
+  background-color: #2a2a2a !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .detailing-button-primary {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+.dark-mode .detailing-button-primary:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.dark-mode .products-image-wrapper {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .product-name,
+.dark-mode .product-description {
+  color: #ffffff !important;
+}
+
+.dark-mode p,
+.dark-mode span,
+.dark-mode div,
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: #ffffff;
+}
+

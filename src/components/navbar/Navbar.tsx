@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useCart } from '../../contexts/CartContext'
+import { useAuth } from '../../contexts/AuthContext'
+import AuthModal from '../auth/AuthModal'
+import ProfilePopup from '../profile/ProfilePopup'
 import './Navbar.css'
 
 interface NavbarProps {
@@ -12,9 +16,15 @@ interface NavbarProps {
 function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { openCart, getTotalItems } = useCart()
+  const { isAuthenticated } = useAuth()
   const [servicesHover, setServicesHover] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
+  const [profilePopupOpen, setProfilePopupOpen] = useState(false)
+  const cartItemCount = getTotalItems()
 
   const navItems = [
     { label: 'Home', href: '/', route: true },
@@ -86,8 +96,17 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
       <nav className={`modern-navbar ${className}`}>
         <div className="navbar-wrapper">
           {/* Logo Section */}
-          {!hideLogo && (
-            <div className="navbar-logo-section">
+          <div className="navbar-logo-section">
+            <Link to="/" onClick={(e) => {
+              handleClick('/', e)
+              if (location.pathname === '/') {
+                window.scrollTo({
+                  top: 0,
+                  left: 0,
+                  behavior: 'smooth'
+                })
+              }
+            }}>
               <div className="navbar-logo-icon">
                 <img
                   src="/JS Car Wash Images/cropped-fghfthgf.png"
@@ -95,8 +114,8 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
                   className="navbar-logo-img"
                 />
               </div>
-            </div>
-          )}
+            </Link>
+          </div>
 
           {/* Desktop Navigation Links */}
           <div className="navbar-links desktop-nav-links">
@@ -154,20 +173,40 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
             })}
           </div>
 
-          {/* Desktop Create Account Button */}
-          <Link
-            to="/register"
-            className="navbar-cta-button desktop-cta-button"
-            onClick={(e) => {
-              e.preventDefault()
-              if (onNavigate) {
-                onNavigate()
-              }
-              navigate('/login', { state: { fromRegister: true } })
-            }}
-          >
-            Create an Account
-          </Link>
+          {/* Desktop Cart Icon */}
+          {isAuthenticated && (
+            <button
+              className="navbar-cart-button desktop-cta-button"
+              aria-label="Shopping Cart"
+              onClick={openCart}
+            >
+              <i className="fas fa-shopping-cart"></i>
+              {cartItemCount > 0 && (
+                <span className="cart-badge">{cartItemCount}</span>
+              )}
+            </button>
+          )}
+
+          {/* Desktop Profile Icon or Sign In Button */}
+          {isAuthenticated ? (
+            <button
+              className="navbar-profile-button desktop-cta-button"
+              onClick={() => setProfilePopupOpen(true)}
+              aria-label="Profile"
+            >
+              <i className="fas fa-user-circle"></i>
+            </button>
+          ) : (
+            <button
+              className="navbar-cta-button desktop-cta-button"
+              onClick={() => {
+                setAuthModalTab('signin')
+                setAuthModalOpen(true)
+              }}
+            >
+              Sign In
+            </button>
+          )}
 
           {/* Mobile Hamburger Button */}
           <button
@@ -209,15 +248,24 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
               <div className="mobile-menu-header">
-                {!hideLogo && (
-                  <div className="mobile-menu-logo">
+                <div className="mobile-menu-logo">
+                  <Link to="/" onClick={(e) => {
+                    handleClick('/', e)
+                    if (location.pathname === '/') {
+                      window.scrollTo({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth'
+                      })
+                    }
+                  }}>
                     <img
                       src="/JS Car Wash Images/cropped-fghfthgf.png"
                       alt="JS Car Wash Logo"
                       className="mobile-logo-img"
                     />
-                  </div>
-                )}
+                  </Link>
+                </div>
                 <button
                   className="mobile-menu-close"
                   onClick={() => {
@@ -298,25 +346,45 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
                   )
                 })}
 
-                <Link
-                  to="/register"
-                  className="mobile-cta-button"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setMobileMenuOpen(false)
-                    if (onNavigate) {
-                      onNavigate()
-                    }
-                    navigate('/login', { state: { fromRegister: true } })
-                  }}
-                >
-                  Create an Account
-                </Link>
+                {isAuthenticated ? (
+                  <button
+                    className="mobile-cta-button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setMobileMenuOpen(false)
+                      setProfilePopupOpen(true)
+                    }}
+                  >
+                    <i className="fas fa-user-circle"></i> Profile
+                  </button>
+                ) : (
+                  <button
+                    className="mobile-cta-button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setMobileMenuOpen(false)
+                      setAuthModalTab('signin')
+                      setAuthModalOpen(true)
+                    }}
+                  >
+                    Sign In
+                  </button>
+                )}
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
+
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialTab={authModalTab}
+      />
+      <ProfilePopup
+        isOpen={profilePopupOpen}
+        onClose={() => setProfilePopupOpen(false)}
+      />
     </>
   )
 }

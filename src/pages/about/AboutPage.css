@@ -1299,4 +1299,90 @@
   }
 }
 
+.dark-mode .about-page {
+  background-color: #0a0a0a !important;
+  color: #ffffff;
+}
+
+.dark-mode .about-section,
+.dark-mode .about-content-section,
+.dark-mode .about-features-section,
+.dark-mode .about-team-section,
+.dark-mode .about-values-section,
+.dark-mode .benefit-section,
+.dark-mode .about-js-section,
+.dark-mode .hero-section {
+  background-color: #0a0a0a !important;
+  color: #ffffff;
+}
+
+.dark-mode .hero-gradient {
+  background: linear-gradient(to bottom, transparent, #0a0a0a) !important;
+}
+
+.dark-mode .about-title,
+.dark-mode .about-subtitle,
+.dark-mode .section-title,
+.dark-mode .feature-title,
+.dark-mode .team-member-name,
+.dark-mode .value-title,
+.dark-mode .benefit-title,
+.dark-mode .benefit-subtitle,
+.dark-mode .about-js-title,
+.dark-mode .about-js-subtitle,
+.dark-mode .about-js-heading {
+  color: #ffffff !important;
+}
+
+.dark-mode .about-description,
+.dark-mode .about-text,
+.dark-mode .feature-description,
+.dark-mode .team-member-role,
+.dark-mode .value-description,
+.dark-mode .benefit-text,
+.dark-mode .benefit-quote,
+.dark-mode .about-js-description,
+.dark-mode .about-js-description p {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .about-card,
+.dark-mode .feature-card,
+.dark-mode .team-card,
+.dark-mode .value-card,
+.dark-mode .feature-block,
+.dark-mode .benefit-image-container {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .about-card:hover,
+.dark-mode .feature-card:hover,
+.dark-mode .team-card:hover,
+.dark-mode .value-card:hover {
+  background-color: #2a2a2a !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .about-js-contact-label,
+.dark-mode .about-js-contact-phone {
+  color: #ffffff !important;
+}
+
+.dark-mode p,
+.dark-mode span,
+.dark-mode div,
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: #ffffff;
+}
+
+.dark-mode .benefit-line {
+  background-color: #ffffff !important;
+}
+
 

@@ -44,7 +44,7 @@ function CarDetailing() {
 
   return (
     <div className="car-detailing-page">
-      <Navbar className="fixed-navbar" />
+      <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
         <div className="page-heading-overlay"></div>

@@ -16,26 +16,6 @@ interface GalleryImage {
 function GalleryPage() {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setSelectedImage(null)
-      }
-    }
-
-    if (selectedImage) {
-      document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
-    }
-  }, [selectedImage])
-
   const galleryImages: GalleryImage[] = [
     { id: 1, src: '/Gallery/01-min.png', alt: 'Car Wash Service 1' },
     { id: 2, src: '/Gallery/02-min.jpg', alt: 'Car Wash Service 2' },
@@ -56,9 +36,58 @@ function GalleryPage() {
     { id: 17, src: '/Gallery/18-min.jpg', alt: 'Car Wash Service 17' }
   ]
 
+  const getCurrentImageIndex = () => {
+    if (!selectedImage) return -1
+    return galleryImages.findIndex(img => img.id === selectedImage.id)
+  }
+
+  const handlePrevious = () => {
+    const currentIndex = getCurrentImageIndex()
+    if (currentIndex > 0) {
+      setSelectedImage(galleryImages[currentIndex - 1])
+    } else {
+      setSelectedImage(galleryImages[galleryImages.length - 1])
+    }
+  }
+
+  const handleNext = () => {
+    const currentIndex = getCurrentImageIndex()
+    if (currentIndex < galleryImages.length - 1) {
+      setSelectedImage(galleryImages[currentIndex + 1])
+    } else {
+      setSelectedImage(galleryImages[0])
+    }
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedImage) return
+
+      if (e.key === 'Escape') {
+        setSelectedImage(null)
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevious()
+      } else if (e.key === 'ArrowRight') {
+        handleNext()
+      }
+    }
+
+    if (selectedImage) {
+      document.addEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'unset'
+    }
+  }, [selectedImage])
+
   return (
     <div className="gallery-page">
-      <Navbar className="fixed-navbar" />
+      <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
         <div className="page-heading-overlay"></div>
@@ -125,6 +154,30 @@ function GalleryPage() {
               >
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                className="gallery-lightbox-prev"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handlePrevious()
+                }}
+                aria-label="Previous image"
+              >
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                className="gallery-lightbox-next"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleNext()
+                }}
+                aria-label="Next image"
+              >
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
               <img

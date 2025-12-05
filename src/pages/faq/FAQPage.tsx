@@ -81,7 +81,7 @@ function FAQPage() {
 
   return (
     <div className="faq-page" id="faq">
-      <Navbar className="fixed-navbar" />
+      <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
         <div className="page-heading-overlay"></div>

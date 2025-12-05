@@ -747,3 +747,21 @@
     padding-top: 80px;
   }
 }
+
+.dark-mode .login-page {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .login-form-panel {
+  background-color: #2a2a2a;
+}
+
+.dark-mode .login-form input {
+  background-color: #1a1a1a;
+  color: #e5e5e5;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .login-form input::placeholder {
+  color: #888;
+}
