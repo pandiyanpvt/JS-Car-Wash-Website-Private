@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { FooterPage } from '../footer'
-import Navbar from '../../components/navbar/Navbar'
+import PageHeading from '../../components/PageHeading'
 import './CarWash.css'
 
 function CarWash() {
@@ -55,14 +55,7 @@ function CarWash() {
 
   return (
     <div className="car-wash-page">
-      <Navbar className="fixed-navbar" />
-      {/* Page Heading Section */}
-      <section className="page-heading-section">
-        <div className="page-heading-overlay"></div>
-        <div className="page-heading-content">
-          <h1 className="page-heading-title">Car Wash</h1>
-        </div>
-      </section>
+      <PageHeading title="Car Wash" />
 
       {/* Pricing Section */}
       <section className="car-wash-pricing-section">

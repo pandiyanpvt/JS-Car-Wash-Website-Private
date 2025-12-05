@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FooterPage } from '../footer'
-import Navbar from '../../components/navbar/Navbar'
+import PageHeading from '../../components/PageHeading'
 import './TestimonialsPage.css'
 
 interface Testimonial {
@@ -77,14 +77,7 @@ function TestimonialsPage() {
 
   return (
     <div className="testimonials-page" id="testimonial">
-      <Navbar className="fixed-navbar" />
-      {/* Page Heading Section */}
-      <section className="page-heading-section">
-        <div className="page-heading-overlay"></div>
-        <div className="page-heading-content">
-          <h1 className="page-heading-title">Our Testimonial</h1>
-        </div>
-      </section>
+      <PageHeading title="Testimonials" />
 
       {/* Feedback Form Section */}
       <section className="testimonials-form-section">

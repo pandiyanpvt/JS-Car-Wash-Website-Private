@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FooterPage } from '../footer'
-import Navbar from '../../components/navbar/Navbar'
+import PageHeading from '../../components/PageHeading'
 import './FAQPage.css'
 
 function FAQPage() {
@@ -81,14 +81,7 @@ function FAQPage() {
 
   return (
     <div className="faq-page" id="faq">
-      <Navbar className="fixed-navbar" />
-      {/* Page Heading Section */}
-      <section className="page-heading-section">
-        <div className="page-heading-overlay"></div>
-        <div className="page-heading-content">
-          <h1 className="page-heading-title">FaQ</h1>
-        </div>
-      </section>
+      <PageHeading title="FAQ" />
 
       {/* FAQ Section */}
       <section className="faq-section">

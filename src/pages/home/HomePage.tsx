@@ -1,16 +1,14 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { FooterPage } from '../footer'
-import Navbar from '../../components/navbar/Navbar'
+import { useNavbar } from '../../contexts/NavbarContext'
 import './HomePage.css'
 
 interface HomePageProps {}
 
 function HomePage({}: HomePageProps) {
   const [currentPage, setCurrentPage] = useState(1)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
   const [modelsShow, setModelsShow] = useState(false)
   const [dealersShow, setDealersShow] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
@@ -20,8 +18,8 @@ function HomePage({}: HomePageProps) {
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const [containerPosition, setContainerPosition] = useState({ top: 0, left: 0, width: 0, height: 0 })
   const totalPages = 6
-  const location = useLocation()
   const navigate = useNavigate()
+  const { setIsVisible } = useNavbar()
 
   // Branches data - memoized
   const branches = useMemo(() => [
@@ -39,98 +37,60 @@ function HomePage({}: HomePageProps) {
     }
   ], [])
 
-  const navItems = useMemo(() => [
-    { label: 'Home', href: '/', route: true },
-    { label: 'AboutUs', href: '/aboutus', route: true },
-    { label: 'Services', href: '/services', route: true, hasDropdown: true },
-    { label: 'Product', href: '/products', route: true },
-    { label: 'Gallery', href: '/gallery', route: true },
-    { label: 'Contact Us', href: '/contact', route: true },
-    { label: 'BOOK NOW', href: '/booking', route: true }
-  ], [])
 
-  const servicesSubItems = useMemo(() => [
-    { label: 'Car Wash', href: '/carwash', route: true },
-    { label: 'Car Detailing', href: '/cardetailing', route: true }
-  ], [])
-
-  const isActive = useCallback((href: string) => {
-    if (href === '/') {
-      return location.pathname === '/'
-    }
-    return location.pathname === href
-  }, [location.pathname])
-
-  const isServicesActive = useCallback(() => {
-    return location.pathname === '/services' || 
-           location.pathname === '/carwash' || 
-           location.pathname === '/cardetailing'
-  }, [location.pathname])
-
-  const isDropdownItemActive = useCallback((href: string) => {
-    return location.pathname === href
-  }, [location.pathname])
-
-  const handleNavClick = useCallback((href: string, e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault()
-    }
-    setMenuOpen(false)
-    setMobileServicesOpen(false)
-    window.location.href = href
-  }, [])
-
-  // Close mobile menu when clicking outside
+  // Hide navbar initially on HomePage
   useEffect(() => {
-    if (!menuOpen) {
-      document.body.style.overflow = 'unset'
-      return
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      // Don't close if clicking on hamburger button or menu overlay
-      if (target.closest('.header-hamburger-btn') || target.closest('.mobile-menu-overlay')) {
-        return
-      }
-      setMenuOpen(false)
-      setMobileServicesOpen(false)
-    }
-
-    // Use a small delay to prevent immediate closure when opening
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside)
-    }, 100)
-
-    document.body.style.overflow = 'hidden'
-
+    setIsVisible(false)
+    
     return () => {
-      clearTimeout(timeoutId)
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.body.style.overflow = 'unset'
+      // Reset navbar visibility when leaving homepage
+      setIsVisible(true)
     }
-  }, [menuOpen])
+  }, [setIsVisible])
 
-  // Show/hide navbar on scroll
+  // Show/hide navbar on scroll - hide until scrolling past entire home-page-container
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY
       const headerHeight = headerContainerRef.current?.offsetHeight || 0
+      const pageContainer = pageContainerRef.current
       
-      // Show navbar when scrolled past the header section
+      // Show navbar when scrolled past the header section (for local header navbar)
       if (scrollY > headerHeight * 0.5) {
         setShowNavbar(true)
       } else {
         setShowNavbar(false)
       }
+
+      // Control global navbar visibility - only show after scrolling past entire home-page-container
+      if (pageContainer) {
+        const containerTop = pageContainer.offsetTop
+        const containerHeight = pageContainer.offsetHeight
+        const containerBottom = containerTop + containerHeight
+        
+        // Show navbar when user has scrolled past the entire home-page-container
+        if (scrollY >= containerBottom) {
+          setIsVisible(true)
+        } else {
+          setIsVisible(false)
+        }
+      }
     }
 
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      handleScroll()
+    }, 100)
+
     window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll, { passive: true })
     
     return () => {
+      clearTimeout(timeoutId)
       window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
     }
-  }, [])
+  }, [setIsVisible])
 
   // Services data - memoized
   const services = useMemo(() => [
@@ -339,139 +299,6 @@ function HomePage({}: HomePageProps) {
 
   return (
     <div className="home-page">
-      {/* Mobile Menu Overlay - HomePage Navigation */}
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            <motion.div
-              className="mobile-menu-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={() => {
-                setMenuOpen(false)
-                setMobileServicesOpen(false)
-              }}
-            />
-            <motion.div
-              className="mobile-menu-overlay"
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              onMouseEnter={() => setMenuOpen(true)}
-              onMouseLeave={() => setMenuOpen(false)}
-            >
-              <div className="mobile-menu-header">
-                <div className="mobile-menu-logo">
-                  <img
-                    src="/JS Car Wash Images/cropped-fghfthgf.png"
-                    alt="JS Car Wash Logo"
-                    className="mobile-logo-img"
-                  />
-                </div>
-                <button
-                  className="mobile-menu-close"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setMobileServicesOpen(false)
-                  }}
-                  aria-label="Close menu"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-
-              <div className="mobile-menu-content">
-                {navItems.map((item, index) => {
-                  const active = isActive(item.href)
-                  if (item.hasDropdown) {
-                    const servicesActive = isServicesActive()
-                    return (
-                      <div 
-                        key={index} 
-                        className="mobile-menu-item"
-                        onMouseEnter={() => setMobileServicesOpen(true)}
-                        onMouseLeave={() => setMobileServicesOpen(false)}
-                      >
-                        <div className="mobile-menu-link-with-dropdown">
-                          <Link
-                            to={item.href}
-                            className={`mobile-menu-link ${servicesActive ? 'mobile-menu-link-active' : ''}`}
-                            onClick={(e) => handleNavClick(item.href, e)}
-                          >
-                            {item.label}
-                          </Link>
-                          <button
-                            className="mobile-dropdown-toggle"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setMobileServicesOpen(!mobileServicesOpen)
-                            }}
-                            aria-label="Toggle services menu"
-                          >
-                            <svg
-                              className={`mobile-dropdown-arrow ${mobileServicesOpen ? 'mobile-dropdown-arrow-open' : ''}`}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                        </div>
-                        {mobileServicesOpen && (
-                          <div className="mobile-submenu">
-                            {servicesSubItems.map((subItem, subIndex) => {
-                              const dropdownActive = isDropdownItemActive(subItem.href)
-                              return (
-                                <Link
-                                  key={subIndex}
-                                  to={subItem.href}
-                                  className={`mobile-submenu-item ${dropdownActive ? 'mobile-submenu-item-active' : ''}`}
-                                  onClick={(e) => handleNavClick(subItem.href, e)}
-                                >
-                                  {subItem.label}
-                                </Link>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  }
-                  return (
-                    <Link
-                      key={index}
-                      to={item.href}
-                      className={`mobile-menu-link ${active ? 'mobile-menu-link-active' : ''}`}
-                      onClick={(e) => handleNavClick(item.href, e)}
-                    >
-                      {item.label}
-                    </Link>
-                  )
-                })}
-
-                <Link
-                  to="/register"
-                  className="mobile-cta-button"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setMenuOpen(false)
-                    navigate('/login', { state: { fromRegister: true } })
-                  }}
-                >
-                  Create an Account
-                </Link>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
       {/* Main Container */}
       <motion.div 
         ref={(el) => {
@@ -487,7 +314,6 @@ function HomePage({}: HomePageProps) {
         {/* Header with Navbar - Full Width */}
         <div className="home-page-header">
           <div className={`header-navbar-wrapper ${showNavbar ? 'navbar-visible' : 'navbar-hidden'}`}>
-            <Navbar hideLogo={true} />
           </div>
           
           {/* Split Design - Left and Right Sections */}
@@ -504,7 +330,7 @@ function HomePage({}: HomePageProps) {
                   className="header-dealers-btn"
                   onClick={() => setDealersShow(true)}
                 >
-                  DEALERS
+                  BRANCHES
                 </button>
               </div>
             </div>
@@ -801,7 +627,7 @@ function HomePage({}: HomePageProps) {
               {/* Header with Title */}
               <div className="dealersshow-header">
                 <div className="dealersshow-nav-row">
-                  <h1 className="dealersshow-title">FIND YOUR DEALER</h1>
+                  <h1 className="dealersshow-title">FIND YOUR BRANCH</h1>
                   <button
                     className="dealersshow-close-btn"
                     onClick={() => setDealersShow(false)}
@@ -834,25 +660,6 @@ function HomePage({}: HomePageProps) {
                       className="dealersshow-map-iframe"
                       title={`${branch.name} - ${branch.subtitle}`}
                     ></iframe>
-                  </div>
-
-                  {/* Dealer Info */}
-                  <div className="dealersshow-dealer-info">
-                    <h2 className="dealersshow-dealer-name">{branch.name}</h2>
-                    <p className="dealersshow-dealer-subtitle">{branch.subtitle}</p>
-                    <div className="dealersshow-dealer-address">
-                      <svg className="location-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
-                      </svg>
-                      <p className="dealersshow-address-text">
-                        {branch.address.split(', ').map((line, idx, array) => (
-                          <span key={idx}>
-                            {line}
-                            {idx < array.length - 1 && <br />}
-                          </span>
-                        ))}
-                      </p>
-                    </div>
                   </div>
 
                   {/* Action Buttons */}
