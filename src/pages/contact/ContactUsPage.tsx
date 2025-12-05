@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { FooterPage } from '../footer'
-import Navbar from '../../components/navbar/Navbar'
+import PageHeading from '../../components/PageHeading'
 import './ContactUsPage.css'
 
 function ContactUsPage() {
@@ -27,14 +27,7 @@ function ContactUsPage() {
 
   return (
     <div className="contact-page" id="contact">
-      <Navbar className="fixed-navbar" />
-      {/* Page Heading Section */}
-      <section className="page-heading-section">
-        <div className="page-heading-overlay"></div>
-        <div className="page-heading-content">
-          <h1 className="page-heading-title">Contact Us</h1>
-        </div>
-      </section>
+      <PageHeading title="Contact Us" />
       <div className="container">
         {/* Contact Info Section */}
         <div className="contact-info-section">

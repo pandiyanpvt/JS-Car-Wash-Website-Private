@@ -10,24 +10,38 @@ import TestimonialsPage from './pages/testimonials/TestimonialsPage'
 import { ProductPage } from './pages/products'
 import { BookingPage } from './pages/booking'
 import { LoginPage } from './pages/login'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import ScrollToTop from './components/ScrollToTop'
+import Navbar from './components/navbar'
+import { NavbarProvider, useNavbar } from './contexts/NavbarContext'
 import './styles/index.css'
 
-function App() {
+function AppContent() {
+  const location = useLocation()
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/register'
+  const isHomePage = location.pathname === '/'
+  const { setIsVisible } = useNavbar()
+
+  // Show navbar on all pages except HomePage (HomePage handles its own visibility)
+  useEffect(() => {
+    if (!isHomePage && !isLoginPage) {
+      setIsVisible(true)
+    }
+  }, [location.pathname, isHomePage, isLoginPage, setIsVisible])
 
   return (
-    <BrowserRouter>
-      <div
-        style={{
-          margin: 0,
-          padding: 0,
-          width: '100%',
-          minHeight: '100vh',
-          overflow: 'auto',
-        }}
-      >
-        <Routes>
+    <div
+      style={{
+        margin: 0,
+        padding: 0,
+        width: '100%',
+        minHeight: '100vh',
+        overflow: 'auto',
+      }}
+    >
+      {!isLoginPage && <Navbar />}
+      <Routes>
           <Route
             path="/"
             element={
@@ -49,8 +63,17 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<Navigate to="/login" replace />} />
         </Routes>
-        <ScrollToTop />
-      </div>
+      <ScrollToTop />
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <NavbarProvider>
+        <AppContent />
+      </NavbarProvider>
     </BrowserRouter>
   )
 }
