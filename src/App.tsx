@@ -10,8 +10,11 @@ import TestimonialsPage from './pages/testimonials/TestimonialsPage'
 import { ProductPage } from './pages/products'
 import { BookingPage } from './pages/booking'
 import { LoginPage } from './pages/login'
+import CheckoutPage from './pages/checkout/CheckoutPage'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
+import CartSidebar from './components/cart/CartSidebar'
+import ThemeToggle from './components/theme/ThemeToggle'
 import './styles/index.css'
 
 function App() {
@@ -46,10 +49,13 @@ function App() {
           <Route path="/testimonial" element={<TestimonialsPage />} />
           <Route path="/products" element={<ProductPage />} />
           <Route path="/booking" element={<BookingPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<Navigate to="/login" replace />} />
         </Routes>
         <ScrollToTop />
+        <CartSidebar />
+        <ThemeToggle />
       </div>
     </BrowserRouter>
   )

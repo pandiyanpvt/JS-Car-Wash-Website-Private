@@ -77,7 +77,7 @@ function TestimonialsPage() {
 
   return (
     <div className="testimonials-page" id="testimonial">
-      <Navbar className="fixed-navbar" />
+      <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
         <div className="page-heading-overlay"></div>

@@ -1,0 +1,1444 @@
+.profile-popup-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1400;
+}
+
+.profile-popup-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1401;
+  pointer-events: none;
+}
+
+.profile-popup {
+  position: relative;
+  width: 95%;
+  max-width: 1100px;
+  height: 85vh;
+  max-height: 85vh;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.profile-popup-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: #666;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+  z-index: 10;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.profile-popup-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #1e3a8a;
+  transform: rotate(90deg);
+}
+
+.profile-popup-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.profile-sidebar {
+  width: 280px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.profile-sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.profile-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-username {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: auto;
+  flex: 1;
+}
+
+.profile-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #666;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-tab i {
+  width: 20px;
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+}
+
+.profile-tab:hover {
+  background-color: rgba(30, 58, 138, 0.05);
+  color: #1e3a8a;
+}
+
+.profile-tab:hover i {
+  color: #1e3a8a;
+}
+
+.profile-tab.active {
+  background-color: #1e3a8a;
+  color: #ffffff;
+}
+
+.profile-tab.active i {
+  color: #ffffff;
+}
+
+.profile-logout-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.profile-logout-btn:hover {
+  background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(244, 67, 54, 0.3);
+}
+
+.profile-logout-btn:active {
+  transform: translateY(0);
+}
+
+.profile-main-content {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.profile-header-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.profile-content-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 24px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.profile-action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.profile-edit-btn,
+.profile-password-btn {
+  padding: 10px 20px;
+  border: 2px solid #1e3a8a;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1e3a8a;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+}
+
+.profile-edit-btn:hover,
+.profile-password-btn:hover {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.3);
+  border-color: #1e3a8a;
+}
+
+.profile-edit-btn:active,
+.profile-password-btn:active {
+  transform: translateY(0);
+}
+
+.profile-details-section {
+  width: 100%;
+  background: #ffffff;
+}
+
+.profile-password-section {
+  width: 100%;
+  max-width: 600px;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.profile-section-subtitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 32px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: -0.3px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-form-group label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-form-group input,
+.profile-edit-input {
+  padding: 14px 18px;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.profile-form-group input:focus,
+.profile-edit-input:focus {
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
+  background: #fafbfc;
+}
+
+.profile-form-group input::placeholder,
+.profile-edit-input::placeholder {
+  color: #999;
+}
+
+.profile-save-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 2px solid #f0f0f0;
+  justify-content: flex-end;
+}
+
+.profile-save-btn {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-save-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.4);
+}
+
+.profile-save-btn:active {
+  transform: translateY(0);
+}
+
+.profile-cancel-btn {
+  padding: 14px 32px;
+  background: #ffffff;
+  color: #374151;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-cancel-btn:hover {
+  background: #f8f9fa;
+  border-color: #d0d0d0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-cancel-btn:active {
+  transform: translateY(0);
+}
+
+.profile-tab-content {
+  width: 100%;
+}
+
+.profile-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 24px;
+  background: #fafbfc;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.profile-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.profile-detail-item:hover {
+  border-color: #1e3a8a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08);
+  transform: translateY(-2px);
+}
+
+.profile-detail-item label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  margin-bottom: 2px;
+}
+
+.profile-detail-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.5;
+}
+
+.profile-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.profile-setting-info h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-setting-info p {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.profile-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.profile-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 26px;
+}
+
+.profile-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.profile-toggle input:checked + .profile-toggle-slider {
+  background-color: #1e3a8a;
+}
+
+.profile-toggle input:checked + .profile-toggle-slider:before {
+  transform: translateX(24px);
+}
+
+.profile-no-orders,
+.profile-no-reviews {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.profile-no-orders i,
+.profile-no-reviews i {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.profile-no-orders p,
+.profile-no-reviews p {
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-no-reviews-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.profile-reviews-section {
+  margin-bottom: 32px;
+}
+
+.profile-reviews-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 20px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-orders-to-review {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.profile-order-to-review {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.profile-order-to-review:hover {
+  border-color: #1e3a8a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.1);
+}
+
+.profile-order-to-review-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.profile-order-to-review-id {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-order-to-review-date {
+  font-size: 0.8125rem;
+  color: #666;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-order-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-review-order-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.3);
+}
+
+.profile-order-to-review-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-order-to-review-item {
+  font-size: 0.8125rem;
+  color: #666;
+  background-color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-form-section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e0e0e0;
+}
+
+.profile-review-form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-review-back-btn {
+  background: none;
+  border: none;
+  color: #1e3a8a;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-back-btn:hover {
+  background-color: rgba(30, 58, 138, 0.1);
+}
+
+.profile-review-form-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-order-info {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-review-order-id {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-order-date {
+  font-size: 0.8125rem;
+  color: #666;
+  margin: 0 0 12px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-review-order-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #666;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-review-rating-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-review-rating-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #333;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-stars {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-review-star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.75rem;
+  color: #e0e0e0;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.profile-review-star:hover {
+  transform: scale(1.1);
+}
+
+.profile-review-star.active {
+  color: #ffc107;
+}
+
+.profile-review-rating-text {
+  font-size: 0.875rem;
+  color: #1e3a8a;
+  font-weight: 600;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-review-form-group label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #333;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-textarea {
+  padding: 14px 18px;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #ffffff;
+  color: #1a1a1a;
+  resize: vertical;
+}
+
+.profile-review-textarea:focus {
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
+  background: #fafbfc;
+}
+
+.profile-review-textarea::placeholder {
+  color: #999;
+}
+
+.profile-review-form-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.profile-review-cancel-btn {
+  padding: 12px 24px;
+  background: #ffffff;
+  color: #374151;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-cancel-btn:hover {
+  background: #f8f9fa;
+  border-color: #d0d0d0;
+}
+
+.profile-review-submit-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+}
+
+.profile-review-submit-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+}
+
+.profile-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-review-item {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.profile-review-item:hover {
+  border-color: #1e3a8a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.1);
+}
+
+.profile-review-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.profile-review-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-review-item-order {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-item-date {
+  font-size: 0.8125rem;
+  color: #666;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-item-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.profile-review-item-rating i {
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+.profile-review-item-rating i.active {
+  color: #ffc107;
+}
+
+.profile-review-item-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.profile-review-item-service {
+  font-size: 0.8125rem;
+  color: #666;
+  background-color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-review-item-comment {
+  font-size: 0.9375rem;
+  color: #1a1a1a;
+  line-height: 1.6;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.profile-order-item {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+}
+
+.profile-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-order-id {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-order-date {
+  font-size: 0.8125rem;
+  color: #666;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-order-status {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.profile-order-item-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #666;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-order-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+@media (max-width: 768px) {
+  .profile-popup {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .profile-popup-container {
+    flex-direction: column;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 20px;
+    max-height: 200px;
+  }
+
+  .profile-sidebar-header {
+    flex-direction: row;
+    text-align: left;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .profile-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex: 0;
+  }
+
+  .profile-tab {
+    white-space: nowrap;
+    padding: 10px 16px;
+  }
+
+  .profile-main-content {
+    padding: 24px 20px;
+  }
+
+  .profile-header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .profile-action-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .profile-edit-btn,
+  .profile-password-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profile-content-title {
+    font-size: 1.75rem;
+  }
+
+  .profile-details-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .profile-detail-item {
+    padding: 16px;
+  }
+
+  .profile-password-section {
+    padding: 24px 20px;
+  }
+
+  .profile-save-actions {
+    flex-direction: column;
+  }
+
+  .profile-save-btn,
+  .profile-cancel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profile-orders-list {
+    max-height: 400px;
+  }
+}
+
+.dark-mode .profile-popup {
+  background-color: #1a1a1a !important;
+  box-shadow: 0 20px 60px rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark-mode .profile-popup-close {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-popup-close:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #1e3a8a !important;
+}
+
+.dark-mode .profile-sidebar {
+  background-color: #2a2a2a !important;
+  border-right-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-sidebar-header h3,
+.dark-mode .profile-sidebar-header p {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-tab {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-tab:hover,
+.dark-mode .profile-tab.active {
+  background-color: #3a3a3a !important;
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-logout-btn {
+  background-color: #3a3a3a !important;
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-logout-btn:hover {
+  background-color: #4a4a4a !important;
+}
+
+.dark-mode .profile-main-content {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .profile-content-title {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-info-group label,
+.dark-mode .profile-info-group p,
+.dark-mode .profile-detail-label,
+.dark-mode .profile-detail-value {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-details-section {
+  background: #2a2a2a !important;
+}
+
+.dark-mode .profile-detail-item {
+  background: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-detail-item:hover {
+  background: #3a3a3a !important;
+}
+
+.dark-mode .profile-detail-item label {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-detail-value {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-header-section {
+  border-bottom-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-password-section {
+  background: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-save-actions {
+  border-top-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-details-grid {
+  background: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-edit-btn,
+.dark-mode .profile-password-btn {
+  background-color: #3a3a3a !important;
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-edit-btn:hover,
+.dark-mode .profile-password-btn:hover {
+  background-color: #4a4a4a !important;
+}
+
+.dark-mode .profile-form-group label {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-form input,
+.dark-mode .profile-form textarea {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-form input::placeholder,
+.dark-mode .profile-form textarea::placeholder {
+  color: #888 !important;
+}
+
+.dark-mode .profile-save-btn {
+  background-color: #1e3a8a !important;
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-save-btn:hover {
+  background-color: #2563eb !important;
+}
+
+.dark-mode .profile-cancel-btn {
+  background-color: #3a3a3a !important;
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-cancel-btn:hover {
+  background-color: #4a4a4a !important;
+}
+
+.dark-mode .profile-order-card,
+.dark-mode .profile-order-item {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-order-id,
+.dark-mode .profile-order-date,
+.dark-mode .profile-order-total,
+.dark-mode .profile-order-item-name {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-order-status {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-section-subtitle {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-available-review-item,
+.dark-mode .profile-your-review-item {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-review-btn {
+  background-color: #1e3a8a !important;
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-review-btn:hover {
+  background-color: #2563eb !important;
+}
+
+.dark-mode .profile-review-order-id,
+.dark-mode .profile-review-date,
+.dark-mode .profile-review-comment {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-star-rating i {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-star-rating i.active {
+  color: #fbbf24 !important;
+}
+
+.dark-mode .profile-rating-text {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-review-back-btn {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-review-back-btn:hover {
+  color: #1e3a8a !important;
+}
+
+.dark-mode .profile-review-form-title {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-review-order-details h4,
+.dark-mode .profile-review-order-details p {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-review-rating-label {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-reviews-section-title {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-order-to-review {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-order-to-review:hover {
+  border-color: #1e3a8a !important;
+}
+
+.dark-mode .profile-order-to-review-id {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-order-to-review-date {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-order-to-review-item {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-review-form-section {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-review-form-header {
+  border-bottom-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-review-order-info {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .profile-review-order-id {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-review-order-date {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-review-order-item {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-review-textarea {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-review-textarea:focus {
+  background: #1a1a1a !important;
+  border-color: #1e3a8a !important;
+}
+
+.dark-mode .profile-review-textarea::placeholder {
+  color: #888 !important;
+}
+
+.dark-mode .profile-review-item {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .profile-review-item:hover {
+  border-color: #1e3a8a !important;
+}
+
+.dark-mode .profile-review-item-order {
+  color: #ffffff !important;
+}
+
+.dark-mode .profile-review-item-date {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-review-item-rating i {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-review-item-rating i.active {
+  color: #ffc107 !important;
+}
+
+.dark-mode .profile-review-item-service {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a !important;
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-review-item-comment {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .profile-review-rating-text {
+  color: #1e3a8a !important;
+}
+
+.dark-mode .profile-review-star {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .profile-review-star.active {
+  color: #ffc107 !important;
+}
+
+.dark-mode .profile-no-orders,
+.dark-mode .profile-no-reviews {
+  color: #b0b0b0 !important;
+}

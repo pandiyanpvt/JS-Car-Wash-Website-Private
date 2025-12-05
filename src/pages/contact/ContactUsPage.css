@@ -297,32 +297,178 @@
   text-decoration: underline;
 }
 
-/* Map Section */
-.map-section {
+/* Branches Section */
+.branches-section {
   margin-bottom: 80px;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  background: #f5f5f5;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.4s ease;
 }
 
-.map-section:hover {
+.branches-header {
+  text-align: center;
+  margin-bottom: 48px;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.branches-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #475569 100%);
+  border-radius: 2px;
+}
+
+.branches-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 12px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.branches-subtitle {
+  font-size: 1.125rem;
+  color: #666;
+  margin: 0;
+}
+
+.branches-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+@media (min-width: 992px) {
+  .branches-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+}
+
+.branch-card {
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.branch-card:hover {
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
   transform: translateY(-4px);
 }
 
-.contact-map {
+.branch-header {
+  padding: 32px 32px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.branch-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 8px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.branch-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  font-weight: 600;
+}
+
+.branch-info {
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+}
+
+.branch-address {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #666;
+  font-size: 0.9375rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.branch-address i {
+  color: #1e3a8a;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.branch-actions {
+  flex-shrink: 0;
+}
+
+.branch-directions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.branch-directions-btn:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.35);
+}
+
+.branch-directions-btn i {
+  font-size: 1rem;
+}
+
+.branch-map {
+  position: relative;
   width: 100%;
   height: 450px;
-  display: block;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.branch-map-iframe {
+  width: 100%;
+  height: 100%;
   border: none;
+  display: block;
 }
 
 @media (min-width: 768px) {
-  .contact-map {
+  .branch-map {
     height: 500px;
+  }
+}
+
+@media (max-width: 991px) {
+  .branch-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .branch-directions-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -596,11 +742,59 @@
     line-height: 1.4;
   }
 
-  .map-section {
+  .branches-section {
     margin-bottom: 50px;
   }
 
-  .contact-map {
+  .branches-header {
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+  }
+
+  .branches-title {
+    font-size: 2rem;
+  }
+
+  .branches-subtitle {
+    font-size: 1rem;
+  }
+
+  .branches-grid {
+    gap: 32px;
+  }
+
+  .branch-header {
+    padding: 24px 20px 20px;
+  }
+
+  .branch-name {
+    font-size: 1.25rem;
+  }
+
+  .branch-subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .branch-info {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .branch-address {
+    width: 100%;
+    font-size: 0.875rem;
+  }
+
+  .branch-directions-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
+
+  .branch-map {
     height: 350px;
   }
 
@@ -711,12 +905,54 @@
     line-height: 1.3;
   }
 
-  .map-section {
+  .branches-section {
     margin-bottom: 40px;
-    border-radius: 16px;
   }
 
-  .contact-map {
+  .branches-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .branches-title {
+    font-size: 1.75rem;
+  }
+
+  .branches-subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .branches-grid {
+    gap: 24px;
+  }
+
+  .branch-header {
+    padding: 20px 16px 16px;
+  }
+
+  .branch-name {
+    font-size: 1.125rem;
+  }
+
+  .branch-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .branch-info {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .branch-address {
+    font-size: 0.8125rem;
+  }
+
+  .branch-directions-btn {
+    padding: 10px 16px;
+    font-size: 0.8125rem;
+  }
+
+  .branch-map {
     height: 300px;
   }
 
@@ -845,5 +1081,177 @@
     letter-spacing: 1px;
     width: 100%;
   }
+}
+
+.dark-mode .contact-page {
+  background: linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%) !important;
+  color: #ffffff;
+}
+
+.dark-mode .contact-section {
+  background-color: #0a0a0a !important;
+}
+
+.dark-mode .contact-heading-section,
+.dark-mode .contact-info-section,
+.dark-mode .contact-form-section {
+  background-color: transparent;
+}
+
+.dark-mode .contact-main-heading,
+.dark-mode .contact-title,
+.dark-mode .contact-card-title,
+.dark-mode .contact-form-title,
+.dark-mode .contact-form-subtitle {
+  color: #ffffff !important;
+}
+
+.dark-mode .contact-heading-description,
+.dark-mode .contact-form-description {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .contact-card {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .contact-card:hover {
+  background-color: #2a2a2a !important;
+}
+
+.dark-mode .contact-info-card {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .contact-info-card:hover {
+  background-color: #2a2a2a !important;
+}
+
+.dark-mode .contact-info-icon,
+.dark-mode .contact-info-title,
+.dark-mode .contact-info-text {
+  color: #ffffff !important;
+}
+
+.dark-mode .contact-form {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .form-label {
+  color: #ffffff !important;
+}
+
+.dark-mode .form-input,
+.dark-mode .form-textarea,
+.dark-mode .contact-form input,
+.dark-mode .contact-form textarea {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .form-input:focus,
+.dark-mode .form-textarea:focus {
+  background-color: #2a2a2a !important;
+  border-color: #1e3a8a !important;
+}
+
+.dark-mode .form-input::placeholder,
+.dark-mode .form-textarea::placeholder,
+.dark-mode .contact-form input::placeholder,
+.dark-mode .contact-form textarea::placeholder {
+  color: #888 !important;
+}
+
+.dark-mode .branch-card {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .branch-name,
+.dark-mode .branch-address {
+  color: #ffffff !important;
+}
+
+.dark-mode .branch-map {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .submit-btn {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important;
+  color: #ffffff !important;
+}
+
+.dark-mode .submit-btn:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
+}
+
+.dark-mode .branches-section {
+  background-color: transparent;
+}
+
+.dark-mode .branches-title,
+.dark-mode .branches-subtitle {
+  color: #ffffff !important;
+}
+
+.dark-mode .branch-header {
+  border-bottom-color: #3a3a3a !important;
+}
+
+.dark-mode .branch-subtitle {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .branch-info {
+  border-bottom-color: #3a3a3a !important;
+}
+
+.dark-mode .branch-address i {
+  color: #1e3a8a !important;
+}
+
+.dark-mode .contact-icon {
+  color: #1e3a8a !important;
+}
+
+.dark-mode .contact-info-value {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .contact-link {
+  color: #60a5fa !important;
+}
+
+.dark-mode .contact-link:hover {
+  color: #93c5fd !important;
+}
+
+.dark-mode .form-submit-button {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important;
+  color: #ffffff !important;
+}
+
+.dark-mode .form-submit-button:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
+}
+
+.dark-mode .page-heading-title {
+  color: #ffffff !important;
+}
+
+.dark-mode p,
+.dark-mode span,
+.dark-mode div,
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: #ffffff;
 }
 

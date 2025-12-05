@@ -15,13 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 80px;
-}
-
-@media (max-width: 1346px) {
-  .page-heading-section {
-    margin-top: 0;
-  }
+  margin-top: 0;
 }
 
 .page-heading-overlay {
@@ -323,5 +317,68 @@
   .page-heading-section {
     margin-top: 0;
   }
+}
+
+.dark-mode .car-detailing-page {
+  background-color: #0a0a0a !important;
+  color: #ffffff;
+}
+
+.dark-mode .car-detailing-pricing-section {
+  background-color: #0a0a0a !important;
+}
+
+.dark-mode .pricing-title,
+.dark-mode .pricing-subtitle {
+  color: #ffffff !important;
+}
+
+.dark-mode .pricing-title-red {
+  color: #1e3a8a;
+}
+
+.dark-mode .pricing-card {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .pricing-card:hover {
+  background-color: #2a2a2a !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .pricing-price,
+.dark-mode .pricing-card-title,
+.dark-mode .pricing-features-title {
+  color: #ffffff !important;
+}
+
+.dark-mode .pricing-price-suffix {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .pricing-feature-item {
+  color: #ffffff !important;
+}
+
+.dark-mode .pricing-book-btn {
+  background-color: #1e3a8a !important;
+  color: #ffffff !important;
+}
+
+.dark-mode .pricing-book-btn:hover {
+  background-color: #0f172a !important;
+}
+
+.dark-mode p,
+.dark-mode span,
+.dark-mode div,
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: #ffffff;
 }
 

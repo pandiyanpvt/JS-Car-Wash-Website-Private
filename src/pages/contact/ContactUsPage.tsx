@@ -27,7 +27,7 @@ function ContactUsPage() {
 
   return (
     <div className="contact-page" id="contact">
-      <Navbar className="fixed-navbar" />
+      <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
         <div className="page-heading-overlay"></div>
@@ -80,19 +80,90 @@ function ContactUsPage() {
           </div>
         </div>
 
-        {/* Map Section */}
-        <div className="map-section">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763360957951!5m2!1sen!2sus"
-            width="100%"
-            height="450"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="contact-map"
-            title="JS Car Wash Location"
-          ></iframe>
+        {/* Branches Section */}
+        <div className="branches-section">
+          <div className="branches-header">
+            <h2 className="branches-title">Our Branches</h2>
+            <p className="branches-subtitle">Visit us at any of our locations</p>
+          </div>
+
+          <div className="branches-grid">
+            {/* Branch 1 - Dubbo */}
+            <div className="branch-card">
+              <div className="branch-header">
+                <h3 className="branch-name">JS Car Wash and Detailing</h3>
+                <p className="branch-subtitle">Dubbo</p>
+              </div>
+              <div className="branch-info">
+                <div className="branch-address">
+                  <i className="fas fa-map-marker-alt"></i>
+                  <span>66-72 Windsor parade, Dubbo, 2830, NSW</span>
+                </div>
+                <div className="branch-actions">
+                  <a
+                    href="https://maps.app.goo.gl/o8hPg2ap39zBX77H7"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="branch-directions-btn"
+                  >
+                    <i className="fas fa-directions"></i>
+                    Get Directions
+                  </a>
+                </div>
+              </div>
+              <div className="branch-map">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3374.180424993968!2d148.6284251755715!3d-32.253227437203996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2slk!4v1764846725165!5m2!1sen!2slk"
+                  width="100%"
+                  height="450"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="branch-map-iframe"
+                  title="JS Car Wash and Detailing - Dubbo"
+                ></iframe>
+              </div>
+            </div>
+
+            {/* Branch 2 - Toongabbie */}
+            <div className="branch-card">
+              <div className="branch-header">
+                <h3 className="branch-name">JS Car wash and Premium Detailing</h3>
+                <p className="branch-subtitle">Toongabbie</p>
+              </div>
+              <div className="branch-info">
+                <div className="branch-address">
+                  <i className="fas fa-map-marker-alt"></i>
+                  <span>Portico Plaza Shop Ground Floor Parking, 17-19 Aurelia Street, Portico Plaza Shopping Centre, Car park entrance Cornelia RD, Junia Ave, Toongabbie NSW 2146, Australia</span>
+                </div>
+                <div className="branch-actions">
+                  <a
+                    href="https://maps.app.goo.gl/PgpM3vrZHKQ1rK8B8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="branch-directions-btn"
+                  >
+                    <i className="fas fa-directions"></i>
+                    Get Directions
+                  </a>
+                </div>
+              </div>
+              <div className="branch-map">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3315.965734607781!2d150.94737837564423!3d-33.78738301484629!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b129950237d3ef5%3A0x14338f06235cd8bf!2sJS%20Car%20wash%20and%20Premium%20Detailing!5e0!3m2!1sen!2slk!4v1764846756939!5m2!1sen!2slk"
+                  width="100%"
+                  height="450"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="branch-map-iframe"
+                  title="JS Car wash and Premium Detailing"
+                ></iframe>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Contact Form Section */}

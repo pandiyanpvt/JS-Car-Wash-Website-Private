@@ -15,16 +15,27 @@
 /* When used as fixed navbar (on other pages) */
 .modern-navbar.fixed-navbar {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  transform: none;
   pointer-events: none;
-  max-width: 1400px;
-  width: calc(100% - 40px);
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .modern-navbar.fixed-navbar .navbar-wrapper {
   pointer-events: auto;
+  background-color: transparent;
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 0;
 }
 
 /* Navbar Wrapper */
@@ -43,6 +54,17 @@
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+}
+
+.navbar-logo-section a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo-section a:hover {
+  transform: scale(1.05);
 }
 
 .navbar-logo-icon {
@@ -229,7 +251,52 @@
   color: #0f172a;
 }
 
-/* Create Account Button */
+/* Cart Button */
+.navbar-cart-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-right: 12px;
+  position: relative;
+}
+
+.navbar-cart-button:hover {
+  background-color: #f5f5f5;
+  color: #1e3a8a;
+}
+
+.navbar-cart-button i {
+  font-size: 1.25rem;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Sign In Button */
 .navbar-cta-button {
   padding: 10px 20px;
   border-radius: 8px;
@@ -243,7 +310,29 @@
   flex-shrink: 0;
   border: none;
   cursor: pointer;
-  margin-left: auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.navbar-profile-button {
+  padding: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.navbar-profile-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
 }
 
 .navbar-cta-button:hover {
@@ -329,6 +418,17 @@
 .mobile-menu-logo {
   display: flex;
   align-items: center;
+}
+
+.mobile-menu-logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.mobile-menu-logo a:hover {
+  transform: scale(1.05);
 }
 
 .mobile-logo-img {
@@ -489,6 +589,9 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: none;
   cursor: pointer;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  width: calc(100% - 40px);
+  display: block;
 }
 
 .mobile-cta-button:hover {
@@ -631,8 +734,11 @@
     right: 0;
     width: 100%;
     transform: none;
-    background: transparent;
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     padding: 0;
     pointer-events: none;
     z-index: 1000;
@@ -687,8 +793,11 @@
     right: 0;
     width: 100%;
     transform: none;
-    background: transparent;
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     padding: 0;
     pointer-events: none;
     z-index: 1000;
@@ -821,4 +930,87 @@
     padding: 5px 10px;
     font-size: 0.625rem;
   }
+}
+
+.dark-mode .modern-navbar {
+  background-color: #2a2a2a;
+}
+
+.dark-mode .modern-navbar.fixed-navbar {
+  background: rgba(26, 26, 26, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .navbar-brand-main,
+.dark-mode .navbar-brand-sub,
+.dark-mode .navbar-link {
+  color: #e5e5e5;
+}
+
+.dark-mode .navbar-link:hover {
+  color: #ffffff;
+}
+
+.dark-mode .navbar-cta-button {
+  background-color: #1e3a8a;
+  color: #ffffff;
+}
+
+.dark-mode .navbar-cta-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+}
+
+.dark-mode .mobile-menu-overlay {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .mobile-menu-link {
+  color: #e5e5e5;
+}
+
+.dark-mode .mobile-menu-link:hover {
+  color: #ffffff;
+  background-color: #2a2a2a;
+}
+
+.dark-mode .navbar-dropdown-menu {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .navbar-dropdown-item {
+  color: #ffffff !important;
+}
+
+.dark-mode .navbar-dropdown-item:hover {
+  background-color: #2a2a2a !important;
+  color: #1e3a8a !important;
+}
+
+.dark-mode .navbar-dropdown-item-active {
+  background-color: #2a2a2a !important;
+  color: #1e3a8a !important;
+}
+
+.dark-mode .navbar-dropdown-item-active:hover {
+  background-color: #3a3a3a !important;
+  color: #1e3a8a !important;
+}
+
+.dark-mode .navbar-link-active {
+  color: #ffffff !important;
+}
+
+.dark-mode .navbar-link-active::after {
+  background-color: #1e3a8a;
+}
+
+.dark-mode .navbar-cart-button {
+  color: #ffffff !important;
+}
+
+.dark-mode .navbar-cart-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fbbf24 !important;
 }

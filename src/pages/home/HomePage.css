@@ -5800,3 +5800,421 @@
   }
 }
 
+.dark-mode .home-page {
+  background-color: #0a0a0a;
+  color: #ffffff;
+}
+
+.dark-mode .header-navbar-wrapper {
+  background-color: rgba(10, 10, 10, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .header-left-section {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .header-brand-main,
+.dark-mode .header-brand-sub {
+  color: #ffffff;
+}
+
+.dark-mode .header-dealers-btn {
+  color: #ff5252;
+}
+
+.dark-mode .header-hamburger-btn {
+  background-color: rgba(26, 26, 26, 0.95);
+  color: #ffffff;
+}
+
+.dark-mode .header-hamburger-btn:hover {
+  background-color: rgba(26, 26, 26, 1);
+}
+
+.dark-mode .home-left-section {
+  background-color: #0a0a0a !important;
+  color: #ffffff;
+}
+
+.dark-mode .home-left-section * {
+  color: #ffffff;
+}
+
+.dark-mode .home-right-section {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .right-section-content {
+  background-color: #0f172a;
+}
+
+.dark-mode .home-main-content {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .mobile-menu-overlay {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .mobile-menu-header {
+  background-color: #2a2a2a;
+  border-bottom-color: #3a3a3a;
+}
+
+.dark-mode .mobile-menu-close {
+  color: #ffffff;
+}
+
+.dark-mode .mobile-menu-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .mobile-menu-link,
+.dark-mode .mobile-dropdown-toggle {
+  color: #ffffff;
+}
+
+.dark-mode .mobile-menu-link:hover,
+.dark-mode .mobile-menu-link-active {
+  background-color: #2a2a2a;
+  color: #1e3a8a;
+}
+
+.dark-mode .mobile-submenu-item {
+  color: #b0b0b0;
+}
+
+.dark-mode .mobile-submenu-item:hover,
+.dark-mode .mobile-submenu-item-active {
+  background-color: #2a2a2a;
+  color: #1e3a8a;
+}
+
+.dark-mode .navbar {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .navbar-brand-main,
+.dark-mode .navbar-brand-sub,
+.dark-mode .navbar-link {
+  color: #ffffff;
+}
+
+.dark-mode .navbar-link:hover {
+  color: #b0b0b0;
+}
+
+.dark-mode .navbar-link-active {
+  color: #ffffff;
+}
+
+.dark-mode .navbar-dropdown-menu {
+  background-color: #2a2a2a;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .navbar-dropdown-item {
+  color: #ffffff;
+}
+
+.dark-mode .navbar-dropdown-item:hover {
+  background-color: #3a3a3a;
+  color: #1e3a8a;
+}
+
+.dark-mode .book-now-btn {
+  border-color: #ffffff;
+  color: #ffffff;
+  background-color: transparent;
+}
+
+.dark-mode .book-now-btn:hover {
+  border-color: #ffffff;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.dark-mode .home-hero-section {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-hero-title,
+.dark-mode .home-hero-description {
+  color: #ffffff;
+}
+
+.dark-mode .home-services-section {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-services-subtitle,
+.dark-mode .home-services-title,
+.dark-mode .home-service-title {
+  color: #ffffff;
+}
+
+.dark-mode .home-services-book-btn,
+.dark-mode .home-services-plus-btn {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.dark-mode .home-services-book-btn:hover,
+.dark-mode .home-services-plus-btn:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.dark-mode .home-service-card {
+  background-color: #1a1a1a;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .home-service-card:hover {
+  background-color: #2a2a2a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .home-service-description {
+  color: #b0b0b0;
+}
+
+.dark-mode .home-about-section {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-section-title,
+.dark-mode .home-section-description {
+  color: #ffffff;
+}
+
+.dark-mode .home-gallery-section {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-testimonials-section {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-testimonial-card {
+  background-color: #1a1a1a;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .home-testimonial-card:hover {
+  background-color: #2a2a2a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .home-testimonial-name,
+.dark-mode .home-testimonial-text {
+  color: #ffffff;
+}
+
+.dark-mode .home-faq-section {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-faq-title {
+  color: #ffffff;
+}
+
+.dark-mode .home-faq-item {
+  background-color: #1a1a1a;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .home-faq-item:hover,
+.dark-mode .home-faq-item.faq-item-open {
+  background-color: #2a2a2a;
+}
+
+.dark-mode .home-faq-question-text {
+  color: #ffffff;
+}
+
+.dark-mode .home-faq-answer,
+.dark-mode .home-faq-answer p {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .home-faq-bullet-list li {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .home-faq-bullet-label {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-features-banner {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 50%, #0a0a0a 100%);
+}
+
+.dark-mode .home-feature-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .home-feature-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .home-red-banner {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .home-red-banner-text,
+.dark-mode .home-red-banner-star {
+  color: #ffffff;
+}
+
+.dark-mode .home-dark-banner {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-dark-banner-text,
+.dark-mode .home-dark-banner-star {
+  color: #ffffff;
+}
+
+.dark-mode p,
+.dark-mode span,
+.dark-mode div,
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: #ffffff;
+}
+
+.dark-mode .home-left-section p,
+.dark-mode .home-left-section span,
+.dark-mode .home-left-section div,
+.dark-mode .home-left-section h1,
+.dark-mode .home-left-section h2,
+.dark-mode .home-left-section h3,
+.dark-mode .home-left-section h4,
+.dark-mode .home-left-section h5,
+.dark-mode .home-left-section h6 {
+  color: #ffffff;
+}
+
+.dark-mode .home-main-content {
+  background-color: #0a0a0a !important;
+  color: #ffffff;
+}
+
+.dark-mode .home-page-container {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-detailing-section {
+  background-color: #0a0a0a !important;
+}
+
+.dark-mode .home-detailing-title,
+.dark-mode .home-detailing-text {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-book-online-section {
+  background-color: #0a0a0a !important;
+}
+
+.dark-mode .home-book-online-title,
+.dark-mode .home-book-online-subtitle {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-book-online-step-card {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .home-book-online-step-card:hover {
+  background-color: #2a2a2a !important;
+  border-color: #1e3a8a !important;
+}
+
+.dark-mode .home-book-online-step-number,
+.dark-mode .home-book-online-step-title,
+.dark-mode .home-book-online-step-description {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-book-online-step-card:hover .home-book-online-step-number,
+.dark-mode .home-book-online-step-card:hover .home-book-online-step-title,
+.dark-mode .home-book-online-step-card:hover .home-book-online-step-description {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-red-banner-section,
+.dark-mode .home-dark-banner-section {
+  background-color: #0a0a0a !important;
+}
+
+.dark-mode .home-red-banner-container,
+.dark-mode .home-dark-banner-container {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-page-content-wrapper {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-page-header {
+  background-color: #0a0a0a;
+}
+
+.dark-mode .home-packages-section {
+  background-color: #0a0a0a !important;
+}
+
+.dark-mode .home-packages-title,
+.dark-mode .home-packages-subtitle {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-packages-title-red {
+  color: #1e3a8a;
+}
+
+.dark-mode .home-package-card {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .home-package-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .home-package-price,
+.dark-mode .home-package-name,
+.dark-mode .home-package-features-title {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-package-price-suffix {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .home-package-feature-item {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-package-x-icon {
+  color: #ffffff !important;
+}
+
+.dark-mode .home-package-book-btn {
+  background-color: #1e3a8a !important;
+  color: #ffffff !important;
+}
+
+.dark-mode .home-package-book-btn:hover {
+  background-color: #0f172a !important;
+}
+

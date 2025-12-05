@@ -423,6 +423,46 @@
   height: 24px;
 }
 
+.gallery-lightbox-prev,
+.gallery-lightbox-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  z-index: 2001;
+}
+
+.gallery-lightbox-prev {
+  left: -70px;
+}
+
+.gallery-lightbox-next {
+  right: -70px;
+}
+
+.gallery-lightbox-prev:hover,
+.gallery-lightbox-next:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #1e3a8a;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-lightbox-prev svg,
+.gallery-lightbox-next svg {
+  width: 24px;
+  height: 24px;
+}
+
 .gallery-lightbox-image {
   max-width: 100%;
   max-height: 75vh;
@@ -458,6 +498,26 @@
   }
 
   .gallery-lightbox-close svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .gallery-lightbox-prev,
+  .gallery-lightbox-next {
+    width: 40px;
+    height: 40px;
+  }
+
+  .gallery-lightbox-prev {
+    left: 10px;
+  }
+
+  .gallery-lightbox-next {
+    right: 10px;
+  }
+
+  .gallery-lightbox-prev svg,
+  .gallery-lightbox-next svg {
     width: 20px;
     height: 20px;
   }
@@ -643,5 +703,46 @@
   .page-heading-section {
     margin-top: 0;
   }
+}
+
+.dark-mode .gallery-page {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .gallery-navbar {
+  background: rgba(26, 26, 26, 0.95);
+}
+
+.dark-mode .navbar-link {
+  color: #e5e5e5;
+}
+
+.dark-mode .navbar-link:hover {
+  color: #1e3a8a;
+  background-color: rgba(30, 58, 138, 0.1);
+}
+
+.dark-mode .gallery-header {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+}
+
+.dark-mode .gallery-title {
+  color: #e5e5e5;
+}
+
+.dark-mode .gallery-description {
+  color: #b0b0b0;
+}
+
+.dark-mode .gallery-section {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .gallery-card {
+  background-color: #2a2a2a;
+}
+
+.dark-mode .gallery-card-image-wrapper {
+  background-color: #1a1a1a;
 }
 
