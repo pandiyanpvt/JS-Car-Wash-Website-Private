@@ -22,6 +22,7 @@ function ProductPage() {
   const { isAuthenticated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'stock'>('name')
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
 
@@ -134,13 +135,29 @@ function ProductPage() {
   }, [products])
 
   const filteredProducts = useMemo(() => {
-    return products.filter(product => {
+    let filtered = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory
       return matchesSearch && matchesCategory
     })
-  }, [products, searchQuery, selectedCategory])
+
+    filtered = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return a.price - b.price
+        case 'price-high':
+          return b.price - a.price
+        case 'stock':
+          return b.stock - a.stock
+        case 'name':
+        default:
+          return a.name.localeCompare(b.name)
+      }
+    })
+
+    return filtered
+  }, [products, searchQuery, selectedCategory, sortBy])
 
   const handleAddToCart = useCallback((product: Product) => {
     if (!isAuthenticated) {
@@ -173,36 +190,50 @@ function ProductPage() {
       {/* Search Bar Section - Below Navbar */}
       <div className="product-search-section">
         <div className="product-search-wrapper">
-          <div className="product-search-container">
-            <input
-              type="text"
-              className="product-search-input"
-              placeholder="Search your product..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button className="product-search-icon-btn" aria-label="Search">
-              <i className="fas fa-search"></i>
-            </button>
-          </div>
-          
-          {/* Category Filter */}
-          <div className="product-category-filter">
-            <button
-              className={`category-filter-btn ${selectedCategory === 'All' ? 'active' : ''}`}
-              onClick={() => setSelectedCategory('All')}
-            >
-              All
-            </button>
-            {categories.map(category => (
-              <button
-                key={category}
-                className={`category-filter-btn ${selectedCategory === category ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
+          <div className="product-search-row">
+            <div className="product-search-container">
+              <input
+                type="text"
+                className="product-search-input"
+                placeholder="Search your product..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="product-search-icon-btn" aria-label="Search">
+                <i className="fas fa-search"></i>
               </button>
-            ))}
+            </div>
+            
+            <div className="product-category-filter">
+              <button
+                className={`category-filter-btn ${selectedCategory === 'All' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('All')}
+              >
+                All
+              </button>
+              {categories.map(category => (
+                <button
+                  key={category}
+                  className={`category-filter-btn ${selectedCategory === category ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <div className="product-filter-options">
+              <select
+                className="product-filter-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'name' | 'price-low' | 'price-high' | 'stock')}
+              >
+                <option value="name">Sort by Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="stock">Stock: High to Low</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

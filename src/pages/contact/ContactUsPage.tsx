@@ -135,7 +135,7 @@ function ContactUsPage() {
               <div className="branch-info">
                 <div className="branch-address">
                   <i className="fas fa-map-marker-alt"></i>
-                  <span>Portico Plaza Shop Ground Floor Parking, 17-19 Aurelia Street, Portico Plaza Shopping Centre, Car park entrance Cornelia RD, Junia Ave, Toongabbie NSW 2146, Australia</span>
+                  <span>PORTICO PLAZA, 17-19 Aurleia St, Toongabbie NSW 2146</span>
                 </div>
                 <div className="branch-actions">
                   <a
