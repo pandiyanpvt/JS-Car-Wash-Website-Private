@@ -54,9 +54,31 @@ function BookingPage() {
   const [packageStep, setPackageStep] = useState(0) // For handling multiple package selections
 
   // Form data
-  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null)
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(() => {
+    // Load selected branch from localStorage on mount
+    try {
+      const stored = localStorage.getItem('selectedBranch')
+      if (stored) {
+        return JSON.parse(stored)
+      }
+    } catch (error) {
+      console.error('Failed to load selected branch from localStorage:', error)
+    }
+    return null
+  })
   const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(null)
+  const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(() => {
+    // Load selected vehicle model from localStorage on mount
+    try {
+      const stored = localStorage.getItem('selectedVehicleModel')
+      if (stored) {
+        return JSON.parse(stored)
+      }
+    } catch (error) {
+      console.error('Failed to load selected vehicle model from localStorage:', error)
+    }
+    return null
+  })
   const [carNumber, setCarNumber] = useState('')
   const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
   const [selectedExtras, setSelectedExtras] = useState<string[]>([])
@@ -255,6 +277,12 @@ function BookingPage() {
   // Handle vehicle model selection
   const handleVehicleModelSelect = (model: VehicleModel) => {
     setSelectedVehicleModel(model)
+    // Save selected vehicle model to localStorage
+    try {
+      localStorage.setItem('selectedVehicleModel', JSON.stringify(model))
+    } catch (error) {
+      console.error('Failed to save selected vehicle model to localStorage:', error)
+    }
   }
 
   // Handle package selection
@@ -437,7 +465,15 @@ function BookingPage() {
                         <button
                           key={branch.id}
                           className={`booking-branch-btn ${selectedBranch?.id === branch.id ? 'active' : ''}`}
-                          onClick={() => setSelectedBranch(branch)}
+                          onClick={() => {
+                            setSelectedBranch(branch)
+                            // Save selected branch to localStorage
+                            try {
+                              localStorage.setItem('selectedBranch', JSON.stringify(branch))
+                            } catch (error) {
+                              console.error('Failed to save selected branch to localStorage:', error)
+                            }
+                          }}
                         >
                           {branch.name}
                         </button>

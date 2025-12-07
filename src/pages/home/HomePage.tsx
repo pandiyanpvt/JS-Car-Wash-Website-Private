@@ -16,6 +16,29 @@ function HomePage({}: HomePageProps) {
   const [isClosing, setIsClosing] = useState(false)
   const [faqClickedIndex, setFaqClickedIndex] = useState<number | null>(null)
   const [showNavbar, setShowNavbar] = useState(false)
+  const [selectedModel, setSelectedModel] = useState<string | null>(() => {
+    // Load selected model from localStorage on mount
+    try {
+      const stored = localStorage.getItem('selectedCarModel')
+      return stored ? stored : null
+    } catch {
+      return null
+    }
+  })
+  const [selectedBranch, setSelectedBranch] = useState<{ name: string; subtitle: string } | null>(() => {
+    // Load selected branch from localStorage on mount
+    try {
+      const stored = localStorage.getItem('selectedBranch')
+      if (stored) {
+        const branch = JSON.parse(stored)
+        return { name: branch.name || branch.subtitle || '', subtitle: branch.subtitle || '' }
+      }
+    } catch (error) {
+      console.error('Failed to load selected branch from localStorage:', error)
+    }
+    return null
+  })
+  const [showVideo, setShowVideo] = useState(false)
   const headerContainerRef = useRef<HTMLDivElement>(null)
   const pageContainerRef = useRef<HTMLDivElement>(null)
   const [containerPosition, setContainerPosition] = useState({ top: 0, left: 0, width: 0, height: 0 })
@@ -33,8 +56,8 @@ function HomePage({}: HomePageProps) {
     },
     {
       name: 'JS CAR WASH',
-      subtitle: 'SERVICE DUBBO',
-      address: '66-72 Windsor parade, Dubbo, 2830, NSW',
+      subtitle: 'SERVICE SYDNEY',
+      address: '123 Main Street, Sydney, 2000, NSW',
       mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
     }
   ], [])
@@ -70,6 +93,66 @@ function HomePage({}: HomePageProps) {
   const isDropdownItemActive = useCallback((href: string) => {
     return location.pathname === href
   }, [location.pathname])
+
+  // Model to head image mapping
+  const modelHeadImageMap: { [key: string]: string } = useMemo(() => ({
+    'SEDAN': '/JS Car Wash Images/sedanhead.png',
+    'X-LARGE': '/JS Car Wash Images/X-Largehead.png',
+    'SUV': '/JS Car Wash Images/suvhead.png',
+    'HATCHBACK': '/JS Car Wash Images/hatchbackhead.png',
+    'WAGON': '/JS Car Wash Images/wagonhead.png',
+    'SPORT': '/JS Car Wash Images/sporthead.png'
+  }), [])
+
+  // Model to video mapping - dummy video URLs for each model
+  const modelVideoMap: { [key: string]: { url: string; title: string; coverImage: string } } = useMemo(() => ({
+    'SEDAN': { 
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+      title: 'Sedan Car Wash Video',
+      coverImage: '/JS Car Wash Images/Sedan.png'
+    },
+    'X-LARGE': { 
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+      title: 'X-Large Car Wash Video',
+      coverImage: '/JS Car Wash Images/X-Large.png'
+    },
+    'SUV': { 
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+      title: 'SUV Car Wash Video',
+      coverImage: '/JS Car Wash Images/Suv.png'
+    },
+    'HATCHBACK': { 
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+      title: 'Hatchback Car Wash Video',
+      coverImage: '/JS Car Wash Images/Hatchback.png'
+    },
+    'WAGON': { 
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+      title: 'Wagon Car Wash Video',
+      coverImage: '/JS Car Wash Images/Wagon.png'
+    },
+    'SPORT': { 
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+      title: 'Sport Car Wash Video',
+      coverImage: '/JS Car Wash Images/Sports.png'
+    }
+  }), [])
+
+  // Get video source based on selected model
+  const videoData = useMemo(() => {
+    if (selectedModel && modelVideoMap[selectedModel]) {
+      return modelVideoMap[selectedModel]
+    }
+    return { url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', title: 'Car Wash Video', coverImage: '/JS Car Wash Images/kindpng_4272437.png' }
+  }, [selectedModel, modelVideoMap])
+
+  // Get car image source based on selected model
+  const carImageSrc = useMemo(() => {
+    if (selectedModel && modelHeadImageMap[selectedModel]) {
+      return modelHeadImageMap[selectedModel]
+    }
+    return '/JS Car Wash Images/kindpng_4272437.png'
+  }, [selectedModel, modelHeadImageMap])
 
   const handleNavClick = useCallback((href: string, e?: React.MouseEvent) => {
     if (e) {
@@ -284,6 +367,43 @@ function HomePage({}: HomePageProps) {
     }
   }, [modelsShow])
 
+  // Save selected model to localStorage whenever it changes
+  useEffect(() => {
+    if (selectedModel) {
+      try {
+        localStorage.setItem('selectedCarModel', selectedModel)
+      } catch (error) {
+        console.error('Failed to save selected model to localStorage:', error)
+      }
+    }
+    // Close video when model changes
+    setShowVideo(false)
+  }, [selectedModel])
+
+  // Handle full-screen video modal
+  useEffect(() => {
+    if (showVideo) {
+      // Prevent body scroll when video is open
+      document.body.style.overflow = 'hidden'
+      
+      // Handle ESC key to close video
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setShowVideo(false)
+        }
+      }
+      
+      window.addEventListener('keydown', handleEscape)
+      
+      return () => {
+        document.body.style.overflow = 'unset'
+        window.removeEventListener('keydown', handleEscape)
+      }
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showVideo])
+
   const handleDiscoverModels = () => {
     if (headerContainerRef.current) {
       const rect = headerContainerRef.current.getBoundingClientRect()
@@ -300,7 +420,7 @@ function HomePage({}: HomePageProps) {
         // Reduced wait time for faster response
         setTimeout(() => {
           setModelsShow(true)
-        }, 300) // Faster response time
+        }, 150) // Faster response time
       } else {
         // Already visible, show overlay immediately
         setModelsShow(true)
@@ -496,6 +616,33 @@ function HomePage({}: HomePageProps) {
             <div className="header-left-section">
             </div>
 
+            {/* Centered Logo */}
+            <div className="header-center-logo">
+              <img
+                src="/JS Car Wash Images/cropped-fghfthgf.png"
+                alt="JS Car Wash Logo"
+                className="header-center-logo-img"
+              />
+              <h1 className="header-js-text">JS</h1>
+              <h2 className="header-car-wash-text">CAR WASH & DETAILING</h2>
+            </div>
+
+            {/* Car Image - Centered in Header */}
+            <motion.div
+              key={selectedModel || 'default'}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.1, delay: 0.08 }}
+              className="car-image-wrapper header-car-image"
+            >
+              <img
+                src={carImageSrc}
+                alt="Car"
+                className="car-image"
+                loading="lazy"
+              />
+            </motion.div>
+
             {/* Right 50% - Dark Background with Red Line */}
             <div className="header-right-section">
               <div className="header-red-line"></div>
@@ -539,53 +686,6 @@ function HomePage({}: HomePageProps) {
 
           {/* Main Content */}
           <div className="home-main-content">
-            {/* Logo */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="logo-wrapper">
-                <img
-                  src="/JS Car Wash Images/cropped-fghfthgf.png"
-                  alt="Logo"
-                  className="logo-img"
-                />
-              </div>
-            </motion.div>
-
-            {/* JS Text */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <h1 className="js-text">JS</h1>
-            </motion.div>
-
-            {/* CAR WASH & DETAILING Text */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <h2 className="car-wash-text">CAR WASH & DETAILING</h2>
-            </motion.div>
-
-            {/* Car Image */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.4 }}
-              className="car-image-wrapper"
-            >
-              <img
-                src="/JS Car Wash Images/kindpng_4272437.png"
-                alt="Car"
-                className="car-image"
-                loading="lazy"
-              />
-            </motion.div>
 
             {/* BOOK NOW Button */}
             <motion.div
@@ -602,9 +702,6 @@ function HomePage({}: HomePageProps) {
         <div className="home-right-section">
           <div className="right-section-wrapper">
             <div className="right-section-content">
-              {/* Red Vertical Line */}
-              <div className="red-vertical-line"></div>
-
               {/* Top Content */}
               <div className="right-top-content">
                   {/* Headline */}
@@ -615,7 +712,7 @@ function HomePage({}: HomePageProps) {
                   >
                     <div className="headline-wrapper">
                       <div className="headline-bar"></div>
-                      <h3 className="headline-text">SHINEUP YOUR CAR TO NEXT LEVEL</h3>
+                      <h3 className="headline-text">SHINE UP YOUR CAR TO NEXT LEVEL</h3>
                     </div>
                   </motion.div>
 
@@ -638,7 +735,17 @@ function HomePage({}: HomePageProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
                   >
-                    <div className="video-player">
+                    <div 
+                      className="video-player"
+                      onClick={() => setShowVideo(true)}
+                      style={{
+                        backgroundImage: `url(${videoData.coverImage})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                      }}
+                    >
+                      <div className="video-overlay"></div>
                       <div className="play-button">
                         <svg className="play-icon" viewBox="0 0 24 24" fill="currentColor">
                           <path d={getIconSVG('play')} />
@@ -648,19 +755,25 @@ function HomePage({}: HomePageProps) {
                     </div>
                   </motion.div>
 
-                  {/* Configure Link */}
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                  >
-                    <div className="configure-link">
-                      <span className="configure-text">CONFIGURE YOUR SEDAN</span>
-                      <svg className="arrow-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d={getIconSVG('arrowForward')} />
-                      </svg>
-                    </div>
-                  </motion.div>
+                  {/* Selected Branch Name */}
+                  {selectedBranch && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.5 }}
+                      className="selected-branch-wrapper"
+                    >
+                      <div className="selected-branch-content">
+                        <svg className="selected-branch-location-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                        </svg>
+                        <p className="selected-branch-text">
+                          {selectedBranch.subtitle || selectedBranch.name}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+
                 </div>
 
                 {/* Bottom Pagination - Centered */}
@@ -693,7 +806,7 @@ function HomePage({}: HomePageProps) {
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
             style={{
               position: 'absolute',
               top: `${containerPosition.top}px`,
@@ -719,7 +832,7 @@ function HomePage({}: HomePageProps) {
                     setTimeout(() => {
                       setModelsShow(false)
                       setIsClosing(false)
-                    }, 600)
+                    }, 300)
                   }}
                   aria-label="Close models"
                 >
@@ -748,8 +861,19 @@ function HomePage({}: HomePageProps) {
                     animate={isClosing ? { opacity: 0 } : { opacity: 1 }}
                     transition={{ 
                       duration: 0.3, 
-                      delay: isClosing ? (5 - index) * 0.1 : index * 0.15
+                      delay: 0
                     }}
+                    onClick={() => {
+                      setSelectedModel(model.name)
+                      // Save selected model to localStorage
+                      try {
+                        localStorage.setItem('selectedCarModel', model.name)
+                      } catch (error) {
+                        console.error('Failed to save selected model to localStorage:', error)
+                      }
+                      setModelsShow(false)
+                    }}
+                    style={{ cursor: 'pointer' }}
                   >
                     <motion.div 
                       className="modelshow-model-image"
@@ -757,7 +881,7 @@ function HomePage({}: HomePageProps) {
                       animate={isClosing ? { opacity: 0, x: '-100%' } : { opacity: 1, x: 0 }}
                       transition={{ 
                         duration: 0.8, 
-                        delay: isClosing ? (5 - index) * 0.1 : index * 0.15,
+                        delay: 0,
                         ease: [0.25, 0.1, 0.25, 1]
                       }}
                     >
@@ -770,6 +894,51 @@ function HomePage({}: HomePageProps) {
               </div>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Full Screen Video Modal */}
+      <AnimatePresence>
+        {showVideo && (
+          <>
+            <motion.div
+              className="video-fullscreen-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => setShowVideo(false)}
+            />
+            <motion.div
+              className="video-fullscreen-container"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ 
+                duration: 0.4,
+                ease: [0.25, 0.1, 0.25, 1]
+              }}
+            >
+              <button
+                className="video-fullscreen-close-btn"
+                onClick={() => setShowVideo(false)}
+                aria-label="Close video"
+              >
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <div className="video-fullscreen-wrapper">
+                <iframe
+                  src={videoData.url}
+                  title={videoData.title}
+                  className="video-fullscreen-iframe"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -801,7 +970,7 @@ function HomePage({}: HomePageProps) {
               {/* Header with Title */}
               <div className="dealersshow-header">
                 <div className="dealersshow-nav-row">
-                  <h1 className="dealersshow-title">FIND YOUR DEALER</h1>
+                  <h1 className="dealersshow-title">Our branchers</h1>
                   <button
                     className="dealersshow-close-btn"
                     onClick={() => setDealersShow(false)}
@@ -817,7 +986,10 @@ function HomePage({}: HomePageProps) {
             {/* Dealers Content */}
             <div className="dealersshow-content">
               {branches.map((branch, index) => (
-                <div key={index} className="dealersshow-branch-item">
+                <div 
+                  key={index} 
+                  className={`dealersshow-branch-item ${selectedBranch?.subtitle === branch.subtitle ? 'selected' : ''}`}
+                >
                   {/* Branch Title */}
                   <h3 className="dealersshow-branch-title">BRANCH {index + 1}</h3>
 
@@ -836,29 +1008,41 @@ function HomePage({}: HomePageProps) {
                     ></iframe>
                   </div>
 
-                  {/* Dealer Info */}
-                  <div className="dealersshow-dealer-info">
-                    <h2 className="dealersshow-dealer-name">{branch.name}</h2>
-                    <p className="dealersshow-dealer-subtitle">{branch.subtitle}</p>
-                    <div className="dealersshow-dealer-address">
-                      <svg className="location-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
-                      </svg>
-                      <p className="dealersshow-address-text">
-                        {branch.address.split(', ').map((line, idx, array) => (
-                          <span key={idx}>
-                            {line}
-                            {idx < array.length - 1 && <br />}
-                          </span>
-                        ))}
-                      </p>
-                    </div>
-                  </div>
-
                   {/* Action Buttons */}
                   <div className="dealersshow-actions">
-                    <button className="dealersshow-action-btn primary">GET DIRECTIONS</button>
-                    <button className="dealersshow-action-btn secondary">REQUEST CALLBACK</button>
+                    <button 
+                      className="dealersshow-action-btn select-btn"
+                      onClick={() => {
+                        setSelectedBranch({ name: branch.name, subtitle: branch.subtitle })
+                        // Save selected branch to localStorage
+                        try {
+                          localStorage.setItem('selectedBranch', JSON.stringify(branch))
+                        } catch (error) {
+                          console.error('Failed to save selected branch to localStorage:', error)
+                        }
+                        setDealersShow(false)
+                      }}
+                    >
+                      SELECT
+                    </button>
+                    <button 
+                      className="dealersshow-action-btn primary"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        window.open(`https://www.google.com/maps?q=${encodeURIComponent(branch.address)}`, '_blank')
+                      }}
+                    >
+                      GET DIRECTIONS
+                    </button>
+                    <button 
+                      className="dealersshow-action-btn secondary"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // Handle callback request
+                      }}
+                    >
+                      REQUEST CALLBACK
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1014,10 +1198,6 @@ function HomePage({}: HomePageProps) {
                 Review your booking details and confirm your appointment.
               </p>
             </div>
-          </div>
-
-          <div className="home-book-online-actions">
-            <button className="book-now-btn" onClick={() => navigate('/booking')}>BOOK NOW</button>
           </div>
         </div>
       </section>
