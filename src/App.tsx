@@ -14,7 +14,6 @@ import CheckoutPage from './pages/checkout/CheckoutPage'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import CartSidebar from './components/cart/CartSidebar'
-import ThemeToggle from './components/theme/ThemeToggle'
 import './styles/index.css'
 
 function App() {
@@ -55,7 +54,6 @@ function App() {
         </Routes>
         <ScrollToTop />
         <CartSidebar />
-        <ThemeToggle />
       </div>
     </BrowserRouter>
   )

@@ -1,10 +1,9 @@
 .theme-toggle-button {
   position: fixed;
   right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 50px;
-  height: 50px;
+  top: 80px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
   border: none;
@@ -20,12 +19,12 @@
 }
 
 .theme-toggle-button:hover {
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
 }
 
 .theme-toggle-button:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 
 .dark-mode .theme-toggle-button {
@@ -39,10 +38,18 @@
 
 @media (max-width: 768px) {
   .theme-toggle-button {
-    width: 45px;
-    height: 45px;
+    width: 44px;
+    height: 44px;
     font-size: 1.125rem;
-    right: 15px;
+    right: 16px;
+    top: 70px;
+  }
+}
+
+@media (min-width: 960px) {
+  .theme-toggle-button {
+    top: 90px;
+    right: 24px;
   }
 }
 
