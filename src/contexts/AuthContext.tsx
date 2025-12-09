@@ -1,13 +1,27 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { authApi } from '../services/api'
 
 export interface User {
-  id: string
+  id: number
   firstName: string
   lastName: string
   userName: string
   email: string
   phone: string
+  isVerified: boolean
+  verifiedAt: string | null
+  userRoleId: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+  role?: {
+    id: number
+    roleName: string
+    isActive: boolean
+    createdAt: string
+    updatedAt: string
+  }
 }
 
 export interface Order {
@@ -39,7 +53,7 @@ export interface Review {
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<boolean>
+  login: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>
   signup: (userData: {
     firstName: string
     lastName: string
@@ -47,7 +61,10 @@ interface AuthContextType {
     email: string
     phone: string
     password: string
-  }) => Promise<boolean>
+  }) => Promise<{ success: boolean; error?: string }>
+  verifyEmail: (email: string, otp: string) => Promise<{ success: boolean; error?: string }>
+  forgotPassword: (email: string) => Promise<{ success: boolean; error?: string }>
+  resetPassword: (email: string, otp: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   orders: Order[]
   addOrder: (order: Order) => void
@@ -64,13 +81,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
+    const savedToken = localStorage.getItem('token')
     const savedOrders = localStorage.getItem('orders')
     const savedReviews = localStorage.getItem('reviews')
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
+    
+    if (savedUser && savedToken) {
+      try {
+        setUser(JSON.parse(savedUser))
+      } catch (error) {
+        console.error('Error parsing saved user:', error)
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
+      }
     }
+    
     if (savedOrders) {
-      setOrders(JSON.parse(savedOrders))
+      try {
+        setOrders(JSON.parse(savedOrders))
+      } catch (error) {
+        console.error('Error parsing saved orders:', error)
+      }
     } else {
       const dummyOrders: Order[] = [
         {
@@ -100,30 +130,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setOrders(dummyOrders)
       localStorage.setItem('orders', JSON.stringify(dummyOrders))
     }
+    
     if (savedReviews) {
-      setReviews(JSON.parse(savedReviews))
+      try {
+        setReviews(JSON.parse(savedReviews))
+      } catch (error) {
+        console.error('Error parsing saved reviews:', error)
+      }
     }
   }, [])
 
-  const login = async (_email: string, _password: string): Promise<boolean> => {
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
-      const user = JSON.parse(savedUser)
-      setUser(user)
-      return true
+  const login = async (identifier: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await authApi.login({ identifier, password })
+      
+      if (response.success && response.data) {
+        const { token, user: apiUser } = response.data
+        
+        const user: User = {
+          id: apiUser.id,
+          firstName: apiUser.first_name,
+          lastName: apiUser.last_name,
+          userName: apiUser.user_name,
+          email: apiUser.email_address,
+          phone: apiUser.phone_number,
+          isVerified: apiUser.is_verified,
+          verifiedAt: apiUser.verified_at,
+          userRoleId: apiUser.user_role_id,
+          isActive: apiUser.is_active,
+          createdAt: apiUser.createdAt,
+          updatedAt: apiUser.updatedAt,
+          role: apiUser.role ? {
+            id: apiUser.role.id,
+            roleName: apiUser.role.role_name,
+            isActive: apiUser.role.is_active,
+            createdAt: apiUser.role.createdAt,
+            updatedAt: apiUser.role.updatedAt
+          } : undefined
+        }
+        
+        setUser(user)
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+        
+        return { success: true }
+      }
+      
+      return { success: false, error: response.message || 'Login failed' }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred during login'
+      return { success: false, error: errorMessage }
     }
-    
-    const demoUser: User = {
-      id: '1',
-      firstName: 'Demo',
-      lastName: 'User',
-      userName: 'demouser',
-      email: 'demo@example.com',
-      phone: '+1234567890'
-    }
-    setUser(demoUser)
-    localStorage.setItem('user', JSON.stringify(demoUser))
-    return true
   }
 
   const signup = async (userData: {
@@ -133,36 +190,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string
     phone: string
     password: string
-  }): Promise<boolean> => {
-    const savedUsers = localStorage.getItem('users') || '[]'
-    const users = JSON.parse(savedUsers)
-    
-    const userExists = users.some((u: User & { password: string }) => 
-      u.email === userData.email || u.userName === userData.userName
-    )
-    
-    if (userExists) {
-      return false
+  }): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await authApi.register({
+        email_address: userData.email,
+        phone_number: userData.phone,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        user_name: userData.userName,
+        password: userData.password,
+        user_role_id: 3
+      })
+      
+      if (response.success) {
+        return { success: true }
+      }
+      
+      return { success: false, error: response.message || 'Registration failed' }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred during registration'
+      return { success: false, error: errorMessage }
     }
+  }
 
-    const newUser = {
-      id: Date.now().toString(),
-      ...userData
+  const verifyEmail = async (email: string, otp: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await authApi.verifyEmail({
+        email_address: email,
+        otp
+      })
+      
+      if (response.success) {
+        return { success: true }
+      }
+      
+      return { success: false, error: response.message || 'Email verification failed' }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred during email verification'
+      return { success: false, error: errorMessage }
     }
-    
-    users.push(newUser)
-    localStorage.setItem('users', JSON.stringify(users))
-    
-    const { password: _, ...userWithoutPassword } = newUser
-    setUser(userWithoutPassword)
-    localStorage.setItem('user', JSON.stringify(userWithoutPassword))
-    
-    return true
+  }
+
+  const forgotPassword = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await authApi.forgotPassword({
+        email_address: email
+      })
+      
+      if (response.success) {
+        return { success: true }
+      }
+      
+      return { success: false, error: response.message || 'Failed to send reset password email' }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      return { success: false, error: errorMessage }
+    }
+  }
+
+  const resetPassword = async (email: string, otp: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await authApi.resetPassword({
+        email_address: email,
+        otp,
+        password
+      })
+      
+      if (response.success) {
+        return { success: true }
+      }
+      
+      return { success: false, error: response.message || 'Password reset failed' }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred during password reset'
+      return { success: false, error: errorMessage }
+    }
   }
 
   const logout = () => {
     setUser(null)
     localStorage.removeItem('user')
+    localStorage.removeItem('token')
   }
 
   const addOrder = (order: Order) => {
@@ -184,6 +292,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         signup,
+        verifyEmail,
+        forgotPassword,
+        resetPassword,
         logout,
         orders,
         addOrder,

@@ -1,14 +1,27 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import './LoginPage.css'
 import '../products/ProductPage.css'
 
 function LoginPage() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { login, signup, verifyEmail, forgotPassword, resetPassword } = useAuth()
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('')
+  const [resetPasswordEmail, setResetPasswordEmail] = useState('')
+  const [resetPasswordOtp, setResetPasswordOtp] = useState('')
+  const [resetPasswordNewPassword, setResetPasswordNewPassword] = useState('')
+  const [resetPasswordConfirmPassword, setResetPasswordConfirmPassword] = useState('')
+  const [verificationEmail, setVerificationEmail] = useState('')
+  const [verificationOtp, setVerificationOtp] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
 
@@ -100,49 +113,134 @@ function LoginPage() {
     }
   }, [location])
 
-  // Sign In Form State
   const [signInEmail, setSignInEmail] = useState('')
   const [signInPassword, setSignInPassword] = useState('')
 
-  // Sign Up Form State
-  const [signUpName, setSignUpName] = useState('')
+  const [signUpFirstName, setSignUpFirstName] = useState('')
+  const [signUpLastName, setSignUpLastName] = useState('')
+  const [signUpUserName, setSignUpUserName] = useState('')
   const [signUpEmail, setSignUpEmail] = useState('')
   const [signUpPassword, setSignUpPassword] = useState('')
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('')
   const [signUpPhone, setSignUpPhone] = useState('')
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle sign in logic here
-    console.log('Sign In:', { email: signInEmail, password: signInPassword })
-    // Navigate to home or dashboard after successful login
-    // navigate('/')
+    setError('')
+    setLoading(true)
+    
+    const result = await login(signInEmail, signInPassword)
+    
+    if (result.success) {
+      navigate('/')
+    } else {
+      setError(result.error || 'Login failed. Please check your credentials.')
+    }
+    
+    setLoading(false)
   }
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle sign up logic here
+    setError('')
+    
     if (signUpPassword !== signUpConfirmPassword) {
-      alert('Passwords do not match!')
+      setError('Passwords do not match!')
       return
     }
-    console.log('Sign Up:', {
-      name: signUpName,
+    
+    setLoading(true)
+    
+    const result = await signup({
+      firstName: signUpFirstName,
+      lastName: signUpLastName,
+      userName: signUpUserName,
       email: signUpEmail,
-      password: signUpPassword,
-      phone: signUpPhone
+      phone: signUpPhone,
+      password: signUpPassword
     })
-    // Navigate to home or dashboard after successful signup
-    // navigate('/')
+    
+    if (result.success) {
+      setVerificationEmail(signUpEmail)
+      setShowEmailVerification(true)
+      setSignUpFirstName('')
+      setSignUpLastName('')
+      setSignUpUserName('')
+      setSignUpPhone('')
+      setSignUpPassword('')
+      setSignUpConfirmPassword('')
+    } else {
+      setError(result.error || 'Registration failed. Please try again.')
+    }
+    
+    setLoading(false)
   }
 
-  const handleForgotPassword = (e: React.FormEvent) => {
+  const handleVerifyEmail = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle forgot password logic here
-    console.log('Forgot Password:', { email: forgotPasswordEmail })
-    alert('Password reset link has been sent to your email!')
-    setShowForgotPassword(false)
-    setForgotPasswordEmail('')
+    setError('')
+    setLoading(true)
+    
+    const result = await verifyEmail(verificationEmail, verificationOtp)
+    
+    if (result.success) {
+      setShowEmailVerification(false)
+      setVerificationEmail('')
+      setVerificationOtp('')
+      alert('Email verified successfully! You can now sign in.')
+      setActiveTab('signin')
+    } else {
+      setError(result.error || 'Verification failed. Please check your OTP.')
+    }
+    
+    setLoading(false)
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    
+    const result = await forgotPassword(forgotPasswordEmail)
+    
+    if (result.success) {
+      setResetPasswordEmail(forgotPasswordEmail)
+      setShowForgotPassword(false)
+      setShowResetPassword(true)
+      setForgotPasswordEmail('')
+    } else {
+      setError(result.error || 'Failed to send reset password email. Please try again.')
+    }
+    
+    setLoading(false)
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    
+    if (resetPasswordNewPassword !== resetPasswordConfirmPassword) {
+      setError('Passwords do not match!')
+      return
+    }
+    
+    setLoading(true)
+    
+    const result = await resetPassword(resetPasswordEmail, resetPasswordOtp, resetPasswordNewPassword)
+    
+    if (result.success) {
+      alert('Password reset successfully! You can now sign in with your new password.')
+      setShowResetPassword(false)
+      setResetPasswordEmail('')
+      setResetPasswordOtp('')
+      setResetPasswordNewPassword('')
+      setResetPasswordConfirmPassword('')
+      setActiveTab('signin')
+    } else {
+      setError(result.error || 'Password reset failed. Please check your OTP and try again.')
+    }
+    
+    setLoading(false)
   }
 
   return (
@@ -316,18 +414,23 @@ function LoginPage() {
         <div className="login-form-panel">
           <div className="login-container">
             <div className="login-content">
-          {/* Tabs - Hide when forgot password is shown */}
-          {!showForgotPassword && (
+          {!showForgotPassword && !showResetPassword && !showEmailVerification && (
             <div className="login-tabs">
               <button
                 className={`login-tab ${activeTab === 'signin' ? 'active' : ''}`}
-                onClick={() => setActiveTab('signin')}
+                onClick={() => {
+                  setActiveTab('signin')
+                  setError('')
+                }}
               >
                 Sign In
               </button>
               <button
                 className={`login-tab ${activeTab === 'signup' ? 'active' : ''}`}
-                onClick={() => setActiveTab('signup')}
+                onClick={() => {
+                  setActiveTab('signup')
+                  setError('')
+                }}
               >
                 Sign Up
               </button>
@@ -337,8 +440,160 @@ function LoginPage() {
           {/* Tab Content */}
           <div className="login-tab-content">
             <AnimatePresence mode="wait">
-              {/* Forgot Password Form */}
-              {showForgotPassword && (
+              {showResetPassword ? (
+                <motion.div
+                  key="reset-password"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="login-form-container"
+                >
+                  <h2 className="login-form-title">Reset Password</h2>
+                  <p className="login-form-subtitle">Enter the OTP sent to your email and your new password</p>
+                  
+                  {error && (
+                    <div className="login-error-message">
+                      <i className="fas fa-exclamation-circle"></i>
+                      {error}
+                    </div>
+                  )}
+                  
+                  <form onSubmit={handleResetPassword} className="login-form">
+                    <div className="login-form-group">
+                      <label htmlFor="reset-email">Email Address</label>
+                      <input
+                        type="email"
+                        id="reset-email"
+                        value={resetPasswordEmail}
+                        onChange={(e) => setResetPasswordEmail(e.target.value)}
+                        placeholder="Email Address"
+                        required
+                        disabled
+                      />
+                    </div>
+
+                    <div className="login-form-group">
+                      <label htmlFor="reset-otp">OTP *</label>
+                      <input
+                        type="text"
+                        id="reset-otp"
+                        value={resetPasswordOtp}
+                        onChange={(e) => setResetPasswordOtp(e.target.value)}
+                        placeholder="Enter OTP"
+                        required
+                      />
+                    </div>
+
+                    <div className="login-form-group">
+                      <label htmlFor="reset-new-password">New Password *</label>
+                      <input
+                        type="password"
+                        id="reset-new-password"
+                        value={resetPasswordNewPassword}
+                        onChange={(e) => setResetPasswordNewPassword(e.target.value)}
+                        placeholder="New Password"
+                        required
+                      />
+                    </div>
+
+                    <div className="login-form-group">
+                      <label htmlFor="reset-confirm-password">Confirm New Password *</label>
+                      <input
+                        type="password"
+                        id="reset-confirm-password"
+                        value={resetPasswordConfirmPassword}
+                        onChange={(e) => setResetPasswordConfirmPassword(e.target.value)}
+                        placeholder="Confirm New Password"
+                        required
+                      />
+                    </div>
+
+                    <button type="submit" className="login-submit-btn" disabled={loading}>
+                      {loading ? 'Resetting...' : 'Reset Password'}
+                    </button>
+
+                    <button 
+                      type="button" 
+                      className="login-back-btn"
+                      onClick={() => {
+                        setShowResetPassword(false)
+                        setShowForgotPassword(true)
+                        setResetPasswordEmail('')
+                        setResetPasswordOtp('')
+                        setResetPasswordNewPassword('')
+                        setResetPasswordConfirmPassword('')
+                        setError('')
+                      }}
+                    >
+                      Back
+                    </button>
+                  </form>
+                </motion.div>
+              ) : showEmailVerification ? (
+                <motion.div
+                  key="email-verification"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="login-form-container"
+                >
+                  <h2 className="login-form-title">Verify Email</h2>
+                  <p className="login-form-subtitle">Enter the OTP sent to your email address</p>
+                  
+                  {error && (
+                    <div className="login-error-message">
+                      <i className="fas fa-exclamation-circle"></i>
+                      {error}
+                    </div>
+                  )}
+                  
+                  <form onSubmit={handleVerifyEmail} className="login-form">
+                    <div className="login-form-group">
+                      <label htmlFor="verify-email">Email Address *</label>
+                      <input
+                        type="email"
+                        id="verify-email"
+                        value={verificationEmail}
+                        onChange={(e) => setVerificationEmail(e.target.value)}
+                        placeholder="Email Address"
+                        required
+                      />
+                    </div>
+
+                    <div className="login-form-group">
+                      <label htmlFor="verify-otp">OTP *</label>
+                      <input
+                        type="text"
+                        id="verify-otp"
+                        value={verificationOtp}
+                        onChange={(e) => setVerificationOtp(e.target.value)}
+                        placeholder="Enter OTP"
+                        required
+                      />
+                    </div>
+
+                    <button type="submit" className="login-submit-btn" disabled={loading}>
+                      {loading ? 'Verifying...' : 'Verify Email'}
+                    </button>
+
+                    <button 
+                      type="button" 
+                      className="login-back-btn"
+                      onClick={() => {
+                        setShowEmailVerification(false)
+                        setVerificationEmail('')
+                        setVerificationOtp('')
+                        setError('')
+                        setActiveTab('signup')
+                      }}
+                    >
+                      Back to Sign Up
+                    </button>
+                  </form>
+                </motion.div>
+              ) : showForgotPassword ? (
                 <motion.div
                   key="forgotpassword"
                   initial={{ opacity: 0, x: -20 }}
@@ -348,7 +603,14 @@ function LoginPage() {
                   className="login-form-container"
                 >
                   <h2 className="login-form-title">Forgot Password</h2>
-                  <p className="login-form-subtitle">Enter your email address and we'll send you a link to reset your password</p>
+                  <p className="login-form-subtitle">Enter your email address and we'll send you an OTP to reset your password</p>
+                  
+                  {error && (
+                    <div className="login-error-message">
+                      <i className="fas fa-exclamation-circle"></i>
+                      {error}
+                    </div>
+                  )}
                   
                   <form onSubmit={handleForgotPassword} className="login-form">
                     <div className="login-form-group">
@@ -363,8 +625,8 @@ function LoginPage() {
                       />
                     </div>
 
-                    <button type="submit" className="login-submit-btn">
-                      Send Reset Link
+                    <button type="submit" className="login-submit-btn" disabled={loading}>
+                      {loading ? 'Sending...' : 'Send OTP'}
                     </button>
 
                     <button 
@@ -376,10 +638,7 @@ function LoginPage() {
                     </button>
                   </form>
                 </motion.div>
-              )}
-
-              {/* Sign In Form */}
-              {!showForgotPassword && activeTab === 'signin' && (
+              ) : activeTab === 'signin' ? (
                 <motion.div
                   key="signin"
                   initial={{ opacity: 0, x: -20 }}
@@ -390,6 +649,13 @@ function LoginPage() {
                 >
                   <h2 className="login-form-title">Welcome Back</h2>
                   <p className="login-form-subtitle">Sign in to your account</p>
+                  
+                  {error && (
+                    <div className="login-error-message">
+                      <i className="fas fa-exclamation-circle"></i>
+                      {error}
+                    </div>
+                  )}
                   
                   <form onSubmit={handleSignIn} className="login-form">
                     <div className="login-form-group">
@@ -430,15 +696,12 @@ function LoginPage() {
                       </button>
                     </div>
 
-                    <button type="submit" className="login-submit-btn">
-                      Sign In
+                    <button type="submit" className="login-submit-btn" disabled={loading}>
+                      {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                   </form>
                 </motion.div>
-              )}
-
-              {/* Sign Up Form */}
-              {!showForgotPassword && activeTab === 'signup' && (
+              ) : (
                 <motion.div
                   key="signup"
                   initial={{ opacity: 0, x: -20 }}
@@ -450,21 +713,52 @@ function LoginPage() {
                   <h2 className="login-form-title">Create Account</h2>
                   <p className="login-form-subtitle">Sign up to get started</p>
                   
+                  {error && (
+                    <div className="login-error-message">
+                      <i className="fas fa-exclamation-circle"></i>
+                      {error}
+                    </div>
+                  )}
+                  
                   <form onSubmit={handleSignUp} className="login-form">
                     <div className="login-form-group">
-                      <label htmlFor="signup-name">Full Name</label>
+                      <label htmlFor="signup-username">User Name *</label>
                       <input
                         type="text"
-                        id="signup-name"
-                        value={signUpName}
-                        onChange={(e) => setSignUpName(e.target.value)}
-                        placeholder="Enter your full name"
+                        id="signup-username"
+                        value={signUpUserName}
+                        onChange={(e) => setSignUpUserName(e.target.value)}
+                        placeholder="Enter your username"
                         required
                       />
                     </div>
 
                     <div className="login-form-group">
-                      <label htmlFor="signup-email">Email Address</label>
+                      <label htmlFor="signup-firstname">First Name *</label>
+                      <input
+                        type="text"
+                        id="signup-firstname"
+                        value={signUpFirstName}
+                        onChange={(e) => setSignUpFirstName(e.target.value)}
+                        placeholder="Enter your first name"
+                        required
+                      />
+                    </div>
+
+                    <div className="login-form-group">
+                      <label htmlFor="signup-lastname">Last Name *</label>
+                      <input
+                        type="text"
+                        id="signup-lastname"
+                        value={signUpLastName}
+                        onChange={(e) => setSignUpLastName(e.target.value)}
+                        placeholder="Enter your last name"
+                        required
+                      />
+                    </div>
+
+                    <div className="login-form-group">
+                      <label htmlFor="signup-email">Email Address *</label>
                       <input
                         type="email"
                         id="signup-email"
@@ -476,7 +770,7 @@ function LoginPage() {
                     </div>
 
                     <div className="login-form-group">
-                      <label htmlFor="signup-phone">Phone Number</label>
+                      <label htmlFor="signup-phone">Phone Number *</label>
                       <input
                         type="tel"
                         id="signup-phone"
@@ -488,7 +782,7 @@ function LoginPage() {
                     </div>
 
                     <div className="login-form-group">
-                      <label htmlFor="signup-password">Password</label>
+                      <label htmlFor="signup-password">Password *</label>
                       <input
                         type="password"
                         id="signup-password"
@@ -500,7 +794,7 @@ function LoginPage() {
                     </div>
 
                     <div className="login-form-group">
-                      <label htmlFor="signup-confirm-password">Confirm Password</label>
+                      <label htmlFor="signup-confirm-password">Confirm Password *</label>
                       <input
                         type="password"
                         id="signup-confirm-password"
@@ -518,8 +812,8 @@ function LoginPage() {
                       </label>
                     </div>
 
-                    <button type="submit" className="login-submit-btn">
-                      Create Account
+                    <button type="submit" className="login-submit-btn" disabled={loading}>
+                      {loading ? 'Creating...' : 'Create Account'}
                     </button>
                   </form>
                 </motion.div>

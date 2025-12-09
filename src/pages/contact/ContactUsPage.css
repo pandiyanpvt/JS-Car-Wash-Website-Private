@@ -147,13 +147,13 @@
 
 /* Contact Info Section */
 .contact-info-section {
-  margin-bottom: 80px;
+  margin-bottom: 24px;
 }
 
 .contact-info-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 @media (min-width: 768px) {
@@ -164,8 +164,8 @@
   }
 
   .contact-info-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .map-section {
@@ -281,20 +281,31 @@
   font-size: 0.9375rem;
   color: #666;
   margin: 0;
+  padding: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   line-height: 1.5;
 }
 
+.contact-info-value a {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 .contact-link {
   color: #1e3a8a;
-  text-decoration: none;
+  text-decoration: none !important;
   font-weight: 600;
   transition: color 0.3s ease;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 .contact-link:hover {
   color: #0f172a;
-  text-decoration: underline;
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 /* Branches Section */
@@ -682,8 +693,8 @@
   }
 
   .contact-info-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .contact-form {
@@ -712,7 +723,7 @@
   }
 
   .contact-info-section {
-    margin-bottom: 50px;
+    margin-bottom: 20px;
   }
 
   .contact-info-grid {
@@ -1253,5 +1264,177 @@
 .dark-mode h5,
 .dark-mode h6 {
   color: #ffffff;
+}
+
+.success-message-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2px solid #28a745;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(40, 167, 69, 0.15);
+  animation: slideInDown 0.4s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.success-message-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #28a745 0%, #20c997 100%);
+}
+
+.success-message-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #28a745;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 1.75rem;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.success-message-content {
+  flex: 1;
+}
+
+.success-message-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #155724;
+  margin: 0 0 8px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.success-message-text {
+  font-size: 1rem;
+  color: #155724;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  opacity: 0.9;
+}
+
+.error-message-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  border: 2px solid #dc3545;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(220, 53, 69, 0.15);
+  animation: slideInDown 0.4s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.error-message-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #dc3545 0%, #c82333 100%);
+}
+
+.error-message-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dc3545;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 1.75rem;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.error-message-content {
+  flex: 1;
+}
+
+.error-message-text {
+  font-size: 1rem;
+  color: #721c24;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 600;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .success-message-box,
+  .error-message-box {
+    padding: 20px 24px;
+    gap: 16px;
+  }
+
+  .success-message-icon,
+  .error-message-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+
+  .success-message-title {
+    font-size: 1.125rem;
+  }
+
+  .success-message-text,
+  .error-message-text {
+    font-size: 0.9375rem;
+  }
+}
+
+.dark-mode .success-message-box {
+  background: linear-gradient(135deg, #1e4620 0%, #2d5a2f 100%);
+  border-color: #28a745;
+}
+
+.dark-mode .success-message-icon {
+  background: #28a745;
+}
+
+.dark-mode .success-message-title,
+.dark-mode .success-message-text {
+  color: #d4edda;
+}
+
+.dark-mode .error-message-box {
+  background: linear-gradient(135deg, #4a1f1f 0%, #5a2a2a 100%);
+  border-color: #dc3545;
+}
+
+.dark-mode .error-message-icon {
+  background: #dc3545;
+}
+
+.dark-mode .error-message-text {
+  color: #f8d7da;
 }
 

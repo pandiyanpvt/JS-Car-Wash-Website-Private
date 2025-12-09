@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import ReviewSuccessModal from './ReviewSuccessModal'
@@ -127,6 +128,7 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
+            onClick={onClose}
           />
           <div className="profile-popup-wrapper">
             <motion.div
@@ -639,6 +641,8 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
       />
     </AnimatePresence>
   )
+
+  return isOpen ? createPortal(modalContent, document.body) : null
 }
 
 export default ProfilePopup

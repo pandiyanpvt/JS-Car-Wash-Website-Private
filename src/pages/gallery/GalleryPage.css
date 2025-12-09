@@ -397,7 +397,7 @@
 .gallery-lightbox-close {
   position: absolute;
   top: -50px;
-  right: 0;
+  right: -20px;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
@@ -493,6 +493,7 @@
 
   .gallery-lightbox-close {
     top: -40px;
+    right: -15px;
     width: 36px;
     height: 36px;
   }
@@ -612,16 +613,13 @@
 
   .gallery-lightbox-close {
     top: -40px;
+    right: -15px;
     width: 36px;
     height: 36px;
   }
 
   .gallery-lightbox-image {
     max-height: 70vh;
-  }
-
-  .gallery-lightbox-title h3 {
-    font-size: 1rem;
   }
 }
 
@@ -671,6 +669,7 @@
 
   .gallery-lightbox-close {
     top: -35px;
+    right: -10px;
     width: 32px;
     height: 32px;
   }
@@ -682,14 +681,6 @@
 
   .gallery-lightbox-image {
     max-height: 65vh;
-  }
-
-  .gallery-lightbox-title {
-    margin-top: 16px;
-  }
-
-  .gallery-lightbox-title h3 {
-    font-size: 0.9375rem;
   }
 }
 
