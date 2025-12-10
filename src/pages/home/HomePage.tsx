@@ -62,6 +62,15 @@ function HomePage({}: HomePageProps) {
     }
   ], [])
 
+  // Combined map URL showing both branches with markers
+  const combinedMapUrl = useMemo(() => {
+    const address1 = encodeURIComponent(branches[0].address)
+    const address2 = encodeURIComponent(branches[1].address)
+    // Create a Google Maps URL that shows both locations with markers
+    // Format: using place parameter to show multiple locations
+    return `https://www.google.com/maps?q=${address1}|${address2}&hl=en&z=8&output=embed`
+  }, [branches])
+
   const navItems = useMemo(() => [
     { label: 'Home', href: '/', route: true },
     { label: 'AboutUs', href: '/aboutus', route: true },
@@ -151,7 +160,8 @@ function HomePage({}: HomePageProps) {
     if (selectedModel && modelHeadImageMap[selectedModel]) {
       return modelHeadImageMap[selectedModel]
     }
-    return '/JS Car Wash Images/kindpng_4272437.png'
+    // Default to sports car
+    return '/JS Car Wash Images/sporthead.png'
   }, [selectedModel, modelHeadImageMap])
 
   const handleNavClick = useCallback((href: string, e?: React.MouseEvent) => {
@@ -609,6 +619,20 @@ function HomePage({}: HomePageProps) {
           <div className={`header-navbar-wrapper ${showNavbar ? 'navbar-visible' : 'navbar-hidden'}`}>
             <Navbar hideLogo={true} />
           </div>
+          {/* Hamburger Menu Button - Hidden when navbar is visible */}
+          <button
+            className={`header-hamburger-btn ${showNavbar ? 'hamburger-hidden' : ''}`}
+            onClick={() => setShowNavbar(!showNavbar)}
+            aria-label="Toggle navbar"
+          >
+            <svg className="hamburger-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {showNavbar ? (
+                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              )}
+            </svg>
+          </button>
           
           {/* Split Design - Left and Right Sections */}
           <div className="header-split-sections">
@@ -770,6 +794,13 @@ function HomePage({}: HomePageProps) {
                         <p className="selected-branch-text">
                           {selectedBranch.subtitle || selectedBranch.name}
                         </p>
+                        <button 
+                          className="selected-branch-change-btn"
+                          onClick={() => setDealersShow(true)}
+                          aria-label="Change branch"
+                        >
+                          <span>Change</span>
+                        </button>
                       </div>
                     </motion.div>
                   )}
@@ -985,27 +1016,37 @@ function HomePage({}: HomePageProps) {
 
             {/* Dealers Content */}
             <div className="dealersshow-content">
+              {/* Single Map showing both branches with markers */}
+              <div className="dealersshow-map">
+                <iframe
+                  src={combinedMapUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="dealersshow-map-iframe"
+                  title="JS Car Wash - All Branches"
+                ></iframe>
+              </div>
+
+              {/* Branch Items */}
               {branches.map((branch, index) => (
                 <div 
                   key={index} 
                   className={`dealersshow-branch-item ${selectedBranch?.subtitle === branch.subtitle ? 'selected' : ''}`}
                 >
-                  {/* Branch Title */}
-                  <h3 className="dealersshow-branch-title">BRANCH {index + 1}</h3>
-
-                  {/* Map */}
-                  <div className="dealersshow-map">
-                    <iframe
-                      src={branch.mapUrl}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      className="dealersshow-map-iframe"
-                      title={`${branch.name} - ${branch.subtitle}`}
-                    ></iframe>
+                  {/* Dealer Info */}
+                  <div className="dealersshow-dealer-info">
+                    <p className="dealersshow-dealer-subtitle">{branch.subtitle}</p>
+                    <div className="dealersshow-dealer-address">
+                      <svg className="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <p className="dealersshow-address-text">{branch.address}</p>
+                    </div>
                   </div>
 
                   {/* Action Buttons */}
