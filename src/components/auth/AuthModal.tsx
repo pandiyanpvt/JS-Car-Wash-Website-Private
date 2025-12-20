@@ -121,11 +121,12 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
           />
            <motion.div
              className="auth-modal"
-             initial={{ opacity: 0, scale: 0.95 }}
-             animate={{ opacity: 1, scale: 1 }}
-             exit={{ opacity: 0, scale: 0.95 }}
+             initial={{ opacity: 0, scale: 0.9, x: "-50%", y: "-50%" }}
+             animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+             exit={{ opacity: 0, scale: 0.9, x: "-50%", y: "-50%" }}
              transition={{ duration: 0.3, ease: 'easeOut' }}
              onClick={(e) => e.stopPropagation()}
+             style={{ top: '50%', left: '50%' }}
            >
              <div className="auth-modal-container">
               <div className="auth-modal-left">

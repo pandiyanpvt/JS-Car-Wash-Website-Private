@@ -13,7 +13,7 @@ interface NavbarProps {
   hideLogo?: boolean
 }
 
-function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
+function Navbar({ onNavigate, className = '' }: NavbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { openCart, getTotalItems } = useCart()
@@ -68,28 +68,38 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
     navigate(href)
   }
 
-  // Close mobile menu when clicking outside
+  // Close mobile menu when clicking outside (but not when profile popup is open)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
-      if (mobileMenuOpen && !target.closest('.modern-navbar') && !target.closest('.mobile-menu-overlay')) {
+      // Don't close if profile popup is open
+      if (profilePopupOpen) {
+        return
+      }
+      if (mobileMenuOpen && 
+          !target.closest('.modern-navbar') && 
+          !target.closest('.mobile-menu-overlay') &&
+          !target.closest('.profile-popup') &&
+          !target.closest('.profile-popup-backdrop')) {
         setMobileMenuOpen(false)
         setMobileServicesOpen(false)
       }
     }
 
-    if (mobileMenuOpen) {
+    if (mobileMenuOpen && !profilePopupOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       document.body.style.overflow = 'hidden'
-    } else {
+    } else if (!profilePopupOpen) {
       document.body.style.overflow = 'unset'
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      document.body.style.overflow = 'unset'
+      if (!profilePopupOpen) {
+        document.body.style.overflow = 'unset'
+      }
     }
-  }, [mobileMenuOpen])
+  }, [mobileMenuOpen, profilePopupOpen])
 
   return (
     <>
@@ -174,7 +184,6 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
           </div>
 
           {/* Desktop Cart Icon */}
-          {isAuthenticated && (
             <button
               className="navbar-cart-button desktop-cta-button"
               aria-label="Shopping Cart"
@@ -185,13 +194,16 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
                 <span className="cart-badge">{cartItemCount}</span>
               )}
             </button>
-          )}
 
           {/* Desktop Profile Icon or Sign In Button */}
           {isAuthenticated ? (
             <button
               className="navbar-profile-button desktop-cta-button"
-              onClick={() => setProfilePopupOpen(true)}
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setProfilePopupOpen(true)
+              }}
               aria-label="Profile"
             >
               <i className="fas fa-user-circle"></i>
@@ -346,11 +358,27 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
                   )
                 })}
 
+                {/* Mobile Cart Icon */}
+                <button
+                  className="mobile-cta-button mobile-cart-button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setMobileMenuOpen(false)
+                    openCart()
+                  }}
+                >
+                  <i className="fas fa-shopping-cart"></i> Cart
+                  {cartItemCount > 0 && (
+                    <span className="mobile-cart-badge">{cartItemCount}</span>
+                  )}
+                </button>
+
                 {isAuthenticated ? (
                   <button
                     className="mobile-cta-button"
                     onClick={(e) => {
                       e.preventDefault()
+                      e.stopPropagation()
                       setMobileMenuOpen(false)
                       setProfilePopupOpen(true)
                     }}
@@ -383,7 +411,9 @@ function Navbar({ onNavigate, className = '', hideLogo = false }: NavbarProps) {
       />
       <ProfilePopup
         isOpen={profilePopupOpen}
-        onClose={() => setProfilePopupOpen(false)}
+        onClose={() => {
+          setProfilePopupOpen(false)
+        }}
       />
     </>
   )
