@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
+import { useAuth } from '../../contexts/AuthContext'
 import './BookingPage.css'
 import '../home/HomePage.css'
 import '../about/AboutPage.css'
@@ -47,38 +48,32 @@ interface SelectedProduct {
 
 function BookingPage() {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
 
+  // Branches - matching HomePage structure
+  const branches: Branch[] = useMemo(() => [
+    {
+      id: 'dubbo',
+      name: 'SERVICE DUBBO',
+      location: '66-72 Windsor parade, Dubbo, 2830, NSW',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
+    },
+    {
+      id: 'sydney',
+      name: 'SERVICE SYDNEY',
+      location: '123 Main Street, Sydney, 2000, NSW',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
+    }
+  ], [])
 
   // Step management
   const [currentStep, setCurrentStep] = useState(1)
   const [packageStep, setPackageStep] = useState(0) // For handling multiple package selections
 
   // Form data
-  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(() => {
-    // Load selected branch from localStorage on mount
-    try {
-      const stored = localStorage.getItem('selectedBranch')
-      if (stored) {
-        return JSON.parse(stored)
-      }
-    } catch (error) {
-      console.error('Failed to load selected branch from localStorage:', error)
-    }
-    return null
-  })
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(() => {
-    // Load selected vehicle model from localStorage on mount
-    try {
-      const stored = localStorage.getItem('selectedVehicleModel')
-      if (stored) {
-        return JSON.parse(stored)
-      }
-    } catch (error) {
-      console.error('Failed to load selected vehicle model from localStorage:', error)
-    }
-    return null
-  })
+  const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(null)
   const [carNumber, setCarNumber] = useState('')
   const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
   const [selectedExtras, setSelectedExtras] = useState<string[]>([])
@@ -87,21 +82,41 @@ function BookingPage() {
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [showConfirmationPopup, setShowConfirmationPopup] = useState(false)
 
-  // Branches
-  const branches: Branch[] = [
-    {
-      id: 'australia',
-      name: 'Australia',
-      location: '66-72 Windsor parade, Dubbo, 2830, NSW',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
-    },
-    {
-      id: 'srilanka',
-      name: 'Sri Lanka',
-      location: 'Colombo, Sri Lanka',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126748.60912437247!2d79.7854488!3d6.9270786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae253d10f7a7003%3A0x320b2e4d32d3838d!2sColombo!5e0!3m2!1sen!2sus!4v1234567890!5m2!1sen!2sus'
+  // Lock body scroll when popup is open
+  useEffect(() => {
+    if (showConfirmationPopup) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
     }
-  ]
+    
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showConfirmationPopup])
+
+  // Auto-select branch from HomePage selection (only if authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) return // Don't auto-select if not signed in
+    if (selectedBranch) return // Already selected, don't override
+    
+    try {
+      const stored = localStorage.getItem('selectedBranch')
+      if (stored) {
+        const homePageBranch = JSON.parse(stored)
+        // Map HomePage branch (with subtitle) to BookingPage branch (with id and name)
+        const matchedBranch = branches.find(branch => 
+          branch.name === homePageBranch.subtitle || 
+          branch.name === homePageBranch.name
+        )
+        if (matchedBranch) {
+          setSelectedBranch(matchedBranch)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load selected branch from localStorage:', error)
+    }
+  }, [branches, selectedBranch, isAuthenticated])
 
   // Vehicle models
   const vehicleModels: VehicleModel[] = [
@@ -112,6 +127,29 @@ function BookingPage() {
     { id: 'wagon', name: 'Wagon', image: '/Model/Wagon.png' },
     { id: 'xlarge', name: 'X-Large', image: '/Model/X-Large.png' }
   ]
+
+  // Auto-select vehicle model from HomePage selection (only if authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) return // Don't auto-select if not signed in
+    if (selectedVehicleModel) return // Already selected, don't override
+    
+    try {
+      const stored = localStorage.getItem('selectedVehicleModel')
+      if (stored) {
+        const vehicleModel = JSON.parse(stored)
+        // Find matching vehicle model
+        const matchedModel = vehicleModels.find(model => 
+          model.id === vehicleModel.id || 
+          model.name.toLowerCase() === vehicleModel.name?.toLowerCase()
+        )
+        if (matchedModel) {
+          setSelectedVehicleModel(matchedModel)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load selected vehicle model from localStorage:', error)
+    }
+  }, [vehicleModels, selectedVehicleModel, isAuthenticated])
 
   // Car Wash Packages
   const carWashPackages: Package[] = [

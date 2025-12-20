@@ -599,6 +599,34 @@
   box-shadow: 0 4px 12px rgba(211, 47, 47, 0.4);
 }
 
+/* Mobile Cart Button */
+.mobile-cart-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mobile-cart-badge {
+  position: absolute;
+  top: 8px;
+  right: 20px;
+  background: linear-gradient(135deg, #ff5252 0%, #ff1744 100%);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* Responsive Design */
 @media (max-width: 1400px) {
   .navbar-link {
