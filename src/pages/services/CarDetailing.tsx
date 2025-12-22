@@ -1,46 +1,49 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
+import { packageApi } from '../../services/api'
+import type { ServicePackage } from '../../services/api'
 import './CarDetailing.css'
 
 function CarDetailing() {
   const navigate = useNavigate()
-  
-  const jsMiniDetailFeatures = [
-    'Include JS police',
-    'Interior Polish'
-  ]
+  const [packages, setPackages] = useState<ServicePackage[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const jsExteriorDetailFeatures = [
-    'Include Exterior wash',
-    'Clay bar/ Spot buff',
-    'Exterior Hand Polish',
-    'Wheel & Tyres',
-    'Engine clean (Upon request)'
-  ]
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setLoading(true)
+        // Fetch packages for Car Detailing (service_type_id = 2)
+        const response = await packageApi.getByType(2)
+        if (response.success && response.data) {
+          // Filter only active packages
+          const activePackages = response.data.filter(pkg => pkg.is_active)
+          setPackages(activePackages)
+        }
+      } catch (error) {
+        console.error('Error fetching packages:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const jsInteriorDetailFeatures = [
-    'Include Js platinum',
-    'interior plastic Clean',
-    'Leather seat Clean',
-    'fabric Seats Steam Clean',
-    'Carpets & Matts Steam Clean',
-    'Leather polish'
-  ]
+    fetchPackages()
+  }, [])
 
-  const jsFullDetailFeatures = [
-    'Include JS Polish',
-    'JS Interior Details',
-    'Engine Clean (Upon request)',
-    'Buff (Additional charge)'
-  ]
+  const formatPrice = (amount: string) => {
+    const numAmount = parseFloat(amount)
+    return numAmount.toFixed(0)
+  }
 
-  const paintProtectionFeatures = [
-    'Include JS Full Detail',
-    'JS Paint Protection Treatment',
-    'Buff & Cut (Additional charge)'
-  ]
+  const getPackageFeatures = (pkg: ServicePackage) => {
+    if (!pkg.details || pkg.details.length === 0) return []
+    return pkg.details
+      .filter(detail => detail.is_active && detail.package_includes)
+      .map(detail => detail.package_includes!.includes_details)
+  }
 
   return (
     <div className="car-detailing-page">
@@ -69,130 +72,43 @@ function CarDetailing() {
           </div>
 
           <div className="pricing-cards-grid">
-            {/* JS Mini Detail Card */}
-            <motion.div
-              className="pricing-card"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <div className="pricing-card-header">
-                <div className="pricing-price">$189 <span className="pricing-price-suffix">/ start from</span></div>
-                <h3 className="pricing-card-title">JS Mini Detail</h3>
-              </div>
-              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
-              <div className="pricing-features">
-                <h4 className="pricing-features-title">Package includes</h4>
-                <ul className="pricing-features-list">
-                  {jsMiniDetailFeatures.map((feature, index) => (
-                    <li key={index} className="pricing-feature-item">
-                      <i className="fas fa-check-circle pricing-check-icon"></i>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-
-            {/* JS Exterior Detail Card */}
-            <motion.div
-              className="pricing-card"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <div className="pricing-card-header">
-                <div className="pricing-price">$185 <span className="pricing-price-suffix">/ start from</span></div>
-                <h3 className="pricing-card-title">JS Exterior Detail</h3>
-              </div>
-              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
-              <div className="pricing-features">
-                <h4 className="pricing-features-title">Package includes</h4>
-                <ul className="pricing-features-list">
-                  {jsExteriorDetailFeatures.map((feature, index) => (
-                    <li key={index} className="pricing-feature-item">
-                      <i className="fas fa-check-circle pricing-check-icon"></i>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-
-            {/* JS Interior Detail Card */}
-            <motion.div
-              className="pricing-card"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <div className="pricing-card-header">
-                <div className="pricing-price">$259 <span className="pricing-price-suffix">/ start from</span></div>
-                <h3 className="pricing-card-title">JS Interior Detail</h3>
-              </div>
-              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
-              <div className="pricing-features">
-                <h4 className="pricing-features-title">Package includes</h4>
-                <ul className="pricing-features-list">
-                  {jsInteriorDetailFeatures.map((feature, index) => (
-                    <li key={index} className="pricing-feature-item">
-                      <i className="fas fa-check-circle pricing-check-icon"></i>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-
-            {/* JS Full Detail Card */}
-            <motion.div
-              className="pricing-card"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div className="pricing-card-header">
-                <div className="pricing-price">$350 <span className="pricing-price-suffix">/ start from</span></div>
-                <h3 className="pricing-card-title">JS Full detail</h3>
-              </div>
-              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
-              <div className="pricing-features">
-                <h4 className="pricing-features-title">Package includes</h4>
-                <ul className="pricing-features-list">
-                  {jsFullDetailFeatures.map((feature, index) => (
-                    <li key={index} className="pricing-feature-item">
-                      <i className="fas fa-check-circle pricing-check-icon"></i>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-
-            {/* Paint Protection Card */}
-            <motion.div
-              className="pricing-card"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <div className="pricing-card-header">
-                <div className="pricing-price">$799 <span className="pricing-price-suffix">/ start from</span></div>
-                <h3 className="pricing-card-title">Paint protection & Ceramic Coding</h3>
-              </div>
-              <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
-              <div className="pricing-features">
-                <h4 className="pricing-features-title">Package includes</h4>
-                <ul className="pricing-features-list">
-                  {paintProtectionFeatures.map((feature, index) => (
-                    <li key={index} className="pricing-feature-item">
-                      <i className="fas fa-check-circle pricing-check-icon"></i>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
+            {loading ? (
+              <div className="loading-message">Loading packages...</div>
+            ) : packages.length === 0 ? (
+              <div className="no-packages-message">No packages available at the moment.</div>
+            ) : (
+              packages.map((pkg, index) => {
+                const features = getPackageFeatures(pkg)
+                return (
+                  <motion.div
+                    key={pkg.id}
+                    className="pricing-card"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 * (index + 1) }}
+                  >
+                    <div className="pricing-card-header">
+                      <div className="pricing-price">
+                        ${formatPrice(pkg.total_amount)} <span className="pricing-price-suffix">/ start from</span>
+                      </div>
+                      <h3 className="pricing-card-title">{pkg.package_name}</h3>
+                    </div>
+                    <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
+                    <div className="pricing-features">
+                      <h4 className="pricing-features-title">Package includes</h4>
+                      <ul className="pricing-features-list">
+                        {features.map((feature, featureIndex) => (
+                          <li key={featureIndex} className="pricing-feature-item">
+                            <i className="fas fa-check-circle pricing-check-icon"></i>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </motion.div>
+                )
+              })
+            )}
           </div>
         </div>
       </section>

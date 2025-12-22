@@ -79,10 +79,25 @@ async function apiRequest<T>(
       headers,
     })
 
-    const data = await response.json()
+    let data
+    try {
+      data = await response.json()
+    } catch (jsonError) {
+      // If response is not JSON, create a basic error
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      throw new Error('Invalid response from server')
+    }
 
     if (!response.ok) {
-      throw new Error(data.message || 'An error occurred')
+      const errorMessage = data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`
+      const error = new Error(errorMessage)
+      // Add status code to error for better handling
+      if (response.status === 401) {
+        error.name = 'UnauthorizedError'
+      }
+      throw error
     }
 
     return data
@@ -314,15 +329,29 @@ export const cartApi = {
   },
 }
 
-interface OrderProduct {
+interface OrderService {
+  package_id: number
+  vehicle_type: string
+  vehicle_number: string
+  arrival_date: string
+  arrival_time: string
+}
+
+interface OrderProductRequest {
   product_id: number
   quantity: number
+}
+
+interface OrderExtraWorkRequest {
+  extra_works_id: number
 }
 
 interface OrderRequest {
   user_id: number
   branch_id: number
-  products: OrderProduct[]
+  services: OrderService[]
+  products: OrderProductRequest[]
+  extra_works: OrderExtraWorkRequest[]
 }
 
 interface Order {
@@ -509,6 +538,132 @@ export const reviewApi = {
   delete: async (id: number): Promise<ApiResponse<ApiReview>> => {
     return apiRequest<ApiReview>(`/api/reviews/${id}`, {
       method: 'DELETE',
+    })
+  },
+}
+
+export interface ServiceType {
+  id: number
+  name: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PackageInclude {
+  id: number
+  includes_details: string
+  service_type_id: number
+  is_active: boolean
+  createdAt: string
+  updatedAt: string
+  service_type?: ServiceType
+}
+
+export type ServicePackage = {
+  id: number
+  package_name: string
+  total_amount: string
+  service_type_id: number
+  is_active: boolean
+  createdAt: string
+  updatedAt: string
+  details?: PackageDetail[]
+  service_type?: ServiceType
+}
+
+export interface PackageDetail {
+  id: number
+  package_id: number
+  package_includes_id: number
+  is_active: boolean
+  createdAt: string
+  updatedAt: string
+  package_includes?: PackageInclude
+  package?: ServicePackage
+}
+
+export const serviceTypeApi = {
+  getAll: async (): Promise<ApiResponse<ServiceType[]>> => {
+    return apiRequest<ServiceType[]>('/api/service-types', {
+      method: 'GET',
+    })
+  },
+}
+
+export const packageApi = {
+  getAll: async (): Promise<ApiResponse<ServicePackage[]>> => {
+    return apiRequest<ServicePackage[]>('/api/packages', {
+      method: 'GET',
+    })
+  },
+
+  getById: async (id: number): Promise<ApiResponse<ServicePackage>> => {
+    return apiRequest<ServicePackage>(`/api/packages/${id}`, {
+      method: 'GET',
+    })
+  },
+
+  getByType: async (serviceTypeId: number): Promise<ApiResponse<ServicePackage[]>> => {
+    return apiRequest<ServicePackage[]>(`/api/packages/type/${serviceTypeId}`, {
+      method: 'GET',
+    })
+  },
+}
+
+export const packageIncludeApi = {
+  getAll: async (): Promise<ApiResponse<PackageInclude[]>> => {
+    return apiRequest<PackageInclude[]>('/api/package-includes', {
+      method: 'GET',
+    })
+  },
+
+  getById: async (id: number): Promise<ApiResponse<PackageInclude>> => {
+    return apiRequest<PackageInclude>(`/api/package-includes/${id}`, {
+      method: 'GET',
+    })
+  },
+
+  getByServiceType: async (serviceTypeId: number): Promise<ApiResponse<PackageInclude[]>> => {
+    return apiRequest<PackageInclude[]>(`/api/package-includes/service-type/${serviceTypeId}`, {
+      method: 'GET',
+    })
+  },
+}
+
+export const packageDetailApi = {
+  getAll: async (): Promise<ApiResponse<PackageDetail[]>> => {
+    return apiRequest<PackageDetail[]>('/api/package-details', {
+      method: 'GET',
+    })
+  },
+
+  getById: async (id: number): Promise<ApiResponse<PackageDetail>> => {
+    return apiRequest<PackageDetail>(`/api/package-details/${id}`, {
+      method: 'GET',
+    })
+  },
+
+  getByPackage: async (packageId: number): Promise<ApiResponse<PackageDetail[]>> => {
+    return apiRequest<PackageDetail[]>(`/api/package-details/package/${packageId}`, {
+      method: 'GET',
+    })
+  },
+}
+
+export type ExtraWork = {
+  id: number
+  name: string
+  amount: string
+  description: string
+  is_active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export const extraWorkApi = {
+  getAll: async (): Promise<ApiResponse<ExtraWork[]>> => {
+    return apiRequest<ExtraWork[]>('/api/extra-works', {
+      method: 'GET',
     })
   },
 }

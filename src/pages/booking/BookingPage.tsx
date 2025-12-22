@@ -2,15 +2,28 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
+import { useAuth } from '../../contexts/AuthContext'
+import { useCart } from '../../contexts/CartContext'
+import { 
+  contactApi, 
+  packageApi, 
+  productApi, 
+  extraWorkApi, 
+  orderApi,
+  type Branch as ApiBranch,
+  type ServicePackage,
+  type Product as ApiProduct,
+  type ExtraWork
+} from '../../services/api'
 import './BookingPage.css'
 import '../home/HomePage.css'
 import '../about/AboutPage.css'
 
 interface Branch {
-  id: string
+  id: number
   name: string
   location: string
-  mapUrl: string
+  mapUrl?: string
 }
 
 interface VehicleModel {
@@ -20,7 +33,7 @@ interface VehicleModel {
 }
 
 interface Package {
-  id: string
+  id: number
   name: string
   price: number
   serviceType: 'carwash' | 'cardetailing'
@@ -29,25 +42,26 @@ interface Package {
 }
 
 interface Extra {
-  id: string
+  id: number
   name: string
   price: number
 }
 
 interface Product {
-  id: string
+  id: number
   name: string
   price: number
 }
 
 interface SelectedProduct {
-  productId: string
+  productId: number
   quantity: number
 }
 
 function BookingPage() {
   const navigate = useNavigate()
-
+  const { user } = useAuth()
+  const { cartItems } = useCart()
 
   // Step management
   const [currentStep, setCurrentStep] = useState(1)
@@ -59,27 +73,135 @@ function BookingPage() {
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(null)
   const [carNumber, setCarNumber] = useState('')
   const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([])
+  const [selectedExtras, setSelectedExtras] = useState<number[]>([])
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [showConfirmationPopup, setShowConfirmationPopup] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCartPopup, setShowCartPopup] = useState(false)
+  const [hasShownCartPopup, setHasShownCartPopup] = useState(false)
 
-  // Branches
-  const branches: Branch[] = [
-    {
-      id: 'australia',
-      name: 'Australia',
-      location: '66-72 Windsor parade, Dubbo, 2830, NSW',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
-    },
-    {
-      id: 'srilanka',
-      name: 'Sri Lanka',
-      location: 'Colombo, Sri Lanka',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126748.60912437247!2d79.7854488!3d6.9270786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae253d10f7a7003%3A0x320b2e4d32d3838d!2sColombo!5e0!3m2!1sen!2sus!4v1234567890!5m2!1sen!2sus'
+  // API data
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [carWashPackages, setCarWashPackages] = useState<Package[]>([])
+  const [carDetailingPackages, setCarDetailingPackages] = useState<Package[]>([])
+  const [extras, setExtras] = useState<Extra[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch branches
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await contactApi.getBranches()
+        if (response.success && response.data) {
+          const activeBranches = response.data
+            .filter(branch => branch.is_active)
+            .map(branch => ({
+              id: branch.id,
+              name: branch.branch_name,
+              location: branch.address,
+            }))
+          setBranches(activeBranches)
+        }
+      } catch (error) {
+        console.error('Error fetching branches:', error)
+      }
     }
-  ]
+    fetchBranches()
+  }, [])
+
+  // Fetch packages
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setLoading(true)
+        // Fetch Car Wash packages (service_type_id = 1)
+        const carWashResponse = await packageApi.getByType(1)
+        if (carWashResponse.success && carWashResponse.data) {
+          const packages = carWashResponse.data
+            .filter(pkg => pkg.is_active)
+            .map(pkg => ({
+              id: pkg.id,
+              name: pkg.package_name,
+              price: parseFloat(pkg.total_amount),
+              serviceType: 'carwash' as const,
+              features: pkg.details
+                ?.filter(detail => detail.is_active && detail.package_includes)
+                .map(detail => detail.package_includes!.includes_details) || [],
+            }))
+          setCarWashPackages(packages)
+        }
+
+        // Fetch Car Detailing packages (service_type_id = 2)
+        const carDetailingResponse = await packageApi.getByType(2)
+        if (carDetailingResponse.success && carDetailingResponse.data) {
+          const packages = carDetailingResponse.data
+            .filter(pkg => pkg.is_active)
+            .map(pkg => ({
+              id: pkg.id,
+              name: pkg.package_name,
+              price: parseFloat(pkg.total_amount),
+              serviceType: 'cardetailing' as const,
+              features: pkg.details
+                ?.filter(detail => detail.is_active && detail.package_includes)
+                .map(detail => detail.package_includes!.includes_details) || [],
+            }))
+          setCarDetailingPackages(packages)
+        }
+      } catch (error) {
+        console.error('Error fetching packages:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchPackages()
+  }, [])
+
+  // Fetch extra works
+  useEffect(() => {
+    const fetchExtraWorks = async () => {
+      try {
+        const response = await extraWorkApi.getAll()
+        if (response.success && response.data) {
+          const activeExtras = response.data
+            .filter(extra => extra.is_active)
+            .map(extra => ({
+              id: extra.id,
+              name: extra.name,
+              price: parseFloat(extra.amount),
+            }))
+          setExtras(activeExtras)
+        }
+      } catch (error) {
+        console.error('Error fetching extra works:', error)
+      }
+    }
+    fetchExtraWorks()
+  }, [])
+
+  // Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await productApi.getAll()
+        if (response.success && response.data) {
+          const activeProducts = response.data
+            .filter(product => product.is_active)
+            .map(product => ({
+              id: product.id,
+              name: product.product_name,
+              price: parseFloat(product.amount),
+            }))
+          setProducts(activeProducts)
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      }
+    }
+    fetchProducts()
+  }, [])
 
   // Vehicle models
   const vehicleModels: VehicleModel[] = [
@@ -91,149 +213,6 @@ function BookingPage() {
     { id: 'xlarge', name: 'X-Large', image: '/Model/X-Large.png' }
   ]
 
-  // Car Wash Packages
-  const carWashPackages: Package[] = [
-    { 
-      id: 'js-polish', 
-      name: 'JS Polish', 
-      price: 149, 
-      serviceType: 'carwash',
-      features: [
-        'High - Pressure - rinse',
-        'Exterior Wash with pH neutral shampoo',
-        'Apply tyer shine',
-        'Exterior windows and side mirrirs clean',
-        'Mag wheel wash process',
-        'Vacuum interior floor mats and footwells',
-        'Vacuum seats and boot',
-        'Wipe door and boot jambs',
-        'Interior windows and mirrors clean',
-        'Clean and wipe dashboard and console',
-        'Clean and wipe door trims',
-        'Full Duco Hand Wax Polish'
-      ]
-    },
-    { 
-      id: 'js-platinum', 
-      name: 'JS Platinum', 
-      price: 69, 
-      serviceType: 'carwash',
-      features: [
-        'High - Pressure - rinse',
-        'Exterior Wash with pH neutral shampoo',
-        'Apply tyer shine',
-        'Exterior windows and side mirrirs clean',
-        'Mag wheel wash process',
-        'Vacuum interior floor mats and footwells',
-        'Vacuum seats and boot',
-        'Wipe door and boot jambs',
-        'Interior windows and mirrors clean',
-        'Clean and wipe dashboard and console',
-        'Clean and wipe door trims'
-      ]
-    },
-    { 
-      id: 'js-express', 
-      name: 'JS Express', 
-      price: 39, 
-      serviceType: 'carwash',
-      features: [
-        'High - Pressure - rinse',
-        'Exterior Wash with pH neutral shampoo',
-        'Apply tyer shine',
-        'Exterior windows and side mirrirs clean'
-      ],
-      excludedFeatures: [
-        'Mag wheel wash process',
-        'Vacuum interior floor mats and footwells',
-        'Vacuum seats and boot',
-        'Wipe door and boot jambs',
-        'Interior windows and mirrors clean',
-        'Clean and wipe dashboard and console',
-        'Clean and wipe door trims'
-      ]
-    }
-  ]
-
-  // Car Detailing Packages
-  const carDetailingPackages: Package[] = [
-    { 
-      id: 'js-mini-detail', 
-      name: 'JS Mini Detail', 
-      price: 189, 
-      serviceType: 'cardetailing',
-      features: [
-        'Include JS police',
-        'Interior Polish'
-      ]
-    },
-    { 
-      id: 'js-exterior-detail', 
-      name: 'JS Exterior Detail', 
-      price: 185, 
-      serviceType: 'cardetailing',
-      features: [
-        'Include Exterior wash',
-        'Clay bar/ Spot buff',
-        'Exterior Hand Polish',
-        'Wheel & Tyres',
-        'Engine clean (Upon request)'
-      ]
-    },
-    { 
-      id: 'js-interior-detail', 
-      name: 'JS Interior Detail', 
-      price: 259, 
-      serviceType: 'cardetailing',
-      features: [
-        'Include Js platinum',
-        'interior plastic Clean',
-        'Leather seat Clean',
-        'fabric Seats Steam Clean',
-        'Carpets & Matts Steam Clean',
-        'Leather polish'
-      ]
-    },
-    { 
-      id: 'js-full-detail', 
-      name: 'JS Full detail', 
-      price: 350, 
-      serviceType: 'cardetailing',
-      features: [
-        'Include JS Polish',
-        'JS Interior Details',
-        'Engine Clean (Upon request)',
-        'Buff (Additional charge)'
-      ]
-    },
-    { 
-      id: 'paint-protection', 
-      name: 'Paint protection & Ceramic Coding', 
-      price: 799, 
-      serviceType: 'cardetailing',
-      features: [
-        'Include JS Full Detail',
-        'JS Paint Protection Treatment',
-        'Buff & Cut (Additional charge)'
-      ]
-    }
-  ]
-
-  // Extras
-  const extras: Extra[] = [
-    { id: 'engine-clean', name: 'Engine Clean', price: 50 },
-    { id: 'buff-cut', name: 'Buff & Cut', price: 100 },
-    { id: 'interior-protection', name: 'Interior Protection', price: 75 },
-    { id: 'headlight-restoration', name: 'Headlight Restoration', price: 120 }
-  ]
-
-  // Products
-  const products: Product[] = [
-    { id: 'wax', name: 'Premium Wax', price: 25 },
-    { id: 'shampoo', name: 'Car Shampoo', price: 15 },
-    { id: 'tire-shine', name: 'Tire Shine', price: 20 },
-    { id: 'interior-cleaner', name: 'Interior Cleaner', price: 30 }
-  ]
 
   // Time slots
   const timeSlots = [
@@ -335,6 +314,60 @@ function BookingPage() {
     }
   }
 
+  // Check for cart items when entering step 3
+  useEffect(() => {
+    if (currentStep === 3 && !hasShownCartPopup) {
+      // Check if we have cart items
+      const hasCartItems = cartItems && Array.isArray(cartItems) && cartItems.length > 0
+      
+      if (hasCartItems) {
+        // Small delay to ensure the step transition is complete
+        const timer = setTimeout(() => {
+          setShowCartPopup(true)
+          setHasShownCartPopup(true)
+        }, 800)
+        
+        return () => clearTimeout(timer)
+      } else {
+        // If no cart items yet, check again after a delay (in case cart is still loading)
+        const checkTimer = setTimeout(() => {
+          const hasCartItemsLater = cartItems && Array.isArray(cartItems) && cartItems.length > 0
+          if (hasCartItemsLater && !hasShownCartPopup) {
+            setShowCartPopup(true)
+            setHasShownCartPopup(true)
+          }
+        }, 2000)
+        
+        return () => clearTimeout(checkTimer)
+      }
+    } else if (currentStep < 3) {
+      // Reset the flag when leaving step 3 (going back)
+      setHasShownCartPopup(false)
+      setShowCartPopup(false)
+    }
+  }, [currentStep, cartItems, hasShownCartPopup])
+
+  // Handle adding cart items to booking
+  const handleAddCartItems = () => {
+    const cartProducts = cartItems.map(item => ({
+      productId: item.id,
+      quantity: item.quantity,
+    }))
+    
+    // Merge with existing selected products, avoiding duplicates
+    setSelectedProducts(prev => {
+      const existingIds = new Set(prev.map(p => p.productId))
+      const newProducts = cartProducts.filter(p => !existingIds.has(p.productId))
+      return [...prev, ...newProducts]
+    })
+    
+    setShowCartPopup(false)
+  }
+
+  const handleSkipCartItems = () => {
+    setShowCartPopup(false)
+  }
+
   // Handle back step
   const handleBack = () => {
     if (currentStep === 2 && packageStep === 1) {
@@ -398,6 +431,92 @@ function BookingPage() {
     return ''
   }
 
+  // Format time to HH:MM:SS format
+  const formatTimeToAPI = (time: string): string => {
+    // Convert "9:00 AM" to "09:00:00"
+    const [timePart, period] = time.split(' ')
+    const [hours, minutes] = timePart.split(':')
+    let hour24 = parseInt(hours)
+    if (period === 'PM' && hour24 !== 12) hour24 += 12
+    if (period === 'AM' && hour24 === 12) hour24 = 0
+    return `${hour24.toString().padStart(2, '0')}:${minutes}:00`
+  }
+
+  // Format date to YYYY-MM-DD format
+  const formatDateToAPI = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  // Handle confirm booking
+  const handleConfirmBooking = async () => {
+    if (!user || !selectedBranch || !selectedDate || !selectedTime || selectedPackages.length === 0) {
+      alert('Please fill all required fields and login to continue')
+      return
+    }
+
+    // Check if token exists
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('You are not logged in. Please login to continue.')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      // Prepare services array - one service per package
+      const services = selectedPackages.map(pkg => ({
+        package_id: pkg.id,
+        vehicle_type: selectedVehicleModel?.name || '',
+        vehicle_number: carNumber,
+        arrival_date: formatDateToAPI(selectedDate),
+        arrival_time: formatTimeToAPI(selectedTime),
+      }))
+
+      // Prepare products array
+      const productsRequest = selectedProducts.map(sp => ({
+        product_id: sp.productId,
+        quantity: sp.quantity,
+      }))
+
+      // Prepare extra works array
+      const extraWorksRequest = selectedExtras.map(extraId => ({
+        extra_works_id: extraId,
+      }))
+
+      // Create order
+      const orderData = {
+        user_id: user.id,
+        branch_id: selectedBranch.id,
+        services: services,
+        products: productsRequest,
+        extra_works: extraWorksRequest,
+      }
+
+      const response = await orderApi.create(orderData)
+      
+      if (response.success) {
+        setShowConfirmationPopup(true)
+      } else {
+        alert('Failed to create booking: ' + (response.message || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error creating order:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
+        alert('Your session has expired. Please login again to continue.')
+        // Optionally redirect to login
+      } else {
+        alert('Failed to create booking: ' + errorMessage)
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="booking-page">
       <Navbar className="fixed-navbar" hideLogo={true} />
@@ -425,7 +544,7 @@ function BookingPage() {
                 transition={{ duration: 0.3 }}
                 className="booking-step"
               >
-                <h2 className="booking-step-title">Select Branch & Service</h2>
+                <h2 className="booking-step-title booking-step-title-spaced">Select Branch & Service</h2>
 
                 {/* Branch and Service in One Row */}
                 <div className="booking-branch-service-row">
@@ -516,13 +635,24 @@ function BookingPage() {
                 transition={{ duration: 0.5 }}
                 className="booking-step"
               >
-                <h2 className="booking-step-title">
-                  {selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 0
-                    ? 'Select Car Wash Package'
-                    : selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 1
-                    ? 'Select Car Detailing Package'
-                    : 'Select Package'}
-                </h2>
+                <div className="booking-step-header">
+                  <button 
+                    className="booking-back-icon-btn"
+                    onClick={handleBack}
+                    aria-label="Go back"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  <h2 className="booking-step-title">
+                    {selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 0
+                      ? 'Select Car Wash Package'
+                      : selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 1
+                      ? 'Select Car Detailing Package'
+                      : 'Select Package'}
+                  </h2>
+                </div>
 
                 <div className="booking-packages-grid">
                   {getCurrentPackageSet().map(pkg => (
@@ -567,9 +697,6 @@ function BookingPage() {
                 </div>
 
                 <div className="booking-step-buttons">
-                  <button className="booking-back-btn" onClick={handleBack}>
-                    Back
-                  </button>
                   <button className="booking-next-btn" onClick={handleNext}>
                     {selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 0
                       ? 'Next: Car Detailing Packages'
@@ -589,7 +716,18 @@ function BookingPage() {
                 transition={{ duration: 0.5 }}
                 className="booking-step"
               >
-                <h2 className="booking-step-title">Extras & Schedule</h2>
+                <div className="booking-step-header">
+                  <button 
+                    className="booking-back-icon-btn"
+                    onClick={handleBack}
+                    aria-label="Go back"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  <h2 className="booking-step-title">Extras & Schedule</h2>
+                </div>
 
                 {/* Extras */}
                 <div className="booking-form-section">
@@ -767,12 +905,6 @@ function BookingPage() {
                   </div>
                 </div>
 
-                <div className="booking-step-buttons">
-                  <button className="booking-back-btn" onClick={handleBack}>
-                    Back
-                  </button>
-                </div>
-
               </motion.div>
             )}
 
@@ -785,7 +917,18 @@ function BookingPage() {
                 transition={{ duration: 0.5 }}
                 className="booking-step"
               >
-                <h2 className="booking-step-title">Order Summary</h2>
+                <div className="booking-step-header">
+                  <button 
+                    className="booking-back-icon-btn"
+                    onClick={handleBack}
+                    aria-label="Go back"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  <h2 className="booking-step-title">Order Summary</h2>
+                </div>
 
                 <div className="booking-summary">
                   {/* Row 1: Branch, Service, Vehicle */}
@@ -827,30 +970,33 @@ function BookingPage() {
                       {selectedExtras.length > 0 && (
                         <div className="booking-summary-section">
                           <h3>Extras</h3>
-                          {selectedExtras.map(extraId => {
-                            const extra = extras.find(e => e.id === extraId)
-                            return extra ? (
+                          {selectedExtras
+                            .map(extraId => extras.find(e => e.id === extraId))
+                            .filter((extra): extra is Extra => extra !== undefined)
+                            .map(extra => (
                               <div key={extra.id} className="booking-summary-item">
                                 <span>{extra.name}</span>
                                 <span>${extra.price}</span>
                               </div>
-                            ) : null
-                          })}
+                            ))}
                         </div>
                       )}
 
                       {selectedProducts.length > 0 && (
                         <div className="booking-summary-section">
                           <h3>Products</h3>
-                          {selectedProducts.map(selectedProduct => {
-                            const product = products.find(p => p.id === selectedProduct.productId)
-                            return product ? (
+                          {selectedProducts
+                            .map(selectedProduct => {
+                              const product = products.find(p => p.id === selectedProduct.productId)
+                              return product ? { product, selectedProduct } : null
+                            })
+                            .filter((item): item is { product: Product; selectedProduct: SelectedProduct } => item !== null)
+                            .map(({ product, selectedProduct }) => (
                               <div key={product.id} className="booking-summary-item">
                                 <span>{product.name} {selectedProduct.quantity > 1 ? `(x${selectedProduct.quantity})` : ''}</span>
                                 <span>${(product.price * selectedProduct.quantity).toFixed(2)}</span>
                               </div>
-                            ) : null
-                          })}
+                            ))}
                         </div>
                       )}
                     </div>
@@ -877,9 +1023,25 @@ function BookingPage() {
                     <h2>${calculateTotal()}</h2>
                   </div>
 
-                  <button className="booking-confirm-btn" onClick={() => setShowConfirmationPopup(true)}>
-                    Confirm Booking
+                  <button 
+                    className="booking-confirm-btn" 
+                    onClick={handleConfirmBooking}
+                    disabled={!user || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="booking-loading-spinner"></span>
+                        Processing...
+                      </>
+                    ) : (
+                      'Confirm Booking'
+                    )}
                   </button>
+                  {!user && (
+                    <p style={{ color: 'red', marginTop: '10px', textAlign: 'center' }}>
+                      Please login to confirm booking
+                    </p>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -951,14 +1113,14 @@ function BookingPage() {
                   <span className="booking-total-summary-name">Extras (Optional)</span>
                   {selectedExtras.length > 0 ? (
                     <div className="booking-total-summary-package-list">
-                      {selectedExtras.map(extraId => {
-                        const extra = extras.find(e => e.id === extraId)
-                        return extra ? (
+                      {selectedExtras
+                        .map(extraId => extras.find(e => e.id === extraId))
+                        .filter((extra): extra is Extra => extra !== undefined)
+                        .map(extra => (
                           <div key={extra.id} className="booking-total-summary-package-item">
                             {extra.name}
                           </div>
-                        ) : null
-                      })}
+                        ))}
                     </div>
                   ) : null}
                 </div>
@@ -972,14 +1134,14 @@ function BookingPage() {
                         }, 0).toFixed(2)}
                       </span>
                       <div className="booking-total-summary-package-price-list">
-                        {selectedExtras.map(extraId => {
-                          const extra = extras.find(e => e.id === extraId)
-                          return extra ? (
+                        {selectedExtras
+                          .map(extraId => extras.find(e => e.id === extraId))
+                          .filter((extra): extra is Extra => extra !== undefined)
+                          .map(extra => (
                             <div key={extra.id} className="booking-total-summary-package-price">
                               $ {extra.price.toFixed(2)}
                             </div>
-                          ) : null
-                        })}
+                          ))}
                       </div>
                     </>
                   ) : (
@@ -996,15 +1158,18 @@ function BookingPage() {
                     <div className="booking-total-summary-name-col">
                       <span className="booking-total-summary-name">Products</span>
                       <div className="booking-total-summary-package-list">
-                        {selectedProducts.map(selectedProduct => {
-                          const product = products.find(p => p.id === selectedProduct.productId)
-                          return product ? (
+                        {selectedProducts
+                          .map(selectedProduct => {
+                            const product = products.find(p => p.id === selectedProduct.productId)
+                            return product ? { product, selectedProduct } : null
+                          })
+                          .filter((item): item is { product: Product; selectedProduct: SelectedProduct } => item !== null)
+                          .map(({ product, selectedProduct }) => (
                             <div key={product.id} className="booking-total-summary-package-item">
                               <span className="booking-total-summary-product-name-text">{product.name}</span>
                               {selectedProduct.quantity > 1 && <span className="booking-total-summary-quantity"> (x{selectedProduct.quantity})</span>}
                             </div>
-                          ) : null
-                        })}
+                          ))}
                       </div>
                     </div>
                     <div className="booking-total-summary-total-col">
@@ -1015,14 +1180,17 @@ function BookingPage() {
                         }, 0).toFixed(2)}
                       </span>
                       <div className="booking-total-summary-package-price-list">
-                        {selectedProducts.map(selectedProduct => {
-                          const product = products.find(p => p.id === selectedProduct.productId)
-                          return product ? (
+                        {selectedProducts
+                          .map(selectedProduct => {
+                            const product = products.find(p => p.id === selectedProduct.productId)
+                            return product ? { product, selectedProduct } : null
+                          })
+                          .filter((item): item is { product: Product; selectedProduct: SelectedProduct } => item !== null)
+                          .map(({ product, selectedProduct }) => (
                             <div key={product.id} className="booking-total-summary-package-price">
                               $ {(product.price * selectedProduct.quantity).toFixed(2)}
                             </div>
-                          ) : null
-                        })}
+                          ))}
                       </div>
                     </div>
                   </div>
@@ -1043,6 +1211,65 @@ function BookingPage() {
         </div>
         </div>
       </div>
+
+      {/* Cart Items Popup */}
+      <AnimatePresence>
+        {showCartPopup && (
+          <>
+            <motion.div
+              className="booking-popup-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={handleSkipCartItems}
+            />
+            <motion.div
+              className="booking-cart-popup"
+              initial={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
+              animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+              exit={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
+              transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+            >
+              <div className="booking-cart-popup-icon">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="32" cy="32" r="32" fill="#1e3a8a" opacity="0.1"/>
+                  <path d="M20 24L24 48H40L44 24H20Z" fill="#1e3a8a" opacity="0.3"/>
+                  <path d="M24 20V16C24 13.7909 25.7909 12 28 12H36C38.2091 12 40 13.7909 40 16V20" stroke="#1e3a8a" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="28" cy="44" r="2" fill="#1e3a8a"/>
+                  <circle cx="36" cy="44" r="2" fill="#1e3a8a"/>
+                </svg>
+              </div>
+              <h2 className="booking-cart-popup-title">Add Cart Items to Booking?</h2>
+              <p className="booking-cart-popup-message">
+                You have {cartItems.length} item{cartItems.length > 1 ? 's' : ''} in your cart. Would you like to add {cartItems.length > 1 ? 'them' : 'it'} to this booking?
+              </p>
+              <div className="booking-cart-popup-items">
+                {cartItems.map(item => (
+                  <div key={item.id} className="booking-cart-popup-item">
+                    <span className="booking-cart-popup-item-name">{item.name}</span>
+                    <span className="booking-cart-popup-item-details">Qty: {item.quantity} × ${item.price.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="booking-cart-popup-buttons">
+                <button 
+                  className="booking-cart-popup-btn booking-cart-popup-btn-yes"
+                  onClick={handleAddCartItems}
+                >
+                  Yes, Add Items
+                </button>
+                <button 
+                  className="booking-cart-popup-btn booking-cart-popup-btn-no"
+                  onClick={handleSkipCartItems}
+                >
+                  No, Skip
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Confirmation Popup */}
       <AnimatePresence>
