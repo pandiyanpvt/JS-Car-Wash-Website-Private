@@ -60,7 +60,7 @@ interface SelectedProduct {
 
 function BookingPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { cartItems } = useCart()
 
   // Step management
@@ -203,6 +203,42 @@ function BookingPage() {
     fetchProducts()
   }, [])
 
+  // Lock body scroll when confirmation popup is open
+  useEffect(() => {
+    if (showConfirmationPopup) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showConfirmationPopup])
+
+  // Auto-select branch from HomePage selection (only if authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) return // Don't auto-select if not signed in
+    if (selectedBranch) return // Already selected, don't override
+
+    try {
+      const stored = localStorage.getItem('selectedBranch')
+      if (stored) {
+        const homePageBranch = JSON.parse(stored)
+        // Map HomePage branch (with subtitle) to BookingPage branch (with id and name)
+        const matchedBranch = branches.find(branch => 
+          branch.name === homePageBranch.subtitle || 
+          branch.name === homePageBranch.name
+        )
+        if (matchedBranch) {
+          setSelectedBranch(matchedBranch)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load selected branch from localStorage:', error)
+    }
+  }, [branches, selectedBranch, isAuthenticated])
+
   // Vehicle models
   const vehicleModels: VehicleModel[] = [
     { id: 'hatchback', name: 'Hatchback', image: '/Model/Hatchback.png' },
@@ -213,6 +249,28 @@ function BookingPage() {
     { id: 'xlarge', name: 'X-Large', image: '/Model/X-Large.png' }
   ]
 
+  // Auto-select vehicle model from HomePage selection (only if authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) return // Don't auto-select if not signed in
+    if (selectedVehicleModel) return // Already selected, don't override
+    
+    try {
+      const stored = localStorage.getItem('selectedVehicleModel')
+      if (stored) {
+        const vehicleModel = JSON.parse(stored)
+        // Find matching vehicle model
+        const matchedModel = vehicleModels.find(model => 
+          model.id === vehicleModel.id || 
+          model.name.toLowerCase() === vehicleModel.name?.toLowerCase()
+        )
+        if (matchedModel) {
+          setSelectedVehicleModel(matchedModel)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load selected vehicle model from localStorage:', error)
+    }
+  }, [vehicleModels, selectedVehicleModel, isAuthenticated])
 
   // Time slots
   const timeSlots = [
@@ -234,6 +292,12 @@ function BookingPage() {
   // Handle vehicle model selection
   const handleVehicleModelSelect = (model: VehicleModel) => {
     setSelectedVehicleModel(model)
+    // Save selected vehicle model to localStorage
+    try {
+      localStorage.setItem('selectedVehicleModel', JSON.stringify(model))
+    } catch (error) {
+      console.error('Failed to save selected vehicle model to localStorage:', error)
+    }
   }
 
   // Handle package selection
@@ -556,7 +620,15 @@ function BookingPage() {
                         <button
                           key={branch.id}
                           className={`booking-branch-btn ${selectedBranch?.id === branch.id ? 'active' : ''}`}
-                          onClick={() => setSelectedBranch(branch)}
+                          onClick={() => {
+                            setSelectedBranch(branch)
+                            // Save selected branch to localStorage
+                            try {
+                              localStorage.setItem('selectedBranch', JSON.stringify(branch))
+                            } catch (error) {
+                              console.error('Failed to save selected branch to localStorage:', error)
+                            }
+                          }}
                         >
                           {branch.name}
                         </button>

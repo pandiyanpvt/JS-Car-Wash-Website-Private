@@ -35,19 +35,24 @@ function FooterPage() {
   return (
     <footer className="footer-page">
       <div className="footer-container">
+        {/* Top Section with Gradient Line */}
+        <div className="footer-top-line"></div>
+        
         <div className="footer-content">
-          {/* Loading Animation Bar */}
-          <div className="footer-loading-bar"></div>
-          
           {/* Left Section - Company Info */}
           <div className="footer-left-section">
-            <div className="footer-logo">
-              <img 
-                src="/JS Car Wash Images/cropped-fghfthgf.png" 
-                alt="JS Car Wash Logo" 
-                className="footer-logo-img"
-              />
-              <span className="footer-logo-text">JS Car Wash</span>
+            <div className="footer-logo-wrapper">
+              <div className="footer-logo">
+                <img 
+                  src="/JS Car Wash Images/cropped-fghfthgf.png" 
+                  alt="JS Car Wash Logo" 
+                  className="footer-logo-img"
+                />
+                <div className="footer-logo-text-wrapper">
+                  <span className="footer-logo-text">JS</span>
+                  <span className="footer-logo-subtext">CAR WASH</span>
+                </div>
+              </div>
             </div>
             <p className="footer-description">
               JS Car Wash empowers customers to transform their vehicles into pristine condition - making car care easier, more accessible, and more effective.
@@ -74,15 +79,12 @@ function FooterPage() {
                 </svg>
               </a>
             </div>
-            <p className="footer-copyright-text">
-              © 2025, JS CAR WASH, DEV By Pandiyan (PVT) LTD
-            </p>
           </div>
 
           {/* Navigation Columns */}
           <div className="footer-nav-columns">
             <div className="footer-nav-column">
-              <h3 className="footer-nav-title">Product</h3>
+              <h3 className="footer-nav-title">Quick Links</h3>
               <ul className="footer-nav-list">
                 <li><a href="/products" onClick={(e) => handleFooterLinkClick('/products', true, e)}>Products</a></li>
                 <li><a href="/services" onClick={(e) => handleFooterLinkClick('/services', true, e)}>Services</a></li>
@@ -92,7 +94,7 @@ function FooterPage() {
             </div>
 
             <div className="footer-nav-column">
-              <h3 className="footer-nav-title">Resources</h3>
+              <h3 className="footer-nav-title">Support</h3>
               <ul className="footer-nav-list">
                 <li><a href="/faq" onClick={(e) => handleFooterLinkClick('/faq', true, e)}>FAQ</a></li>
                 <li><a href="/testimonial" onClick={(e) => handleFooterLinkClick('/testimonial', true, e)}>Testimonials</a></li>
@@ -102,14 +104,35 @@ function FooterPage() {
             </div>
 
             <div className="footer-nav-column">
-              <h3 className="footer-nav-title">Company</h3>
+              <h3 className="footer-nav-title">Contact Info</h3>
               <ul className="footer-nav-list">
-                <li><a href="/aboutus" onClick={(e) => handleFooterLinkClick('/aboutus', true, e)}>About</a></li>
-                <li><a href="/contact" onClick={(e) => handleFooterLinkClick('/contact', true, e)}>Contact</a></li>
-                <li><a href="/gallery" onClick={(e) => handleFooterLinkClick('/gallery', true, e)}>Gallery</a></li>
-                <li><a href="/services" onClick={(e) => handleFooterLinkClick('/services', true, e)}>Services</a></li>
+                <li className="footer-contact-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                  <span>02 5804 5720</span>
+                </li>
+                <li className="footer-contact-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                  <span>info@jscarwash.com.au</span>
+                </li>
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="footer-bottom">
+          <div className="footer-bottom-content">
+            <p className="footer-copyright-text">
+              © 2025 JS CAR WASH. All rights reserved.
+            </p>
+            <p className="footer-dev-text">
+              Developed by <span>Pandiyan (PVT) LTD</span>
+            </p>
           </div>
         </div>
       </div>

@@ -16,19 +16,21 @@
 
 .auth-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
   background-color: #ffffff;
   z-index: 2001;
   display: flex;
   overflow-y: auto;
-  border-radius: 0;
+  border-radius: 16px;
   margin: 0;
   padding: 0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  align-items: stretch;
+  justify-content: center;
 }
 
 .auth-modal-close {
@@ -60,7 +62,7 @@
 .auth-modal-container {
   display: flex;
   width: 100%;
-  min-height: 100vh;
+  min-height: auto;
   position: relative;
   z-index: 1;
 }
@@ -71,7 +73,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
+  padding: 40px 30px;
   position: relative;
 }
 
@@ -82,46 +84,46 @@
 }
 
 .auth-modal-logo {
-  margin-bottom: 40px;
+  margin-bottom: 24px;
   display: flex;
   justify-content: center;
 }
 
 .auth-logo-img {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
 }
 
 .auth-welcome-title {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 16px 0;
-  letter-spacing: 4px;
+  margin: 0 0 12px 0;
+  letter-spacing: 3px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .auth-brand-name {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 24px 0;
-  letter-spacing: 2px;
+  margin: 0 0 16px 0;
+  letter-spacing: 1.5px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .auth-welcome-divider {
-  width: 80px;
-  height: 4px;
+  width: 60px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.5);
-  margin: 0 auto 32px;
+  margin: 0 auto 20px;
   border-radius: 2px;
 }
 
 .auth-welcome-text {
-  font-size: 1rem;
-  line-height: 1.8;
+  font-size: 0.875rem;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -133,7 +135,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 50px;
+  padding: 40px 30px;
   overflow-y: auto;
   position: relative;
 }
@@ -397,54 +399,64 @@
 }
 
 @media (max-width: 1024px) {
+  .auth-modal {
+    max-width: 95%;
+    max-height: 95vh;
+  }
+
   .auth-modal-container {
     flex-direction: column;
   }
 
   .auth-modal-left {
-    min-height: 300px;
-    padding: 40px 30px;
-  }
-
-  .auth-welcome-title {
-    font-size: 2.5rem;
-  }
-
-  .auth-brand-name {
-    font-size: 1.5rem;
-  }
-
-  .auth-modal-right {
-    padding: 40px 30px;
-  }
-}
-
-@media (max-width: 768px) {
-  .auth-modal-left {
     min-height: 250px;
     padding: 30px 20px;
   }
 
-  .auth-logo-img {
-    width: 80px;
-    height: 80px;
-  }
-
   .auth-welcome-title {
     font-size: 2rem;
-    letter-spacing: 2px;
   }
 
   .auth-brand-name {
     font-size: 1.25rem;
   }
 
+  .auth-modal-right {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-modal {
+    max-width: 95%;
+    max-height: 95vh;
+  }
+
+  .auth-modal-left {
+    min-height: 200px;
+    padding: 24px 16px;
+  }
+
+  .auth-logo-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .auth-welcome-title {
+    font-size: 1.75rem;
+    letter-spacing: 2px;
+  }
+
+  .auth-brand-name {
+    font-size: 1.125rem;
+  }
+
   .auth-welcome-text {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .auth-modal-right {
-    padding: 30px 20px;
+    padding: 24px 16px;
   }
 
   .auth-form-title {
@@ -482,8 +494,14 @@
 }
 
 @media (max-width: 480px) {
+  .auth-modal {
+    max-width: 98%;
+    max-height: 98vh;
+    border-radius: 12px;
+  }
+
   .auth-modal-content {
-    padding: 32px 20px;
+    padding: 24px 16px;
   }
 
   .auth-form-title {

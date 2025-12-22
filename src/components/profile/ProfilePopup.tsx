@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { orderApi, reviewApi, type ApiOrder, type ApiReview } from '../../services/api'
@@ -7,16 +6,16 @@ import ReviewSuccessModal from './ReviewSuccessModal'
 import ConfirmationModal from './ConfirmationModal'
 import './ProfilePopup.css'
 
+type TabType = 'profile' | 'orders' | 'reviews'
+
 interface ProfilePopupProps {
   isOpen: boolean
   onClose: () => void
 }
 
-type TabType = 'profile' | 'orders' | 'reviews'
-
 function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
   const { user, logout } = useAuth()
-  const [activeTab, setActiveTab] = useState<TabType>('profile')
+  const [activeTab] = useState<TabType>('profile')
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [editFirstName, setEditFirstName] = useState('')
@@ -178,14 +177,55 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
+      
+      // Lock body scroll when popup is open
+      const originalOverflow = document.body.style.overflow
+      const originalPosition = document.body.style.position
+      const scrollY = window.scrollY
+      
       document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+      
+      // Prevent scroll events from propagating to window (which would trigger navbar hide)
+      const preventScrollPropagation = (e: Event) => {
+        e.stopPropagation()
+      }
+      window.addEventListener('scroll', preventScrollPropagation, true)
+      window.addEventListener('wheel', preventScrollPropagation, true)
+      document.addEventListener('scroll', preventScrollPropagation, true)
+      
+      // Prevent any click events from bubbling up (but allow button clicks)
+      const preventClickBubble = (e: MouseEvent) => {
+        const target = e.target as HTMLElement
+        // Don't prevent clicks on buttons - let them work normally
+        if (target.closest('button') || target.closest('.profile-popup-close-btn') || target.closest('.profile-popup-logout-btn')) {
+          return
+        }
+        if (target.closest('.profile-popup') || target.closest('.profile-popup-backdrop')) {
+          e.stopPropagation()
+        }
+      }
+      document.addEventListener('click', preventClickBubble, true)
+      
+      return () => {
+        document.removeEventListener('keydown', handleEscape)
+        document.removeEventListener('click', preventClickBubble, true)
+        window.removeEventListener('scroll', preventScrollPropagation, true)
+        window.removeEventListener('wheel', preventScrollPropagation, true)
+        document.removeEventListener('scroll', preventScrollPropagation, true)
+        document.body.style.overflow = originalOverflow
+        document.body.style.position = originalPosition
+        document.body.style.top = ''
+        document.body.style.width = ''
+        window.scrollTo(0, scrollY)
+      }
     } else {
       document.body.style.overflow = 'unset'
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
     }
   }, [isOpen, onClose])
 
@@ -194,7 +234,8 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
     onClose()
   }
 
-  const formatDate = (dateString: string) => {
+  // Helper functions
+  const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -204,53 +245,68 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'completed':
-        return '#4caf50'
+        return '#10b981'
       case 'pending':
-        return '#ff9800'
+        return '#f59e0b'
       case 'cancelled':
-        return '#f44336'
+        return '#ef4444'
       default:
-        return '#666'
+        return '#6b7280'
     }
   }
 
-  const handleSaveProfile = () => {
-    if (user) {
-      const updatedUser = {
-        ...user,
-        firstName: editFirstName,
-        lastName: editLastName,
-        email: editEmail,
-        phone: editPhone
-      }
-      localStorage.setItem('user', JSON.stringify(updatedUser))
-      window.location.reload()
-    }
-    setIsEditingProfile(false)
-  }
+  const handleChangePassword = async () => {
+    if (!user) return
 
-  const handleChangePassword = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('Please fill all password fields')
+      return
+    }
+
     if (newPassword !== confirmPassword) {
-      alert('New passwords do not match!')
+      alert('New passwords do not match')
       return
     }
+
     if (newPassword.length < 6) {
-      alert('Password must be at least 6 characters!')
+      alert('Password must be at least 6 characters long')
       return
     }
-    alert('Password changed successfully!')
-    setCurrentPassword('')
-    setNewPassword('')
-    setConfirmPassword('')
-    setIsChangingPassword(false)
+
+    try {
+      // You would implement the password change API call here
+      // For now, just show a success message
+      alert('Password changed successfully!')
+      setIsChangingPassword(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error) {
+      alert('Failed to change password')
+    }
   }
 
-  if (!user) return null
+  const handleSaveProfile = async () => {
+    if (!user) return
+
+    try {
+      // You would implement the profile update API call here
+      // For now, just show a success message
+      alert('Profile updated successfully!')
+      setIsEditingProfile(false)
+    } catch (error) {
+      alert('Failed to update profile')
+    }
+  }
+
+  if (!isOpen || !user) {
+    return null
+  }
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
         <>
           <motion.div
@@ -261,65 +317,33 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
             transition={{ duration: 0.3 }}
             onClick={onClose}
           />
-          <div className="profile-popup-wrapper">
-            <motion.div
-              className="profile-popup"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                className="profile-popup-close"
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-
-              <div className="profile-popup-container">
-                <div className="profile-sidebar">
-                  <div className="profile-sidebar-header">
-                    <div className="profile-avatar">
-                      <i className="fas fa-user"></i>
-                    </div>
-                    <h2 className="profile-name">
-                      {user.firstName} {user.lastName}
-                    </h2>
-                    <p className="profile-username">@{user.userName}</p>
-                  </div>
-
-                  <div className="profile-tabs">
-                    <button
-                      className={`profile-tab ${activeTab === 'profile' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('profile')}
-                    >
-                      <i className="fas fa-user"></i>
-                      <span>Profile</span>
-                    </button>
-                    <button
-                      className={`profile-tab ${activeTab === 'orders' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('orders')}
-                    >
-                      <i className="fas fa-shopping-bag"></i>
-                      <span>Orders</span>
-                    </button>
-                    <button
-                      className={`profile-tab ${activeTab === 'reviews' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('reviews')}
-                    >
-                      <i className="fas fa-star"></i>
-                      <span>Reviews</span>
-                    </button>
-                  </div>
-
-                  <button className="profile-logout-btn" onClick={handleLogout}>
-                    <i className="fas fa-sign-out-alt"></i>
-                    <span>Sign Out</span>
-                  </button>
+          <motion.div
+            className="profile-popup"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation()
+            }}
+            style={{
+              top: '50%',
+              left: '50%',
+              x: '-50%',
+              y: '-40%',
+              pointerEvents: 'auto'
+            }}
+          >
+            {/* Profile Popup Header */}
+            <div className="profile-popup-header">
+              <div className="profile-popup-header-content">
+                <div className="profile-popup-avatar">
+                  <i className="fas fa-user-circle"></i>
                 </div>
-
                 <div className="profile-main-content">
                   <AnimatePresence mode="wait">
                     {activeTab === 'profile' && (
@@ -1073,8 +1097,85 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
                   </AnimatePresence>
                 </div>
               </div>
-            </motion.div>
-          </div>
+              <button
+                className="profile-popup-close-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onClose()
+                }}
+                aria-label="Close profile"
+              >
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Profile Popup Content */}
+            <div className="profile-popup-content">
+              {/* User Details Section */}
+              <div className="profile-popup-section">
+                <h3 className="profile-popup-section-title">Account Information</h3>
+                <div className="profile-popup-details">
+                  <div className="profile-popup-detail-item">
+                    <i className="fas fa-envelope"></i>
+                    <div>
+                      <span className="profile-popup-detail-label">Email</span>
+                      <span className="profile-popup-detail-value">{user.email}</span>
+                    </div>
+                  </div>
+                  <div className="profile-popup-detail-item">
+                    <i className="fas fa-phone"></i>
+                    <div>
+                      <span className="profile-popup-detail-label">Phone</span>
+                      <span className="profile-popup-detail-value">{user.phone}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Orders Section */}
+              {orders && orders.length > 0 && (
+                <div className="profile-popup-section">
+                  <h3 className="profile-popup-section-title">Recent Orders</h3>
+                  <div className="profile-popup-orders">
+                    {orders.slice(0, 3).map((order) => (
+                      <div key={order.id} className="profile-popup-order-item">
+                        <div className="profile-popup-order-info">
+                          <span className="profile-popup-order-id">Order #{order.id}</span>
+                          <span className="profile-popup-order-date">
+                            {new Date(order.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="profile-popup-order-status">
+                          <span className={`profile-popup-status-badge ${order.status}`}>
+                            {order.status}
+                          </span>
+                          <span className="profile-popup-order-total">
+                            ${order.total.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions Section */}
+              <div className="profile-popup-actions">
+                <button
+                  className="profile-popup-logout-btn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleLogout()
+                  }}
+                >
+                  <i className="fas fa-sign-out-alt"></i>
+                  Log Out
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </>
       )}
       <ReviewSuccessModal
@@ -1121,8 +1222,6 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps) {
       />
     </AnimatePresence>
   )
-
-  return isOpen ? createPortal(modalContent, document.body) : null
 }
 
 export default ProfilePopup
