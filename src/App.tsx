@@ -14,6 +14,7 @@ import CheckoutPage from './pages/checkout/CheckoutPage'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import CartSidebar from './components/cart/CartSidebar'
+import ThemeToggle from './components/theme/ThemeToggle'
 import './styles/index.css'
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<Navigate to="/login" replace />} />
         </Routes>
+        <ThemeToggle />
         <ScrollToTop />
         <CartSidebar />
       </div>
