@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../../contexts/CartContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '../../contexts/ThemeContext'
 import AuthModal from '../auth/AuthModal'
 import ProfilePopup from '../profile/ProfilePopup'
 import './Navbar.css'
@@ -18,6 +19,7 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
   const navigate = useNavigate()
   const { openCart, getTotalItems } = useCart()
   const { isAuthenticated } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [servicesHover, setServicesHover] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
@@ -62,6 +64,14 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
     e.preventDefault()
     setMobileMenuOpen(false)
     setMobileServicesOpen(false)
+    
+    // Check if user is trying to access booking page without authentication
+    if (href === '/booking' && !isAuthenticated) {
+      setAuthModalTab('signin')
+      setAuthModalOpen(true)
+      return
+    }
+    
     if (onNavigate) {
       onNavigate()
     }
@@ -183,7 +193,8 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
             })}
           </div>
 
-          {/* Desktop Cart Icon */}
+          {/* Desktop Cart Icon - Only show when authenticated */}
+          {isAuthenticated && (
             <button
               className="navbar-cart-button desktop-cta-button"
               aria-label="Shopping Cart"
@@ -194,6 +205,20 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
                 <span className="cart-badge">{cartItemCount}</span>
               )}
             </button>
+          )}
+
+          {/* Desktop Theme Toggle */}
+          <button
+            className="navbar-theme-toggle desktop-cta-button"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? (
+              <i className="fas fa-moon"></i>
+            ) : (
+              <i className="fas fa-sun"></i>
+            )}
+          </button>
 
           {/* Desktop Profile Icon or Sign In Button */}
           {isAuthenticated ? (
@@ -358,18 +383,39 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
                   )
                 })}
 
-                {/* Mobile Cart Icon */}
+                {/* Mobile Cart Icon - Only show when authenticated */}
+                {isAuthenticated && (
+                  <button
+                    className="mobile-cta-button mobile-cart-button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setMobileMenuOpen(false)
+                      openCart()
+                    }}
+                  >
+                    <i className="fas fa-shopping-cart"></i> Cart
+                    {cartItemCount > 0 && (
+                      <span className="mobile-cart-badge">{cartItemCount}</span>
+                    )}
+                  </button>
+                )}
+
+                {/* Mobile Theme Toggle */}
                 <button
-                  className="mobile-cta-button mobile-cart-button"
+                  className="mobile-cta-button mobile-theme-toggle"
                   onClick={(e) => {
                     e.preventDefault()
-                    setMobileMenuOpen(false)
-                    openCart()
+                    toggleTheme()
                   }}
                 >
-                  <i className="fas fa-shopping-cart"></i> Cart
-                  {cartItemCount > 0 && (
-                    <span className="mobile-cart-badge">{cartItemCount}</span>
+                  {theme === 'light' ? (
+                    <>
+                      <i className="fas fa-moon"></i> Dark Mode
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-sun"></i> Light Mode
+                    </>
                   )}
                 </button>
 

@@ -10,6 +10,7 @@
   background-color: #f5f5f5;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* When used as fixed navbar (on other pages) */
@@ -30,12 +31,34 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+/* Dark Mode Styles */
+.dark-mode .modern-navbar {
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .modern-navbar.fixed-navbar {
+  background: rgba(42, 42, 42, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+}
+
 .modern-navbar.fixed-navbar .navbar-wrapper {
   pointer-events: auto;
   background-color: transparent;
   max-width: 1400px;
   margin: 0 auto;
   border-radius: 0;
+}
+
+/* Ensure all interactive elements are clickable in fixed navbar */
+.modern-navbar.fixed-navbar .navbar-wrapper a,
+.modern-navbar.fixed-navbar .navbar-wrapper button,
+.modern-navbar.fixed-navbar .navbar-wrapper .navbar-link,
+.modern-navbar.fixed-navbar .navbar-wrapper .navbar-dropdown-wrapper,
+.modern-navbar.fixed-navbar .navbar-wrapper .navbar-dropdown-item {
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
 /* Navbar Wrapper */
@@ -61,6 +84,8 @@
   align-items: center;
   text-decoration: none;
   transition: transform 0.2s ease;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .navbar-logo-section a:hover {
@@ -139,6 +164,8 @@
   display: inline-flex;
   align-items: center;
   overflow: visible;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .navbar-link:hover {
@@ -166,6 +193,8 @@
   position: relative;
   display: inline-block;
   z-index: 1001;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .navbar-dropdown-wrapper::after {
@@ -206,6 +235,7 @@
   animation: dropdownFadeIn 0.3s ease;
   margin-top: 0;
   padding-top: 4px;
+  pointer-events: auto;
 }
 
 @keyframes dropdownFadeIn {
@@ -228,6 +258,8 @@
   font-weight: 500;
   transition: all 0.3s ease;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .navbar-dropdown-item:last-child {
@@ -266,6 +298,7 @@
   flex-shrink: 0;
   margin-right: 12px;
   position: relative;
+  pointer-events: auto;
 }
 
 .navbar-cart-button:hover {
@@ -311,6 +344,7 @@
   border: none;
   cursor: pointer;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  pointer-events: auto;
 }
 
 .navbar-profile-button {
@@ -328,6 +362,42 @@
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
+  pointer-events: auto;
+}
+
+/* Theme Toggle Button */
+.navbar-theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-right: 12px;
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  font-size: 1.25rem;
+}
+
+.navbar-theme-toggle:hover {
+  background-color: #f5f5f5;
+  color: #1e3a8a;
+  transform: scale(1.1);
+}
+
+.dark-mode .navbar-theme-toggle {
+  color: #e5e5e5;
+}
+
+.dark-mode .navbar-theme-toggle:hover {
+  background-color: #2a2a2a;
+  color: #fbbf24;
 }
 
 .navbar-profile-button:hover {
@@ -592,6 +662,27 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   width: calc(100% - 40px);
   display: block;
+}
+
+.mobile-theme-toggle {
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  color: #ffffff;
+}
+
+.mobile-theme-toggle:hover {
+  background: linear-gradient(135deg, #5a6578 0%, #3d4758 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .mobile-theme-toggle {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1a1a1a;
+}
+
+.dark-mode .mobile-theme-toggle:hover {
+  background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
 .mobile-cta-button:hover {

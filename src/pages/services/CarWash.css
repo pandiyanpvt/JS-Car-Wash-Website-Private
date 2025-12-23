@@ -393,3 +393,17 @@
   color: #ffffff;
 }
 
+.loading-message,
+.no-packages-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.dark-mode .loading-message,
+.dark-mode .no-packages-message {
+  color: #b0b0b0;
+}
+

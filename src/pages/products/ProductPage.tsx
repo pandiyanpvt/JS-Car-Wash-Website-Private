@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import Navbar from '../../components/navbar/Navbar'
 import { FooterPage } from '../footer'
 import { useCart } from '../../contexts/CartContext'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthModal from '../../components/auth/AuthModal'
+import { productApi, productCategoryApi } from '../../services/api'
 import './ProductPage.css'
 
 interface Product {
@@ -25,121 +26,107 @@ function ProductPage() {
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'stock'>('name')
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchLoading, setSearchLoading] = useState(false)
 
-  const products: Product[] = useMemo(() => [
-    {
-      id: 1,
-      name: 'Premium Car Wax',
-      description: 'High-quality car wax for long-lasting shine and protection',
-      price: 134.12,
-      stock: 25,
-      image: '/JS Car Wash Images/Hand Polish.jpg',
-      category: 'Wax & Polish',
-      rating: 5.0
-    },
-    {
-      id: 2,
-      name: 'Interior Cleaner',
-      description: 'Professional interior cleaner for all car surfaces',
-      price: 89.99,
-      stock: 18,
-      image: '/JS Car Wash Images/Leather Clean.png',
-      category: 'Interior Care',
-      rating: 5.0
-    },
-    {
-      id: 3,
-      name: 'Tire Shine Spray',
-      description: 'Premium tire shine for a glossy, black finish',
-      price: 45.50,
-      stock: 32,
-      image: '/JS Car Wash Images/Tyre Shine.png',
-      category: 'Tire Care',
-      rating: 5.0
-    },
-    {
-      id: 4,
-      name: 'Headlight Restorer',
-      description: 'Restore cloudy headlights to crystal clear',
-      price: 67.99,
-      stock: 15,
-      image: '/JS Car Wash Images/Headlight Restoration.jpg',
-      category: 'Restoration',
-      rating: 5.0
-    },
-    {
-      id: 5,
-      name: 'Clay Bar Kit',
-      description: 'Complete clay bar kit for paint decontamination',
-      price: 125.00,
-      stock: 20,
-      image: '/JS Car Wash Images/Clay Bar.jpg',
-      category: 'Paint Care',
-      rating: 5.0
-    },
-    {
-      id: 6,
-      name: 'Buff Polish Compound',
-      description: 'Professional buff polish for removing scratches',
-      price: 98.75,
-      stock: 22,
-      image: '/JS Car Wash Images/Buff Polish.jpg',
-      category: 'Wax & Polish',
-      rating: 5.0
-    },
-    {
-      id: 7,
-      name: 'Carpet Steam Cleaner',
-      description: 'Deep cleaning solution for car carpets and mats',
-      price: 76.50,
-      stock: 28,
-      image: '/JS Car Wash Images/Carpet Steam Clean.jpg',
-      category: 'Interior Care',
-      rating: 5.0
-    },
-    {
-      id: 8,
-      name: 'Sticker Remover',
-      description: 'Safe adhesive remover for stickers and decals',
-      price: 34.99,
-      stock: 40,
-      image: '/JS Car Wash Images/Sticker Removal.jpg',
-      category: 'Restoration',
-      rating: 5.0
-    },
-    {
-      id: 9,
-      name: 'Full Duco Wax',
-      description: 'Premium hand wax polish for complete car protection',
-      price: 149.99,
-      stock: 12,
-      image: '/JS Car Wash Images/Full Duco Hand Wax Polish.jpg',
-      category: 'Wax & Polish',
-      rating: 5.0
-    },
-    {
-      id: 10,
-      name: 'Bugs & Tar Remover',
-      description: 'Effective cleaner for removing bugs and tar',
-      price: 55.25,
-      stock: 30,
-      image: '/JS Car Wash Images/Bugs & Tar Removal.png',
-      category: 'Paint Care',
-      rating: 5.0
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          productApi.getAll(),
+          productCategoryApi.getAll()
+        ])
+
+        if (productsResponse.success && productsResponse.data) {
+          const mappedProducts: Product[] = productsResponse.data
+            .filter(p => p.is_active)
+            .map(p => ({
+              id: p.id,
+              name: p.product_name,
+              description: p.description,
+              price: parseFloat(p.amount),
+              stock: p.stock,
+              image: p.img_url,
+              category: p.category.category
+            }))
+          setProducts(mappedProducts)
+        }
+
+        if (categoriesResponse.success && categoriesResponse.data) {
+          const categoryNames = categoriesResponse.data
+            .filter(c => c.is_active)
+            .map(c => c.category)
+            .sort()
+          setCategories(categoryNames)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load products')
+      } finally {
+        setLoading(false)
+      }
     }
-  ], [])
 
-  const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(products.map(p => p.category)))
-    return uniqueCategories.sort()
-  }, [products])
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (!searchQuery.trim()) {
+        const response = await productApi.getAll()
+        if (response.success && response.data) {
+          const mappedProducts: Product[] = response.data
+            .filter(p => p.is_active)
+            .map(p => ({
+              id: p.id,
+              name: p.product_name,
+              description: p.description,
+              price: parseFloat(p.amount),
+              stock: p.stock,
+              image: p.img_url,
+              category: p.category.category
+            }))
+          setProducts(mappedProducts)
+        }
+        return
+      }
+
+      try {
+        setSearchLoading(true)
+        const response = await productApi.search(searchQuery)
+        if (response.success && response.data) {
+          const mappedProducts: Product[] = response.data
+            .filter(p => p.is_active)
+            .map(p => ({
+              id: p.id,
+              name: p.product_name,
+              description: p.description,
+              price: parseFloat(p.amount),
+              stock: p.stock,
+              image: p.img_url,
+              category: p.category.category
+            }))
+          setProducts(mappedProducts)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Search failed')
+      } finally {
+        setSearchLoading(false)
+      }
+    }
+
+    const timeoutId = setTimeout(searchProducts, 300)
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
 
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory
-      return matchesSearch && matchesCategory
+      return matchesCategory
     })
 
     filtered = [...filtered].sort((a, b) => {
@@ -159,13 +146,13 @@ function ProductPage() {
     return filtered
   }, [products, searchQuery, selectedCategory, sortBy])
 
-  const handleAddToCart = useCallback((product: Product) => {
+  const handleAddToCart = useCallback(async (product: Product) => {
     if (!isAuthenticated) {
       setAuthModalTab('signin')
       setAuthModalOpen(true)
       return
     }
-    addToCart({
+    await addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
@@ -248,8 +235,21 @@ function ProductPage() {
             </div>
           )}
 
-          {/* Products Grid - All products in one grid */}
-          {filteredProducts.length > 0 ? (
+          {loading || searchLoading ? (
+            <div className="product-empty-state">
+              <div className="product-empty-icon">
+                <i className="fas fa-spinner fa-spin"></i>
+              </div>
+              <p>Loading products...</p>
+            </div>
+          ) : error ? (
+            <div className="product-empty-state">
+              <div className="product-empty-icon">
+                <i className="fas fa-exclamation-triangle"></i>
+              </div>
+              <p>{error}</p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <div className="product-grid">
               {filteredProducts.map((product) => (
                 <div key={product.id} className="product-card">

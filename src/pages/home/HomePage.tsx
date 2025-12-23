@@ -889,7 +889,14 @@ function HomePage({}: HomePageProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <button className="book-now-btn" onClick={() => navigate('/booking')}>BOOK NOW</button>
+              <button className="book-now-btn" onClick={() => {
+                if (!isAuthenticated) {
+                  setAuthModalTab('signin')
+                  setAuthModalOpen(true)
+                } else {
+                  navigate('/booking')
+                }
+              }}>BOOK NOW</button>
             </motion.div>
           </div>
         </div>
@@ -1442,7 +1449,14 @@ function HomePage({}: HomePageProps) {
                 <div className="home-package-price">$149 <span className="home-package-price-suffix">/ start from</span></div>
                 <h3 className="home-package-name">JS Polish</h3>
               </div>
-              <button className="home-package-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
+              <button className="home-package-book-btn" onClick={() => {
+                if (!isAuthenticated) {
+                  setAuthModalTab('signin')
+                  setAuthModalOpen(true)
+                } else {
+                  navigate('/booking')
+                }
+              }}>Book Now</button>
               <div className="home-package-features">
                 <h4 className="home-package-features-title">Package includes</h4>
                 <ul className="home-package-features-list">
@@ -1504,7 +1518,14 @@ function HomePage({}: HomePageProps) {
                 <div className="home-package-price">$69 <span className="home-package-price-suffix">/ start from</span></div>
                 <h3 className="home-package-name">JS Platinum</h3>
               </div>
-              <button className="home-package-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
+              <button className="home-package-book-btn" onClick={() => {
+                if (!isAuthenticated) {
+                  setAuthModalTab('signin')
+                  setAuthModalOpen(true)
+                } else {
+                  navigate('/booking')
+                }
+              }}>Book Now</button>
               <div className="home-package-features">
                 <h4 className="home-package-features-title">Package includes</h4>
                 <ul className="home-package-features-list">
@@ -1566,7 +1587,14 @@ function HomePage({}: HomePageProps) {
                 <div className="home-package-price">$39 <span className="home-package-price-suffix">/ start from</span></div>
                 <h3 className="home-package-name">JS Express</h3>
               </div>
-              <button className="home-package-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
+              <button className="home-package-book-btn" onClick={() => {
+                if (!isAuthenticated) {
+                  setAuthModalTab('signin')
+                  setAuthModalOpen(true)
+                } else {
+                  navigate('/booking')
+                }
+              }}>Book Now</button>
               <div className="home-package-features">
                 <h4 className="home-package-features-title">Package includes</h4>
                 <ul className="home-package-features-list">

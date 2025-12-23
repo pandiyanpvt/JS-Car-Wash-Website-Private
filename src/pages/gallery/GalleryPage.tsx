@@ -2,39 +2,48 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
+import { galleryApi } from '../../services/api'
 import './GalleryPage.css'
-
-// Gallery page component with navbar, gallery cards, and footer
 
 interface GalleryImage {
   id: number
   src: string
   alt: string
-  title?: string
 }
 
 function GalleryPage() {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const galleryImages: GalleryImage[] = [
-    { id: 1, src: '/Gallery/01-min.png', alt: 'Car Wash Service 1' },
-    { id: 2, src: '/Gallery/02-min.jpg', alt: 'Car Wash Service 2' },
-    { id: 3, src: '/Gallery/03-min.jpg', alt: 'Car Wash Service 3' },
-    { id: 4, src: '/Gallery/04-min.jpg', alt: 'Car Wash Service 4' },
-    { id: 5, src: '/Gallery/05-min.jpg', alt: 'Car Wash Service 5' },
-    { id: 6, src: '/Gallery/06-min.jpg', alt: 'Car Wash Service 6' },
-    { id: 7, src: '/Gallery/07-min.jpg', alt: 'Car Wash Service 7' },
-    { id: 8, src: '/Gallery/08-min.jpg', alt: 'Car Wash Service 8' },
-    { id: 9, src: '/Gallery/10-min.jpg', alt: 'Car Wash Service 9' },
-    { id: 10, src: '/Gallery/11-min.jpg', alt: 'Car Wash Service 10' },
-    { id: 11, src: '/Gallery/12-min.jpg', alt: 'Car Wash Service 11' },
-    { id: 12, src: '/Gallery/13-min.jpg', alt: 'Car Wash Service 12' },
-    { id: 13, src: '/Gallery/14-min.jpg', alt: 'Car Wash Service 13' },
-    { id: 14, src: '/Gallery/15-min.jpg', alt: 'Car Wash Service 14' },
-    { id: 15, src: '/Gallery/16-min.jpg', alt: 'Car Wash Service 15' },
-    { id: 16, src: '/Gallery/17-min.jpg', alt: 'Car Wash Service 16' },
-    { id: 17, src: '/Gallery/18-min.jpg', alt: 'Car Wash Service 17' }
-  ]
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        setLoading(true)
+        setError('')
+        const response = await galleryApi.getGallery()
+        if (response.success && response.data) {
+          const activeImages = response.data
+            .filter(item => item.is_active)
+            .map(item => ({
+              id: item.id,
+              src: item.img_url,
+              alt: `Gallery Image ${item.id}`
+            }))
+          setGalleryImages(activeImages)
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load gallery images'
+        setError(errorMessage)
+        console.error('Error fetching gallery:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchGallery()
+  }, [])
 
   const getCurrentImageIndex = () => {
     if (!selectedImage) return -1
@@ -66,9 +75,19 @@ function GalleryPage() {
       if (e.key === 'Escape') {
         setSelectedImage(null)
       } else if (e.key === 'ArrowLeft') {
-        handlePrevious()
+        const currentIndex = galleryImages.findIndex(img => img.id === selectedImage.id)
+        if (currentIndex > 0) {
+          setSelectedImage(galleryImages[currentIndex - 1])
+        } else {
+          setSelectedImage(galleryImages[galleryImages.length - 1])
+        }
       } else if (e.key === 'ArrowRight') {
-        handleNext()
+        const currentIndex = galleryImages.findIndex(img => img.id === selectedImage.id)
+        if (currentIndex < galleryImages.length - 1) {
+          setSelectedImage(galleryImages[currentIndex + 1])
+        } else {
+          setSelectedImage(galleryImages[0])
+        }
       }
     }
 
@@ -83,7 +102,7 @@ function GalleryPage() {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'unset'
     }
-  }, [selectedImage])
+  }, [selectedImage, galleryImages])
 
   return (
     <div className="gallery-page">
@@ -99,33 +118,47 @@ function GalleryPage() {
       {/* Gallery Grid */}
       <section className="gallery-section">
         <div className="gallery-container-full">
-          <div className="gallery-grid">
-            {galleryImages.map((image, index) => (
-              <motion.div
-                key={image.id}
-                className="gallery-card"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                whileHover={{ scale: 1.05, zIndex: 10 }}
-                onClick={() => setSelectedImage(image)}
-              >
-                <div className="gallery-card-image-wrapper">
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    className="gallery-card-image"
-                    loading="lazy"
-                  />
-                  <div className="gallery-card-overlay">
-                    <div className="gallery-card-content">
-                      <h3 className="gallery-card-title">{image.alt}</h3>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <p style={{ fontSize: '1.125rem', color: '#666' }}>Loading gallery...</p>
+            </div>
+          ) : error ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <p style={{ fontSize: '1.125rem', color: '#dc3545' }}>{error}</p>
+            </div>
+          ) : galleryImages.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <p style={{ fontSize: '1.125rem', color: '#666' }}>No gallery images available.</p>
+            </div>
+          ) : (
+            <div className="gallery-grid">
+              {galleryImages.map((image, index) => (
+                <motion.div
+                  key={image.id}
+                  className="gallery-card"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  whileHover={{ scale: 1.05, zIndex: 10 }}
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <div className="gallery-card-image-wrapper">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="gallery-card-image"
+                      loading="lazy"
+                    />
+                    <div className="gallery-card-overlay">
+                      <div className="gallery-card-content">
+                        <h3 className="gallery-card-title">{image.alt}</h3>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -137,7 +170,6 @@ function GalleryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSelectedImage(null)}
           >
             <motion.div
               className="gallery-lightbox-content"
@@ -185,9 +217,6 @@ function GalleryPage() {
                 alt={selectedImage.alt}
                 className="gallery-lightbox-image"
               />
-              <div className="gallery-lightbox-title">
-                <h3>{selectedImage.alt}</h3>
-              </div>
             </motion.div>
           </motion.div>
         )}

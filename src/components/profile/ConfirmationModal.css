@@ -1,0 +1,236 @@
+.confirmation-modal-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px);
+  z-index: 1000000002 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+.confirmation-modal-wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000003 !important;
+  pointer-events: none;
+  padding: 20px;
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+.confirmation-modal {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  pointer-events: auto;
+  z-index: 1000000004;
+  isolation: isolate;
+}
+
+.confirmation-modal-content {
+  padding: 32px;
+  text-align: center;
+}
+
+.confirmation-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 2rem;
+}
+
+.confirmation-modal-icon-danger {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.confirmation-modal-icon-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.confirmation-modal-icon-info {
+  background-color: rgba(30, 58, 138, 0.1);
+  color: #1e3a8a;
+}
+
+.confirmation-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: -0.3px;
+}
+
+.confirmation-modal-message {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.confirmation-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.confirmation-modal-cancel-btn,
+.confirmation-modal-confirm-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  min-width: 100px;
+}
+
+.confirmation-modal-cancel-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.confirmation-modal-cancel-btn:hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-modal-confirm-btn {
+  color: #ffffff;
+}
+
+.confirmation-modal-confirm-btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.confirmation-modal-confirm-btn-danger:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
+.confirmation-modal-confirm-btn-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.confirmation-modal-confirm-btn-warning:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.confirmation-modal-confirm-btn-info {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+}
+
+.confirmation-modal-confirm-btn-info:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+}
+
+/* Dark mode styles */
+.dark-mode .confirmation-modal {
+  background-color: #1a1a1a !important;
+  box-shadow: 0 20px 60px rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark-mode .confirmation-modal-title {
+  color: #ffffff !important;
+}
+
+.dark-mode .confirmation-modal-message {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .confirmation-modal-cancel-btn {
+  background-color: #2a2a2a !important;
+  color: #e5e5e5 !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .confirmation-modal-cancel-btn:hover {
+  background-color: #3a3a3a !important;
+  border-color: #4a4a4a !important;
+}
+
+.dark-mode .confirmation-modal-icon-danger {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+  color: #ef4444 !important;
+}
+
+.dark-mode .confirmation-modal-icon-warning {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+}
+
+.dark-mode .confirmation-modal-icon-info {
+  background-color: rgba(30, 58, 138, 0.2) !important;
+  color: #2563eb !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .confirmation-modal {
+    max-width: 90%;
+    margin: 20px;
+  }
+
+  .confirmation-modal-content {
+    padding: 24px;
+  }
+
+  .confirmation-modal-title {
+    font-size: 1.25rem;
+  }
+
+  .confirmation-modal-message {
+    font-size: 0.9375rem;
+  }
+
+  .confirmation-modal-actions {
+    flex-direction: column;
+  }
+
+  .confirmation-modal-cancel-btn,
+  .confirmation-modal-confirm-btn {
+    width: 100%;
+  }
+}
+

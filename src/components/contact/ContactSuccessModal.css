@@ -1,0 +1,173 @@
+.contact-success-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999999;
+  pointer-events: auto;
+}
+
+.contact-success-modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  pointer-events: none;
+  padding: 20px;
+}
+
+.contact-success-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  pointer-events: auto;
+  z-index: 1000001;
+}
+
+.contact-success-modal-content {
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+}
+
+.contact-success-modal-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 2.5rem;
+  box-shadow: 0 8px 24px rgba(40, 167, 69, 0.3);
+  animation: scaleIn 0.4s ease-out 0.2s both;
+}
+
+.contact-success-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 12px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.contact-success-modal-message {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 32px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+}
+
+.contact-success-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.contact-success-modal-ok-btn {
+  padding: 14px 40px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+}
+
+.contact-success-modal-ok-btn:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+}
+
+.contact-success-modal-ok-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 767px) {
+  .contact-success-modal {
+    max-width: 90%;
+  }
+
+  .contact-success-modal-content {
+    padding: 40px 32px;
+  }
+
+  .contact-success-modal-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .contact-success-modal-title {
+    font-size: 1.25rem;
+  }
+
+  .contact-success-modal-message {
+    font-size: 0.9375rem;
+    margin-bottom: 28px;
+  }
+
+  .contact-success-modal-ok-btn {
+    padding: 12px 32px;
+    font-size: 0.9375rem;
+  }
+}
+
+.dark-mode .contact-success-modal {
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+}
+
+.dark-mode .contact-success-modal-title {
+  color: #ffffff;
+}
+
+.dark-mode .contact-success-modal-message {
+  color: #e5e5e5;
+}
+
+.dark-mode .contact-success-modal-ok-btn {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+}
+
+.dark-mode .contact-success-modal-ok-btn:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+}
+
+

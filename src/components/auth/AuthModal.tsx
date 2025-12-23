@@ -11,11 +11,20 @@ interface AuthModalProps {
 }
 
 function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
-  const { signup, login } = useAuth()
+  const { signup, login, verifyEmail, forgotPassword, resetPassword } = useAuth()
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>(initialTab)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('')
+  const [resetPasswordEmail, setResetPasswordEmail] = useState('')
+  const [resetPasswordOtp, setResetPasswordOtp] = useState('')
+  const [resetPasswordNewPassword, setResetPasswordNewPassword] = useState('')
+  const [resetPasswordConfirmPassword, setResetPasswordConfirmPassword] = useState('')
+  const [verificationEmail, setVerificationEmail] = useState('')
+  const [verificationOtp, setVerificationOtp] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const [signInEmail, setSignInEmail] = useState('')
   const [signInPassword, setSignInPassword] = useState('')
@@ -65,20 +74,33 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    await login('', '')
-    onClose()
-    setSignInEmail('')
-    setSignInPassword('')
+    setLoading(true)
+    
+    const result = await login(signInEmail, signInPassword)
+    
+    if (result.success) {
+      onClose()
+      setSignInEmail('')
+      setSignInPassword('')
+    } else {
+      setError(result.error || 'Login failed. Please check your credentials.')
+    }
+    
+    setLoading(false)
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    
     if (signUpPassword !== signUpConfirmPassword) {
       setError('Passwords do not match!')
       return
     }
-    const success = await signup({
+    
+    setLoading(true)
+    
+    const result = await signup({
       firstName: signUpFirstName,
       lastName: signUpLastName,
       userName: signUpUserName,
@@ -86,26 +108,88 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
       phone: signUpPhone,
       password: signUpPassword
     })
-    if (success) {
-      onClose()
+    
+    if (result.success) {
+      setVerificationEmail(signUpEmail)
+      setShowEmailVerification(true)
       setSignUpFirstName('')
       setSignUpLastName('')
       setSignUpUserName('')
-      setSignUpEmail('')
       setSignUpPhone('')
       setSignUpPassword('')
       setSignUpConfirmPassword('')
     } else {
-      setError('Email or username already exists')
+      setError(result.error || 'Registration failed. Please try again.')
     }
+    
+    setLoading(false)
   }
 
-  const handleForgotPassword = (e: React.FormEvent) => {
+  const handleVerifyEmail = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Forgot Password:', { email: forgotPasswordEmail })
-    alert('Password reset link has been sent to your email!')
-    setShowForgotPassword(false)
-    setForgotPasswordEmail('')
+    setError('')
+    setLoading(true)
+    
+    const result = await verifyEmail(verificationEmail, verificationOtp)
+    
+    if (result.success) {
+      setShowEmailVerification(false)
+      setVerificationEmail('')
+      setVerificationOtp('')
+      alert('Email verified successfully! You can now sign in.')
+      setActiveTab('signin')
+    } else {
+      setError(result.error || 'Verification failed. Please check your OTP.')
+    }
+    
+    setLoading(false)
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    
+    const result = await forgotPassword(forgotPasswordEmail)
+    
+    if (result.success) {
+      setResetPasswordEmail(forgotPasswordEmail)
+      setShowForgotPassword(false)
+      setShowResetPassword(true)
+      setForgotPasswordEmail('')
+    } else {
+      setError(result.error || 'Failed to send reset password email. Please try again.')
+    }
+    
+    setLoading(false)
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    
+    if (resetPasswordNewPassword !== resetPasswordConfirmPassword) {
+      setError('Passwords do not match!')
+      return
+    }
+    
+    setLoading(true)
+    
+    const result = await resetPassword(resetPasswordEmail, resetPasswordOtp, resetPasswordNewPassword)
+    
+    if (result.success) {
+      alert('Password reset successfully! You can now sign in with your new password.')
+      setShowResetPassword(false)
+      setResetPasswordEmail('')
+      setResetPasswordOtp('')
+      setResetPasswordNewPassword('')
+      setResetPasswordConfirmPassword('')
+      setActiveTab('signin')
+    } else {
+      setError(result.error || 'Password reset failed. Please check your OTP and try again.')
+    }
+    
+    setLoading(false)
   }
 
   const modalContent = (
@@ -162,6 +246,9 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                       onClick={() => {
                         setActiveTab('signin')
                         setShowForgotPassword(false)
+                        setShowEmailVerification(false)
+                        setShowResetPassword(false)
+                        setError('')
                       }}
                     >
                       Sign In
@@ -171,6 +258,9 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                       onClick={() => {
                         setActiveTab('signup')
                         setShowForgotPassword(false)
+                        setShowEmailVerification(false)
+                        setShowResetPassword(false)
+                        setError('')
                       }}
                     >
                       Sign Up
@@ -179,7 +269,178 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
 
                   <div className="auth-tab-content">
                 <AnimatePresence mode="wait">
-                  {showForgotPassword && activeTab === 'signin' ? (
+                  {showResetPassword ? (
+                    <motion.div
+                      key="reset-password"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="auth-form-container"
+                    >
+                      <h2 className="auth-form-title">Reset Password</h2>
+                      <p className="auth-form-subtitle">Enter the OTP sent to your email and your new password</p>
+                      
+                      {error && (
+                        <div className="auth-error-message">
+                          <i className="fas fa-exclamation-circle"></i>
+                          {error}
+                        </div>
+                      )}
+                      
+                      <form onSubmit={handleResetPassword} className="auth-form">
+                        <div className="auth-form-group">
+                          <label htmlFor="reset-email">Email Address *</label>
+                          <div className="auth-input-wrapper">
+                            <i className="fas fa-envelope auth-input-icon"></i>
+                            <input
+                              type="email"
+                              id="reset-email"
+                              value={resetPasswordEmail}
+                              onChange={(e) => setResetPasswordEmail(e.target.value)}
+                              placeholder="Email Address"
+                              required
+                              disabled
+                            />
+                          </div>
+                        </div>
+
+                        <div className="auth-form-group">
+                          <label htmlFor="reset-otp">OTP *</label>
+                          <div className="auth-input-wrapper">
+                            <i className="fas fa-key auth-input-icon"></i>
+                            <input
+                              type="text"
+                              id="reset-otp"
+                              value={resetPasswordOtp}
+                              onChange={(e) => setResetPasswordOtp(e.target.value)}
+                              placeholder="Enter OTP"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="auth-form-group">
+                          <label htmlFor="reset-new-password">New Password *</label>
+                          <div className="auth-input-wrapper">
+                            <i className="fas fa-lock auth-input-icon"></i>
+                            <input
+                              type="password"
+                              id="reset-new-password"
+                              value={resetPasswordNewPassword}
+                              onChange={(e) => setResetPasswordNewPassword(e.target.value)}
+                              placeholder="New Password"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="auth-form-group">
+                          <label htmlFor="reset-confirm-password">Confirm New Password *</label>
+                          <div className="auth-input-wrapper">
+                            <i className="fas fa-lock auth-input-icon"></i>
+                            <input
+                              type="password"
+                              id="reset-confirm-password"
+                              value={resetPasswordConfirmPassword}
+                              onChange={(e) => setResetPasswordConfirmPassword(e.target.value)}
+                              placeholder="Confirm New Password"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <button type="submit" className="auth-submit-btn" disabled={loading}>
+                          {loading ? 'Resetting...' : 'Reset Password'}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="auth-back-link"
+                          onClick={() => {
+                            setShowResetPassword(false)
+                            setShowForgotPassword(true)
+                            setResetPasswordEmail('')
+                            setResetPasswordOtp('')
+                            setResetPasswordNewPassword('')
+                            setResetPasswordConfirmPassword('')
+                            setError('')
+                          }}
+                        >
+                          Back
+                        </button>
+                      </form>
+                    </motion.div>
+                  ) : showEmailVerification ? (
+                    <motion.div
+                      key="email-verification"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="auth-form-container"
+                    >
+                      <h2 className="auth-form-title">Verify Email</h2>
+                      <p className="auth-form-subtitle">Enter the OTP sent to your email address</p>
+                      
+                      {error && (
+                        <div className="auth-error-message">
+                          <i className="fas fa-exclamation-circle"></i>
+                          {error}
+                        </div>
+                      )}
+                      
+                      <form onSubmit={handleVerifyEmail} className="auth-form">
+                        <div className="auth-form-group">
+                          <label htmlFor="verify-email">Email Address *</label>
+                          <div className="auth-input-wrapper">
+                            <i className="fas fa-envelope auth-input-icon"></i>
+                            <input
+                              type="email"
+                              id="verify-email"
+                              value={verificationEmail}
+                              onChange={(e) => setVerificationEmail(e.target.value)}
+                              placeholder="Email Address"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="auth-form-group">
+                          <label htmlFor="verify-otp">OTP *</label>
+                          <div className="auth-input-wrapper">
+                            <i className="fas fa-key auth-input-icon"></i>
+                            <input
+                              type="text"
+                              id="verify-otp"
+                              value={verificationOtp}
+                              onChange={(e) => setVerificationOtp(e.target.value)}
+                              placeholder="Enter OTP"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <button type="submit" className="auth-submit-btn" disabled={loading}>
+                          {loading ? 'Verifying...' : 'Verify Email'}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="auth-back-link"
+                          onClick={() => {
+                            setShowEmailVerification(false)
+                            setVerificationEmail('')
+                            setVerificationOtp('')
+                            setError('')
+                            setActiveTab('signup')
+                          }}
+                        >
+                          Back to Sign Up
+                        </button>
+                      </form>
+                    </motion.div>
+                  ) : showForgotPassword && activeTab === 'signin' ? (
                     <motion.div
                       key="forgot-password"
                       initial={{ opacity: 0, x: 20 }}
@@ -189,7 +450,14 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                       className="auth-form-container"
                     >
                       <h2 className="auth-form-title">Forgot Password</h2>
-                      <p className="auth-form-subtitle">Enter your email to reset your password</p>
+                      <p className="auth-form-subtitle">Enter your email to receive a password reset OTP</p>
+                      
+                      {error && (
+                        <div className="auth-error-message">
+                          <i className="fas fa-exclamation-circle"></i>
+                          {error}
+                        </div>
+                      )}
                       
                       <form onSubmit={handleForgotPassword} className="auth-form">
                         <div className="auth-form-group">
@@ -207,14 +475,18 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                           </div>
                         </div>
 
-                        <button type="submit" className="auth-submit-btn">
-                          Send Reset Link
+                        <button type="submit" className="auth-submit-btn" disabled={loading}>
+                          {loading ? 'Sending...' : 'Send OTP'}
                         </button>
 
                         <button
                           type="button"
                           className="auth-back-link"
-                          onClick={() => setShowForgotPassword(false)}
+                          onClick={() => {
+                            setShowForgotPassword(false)
+                            setForgotPasswordEmail('')
+                            setError('')
+                          }}
                         >
                           Back to Sign In
                         </button>
@@ -289,8 +561,8 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                           </button>
                         </div>
 
-                        <button type="submit" className="auth-submit-btn">
-                          Sign in
+                        <button type="submit" className="auth-submit-btn" disabled={loading}>
+                          {loading ? 'Signing in...' : 'Sign in'}
                         </button>
                       </form>
                     </motion.div>
@@ -425,8 +697,8 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                            </div>
                          </div>
 
-                        <button type="submit" className="auth-submit-btn">
-                          Create Account
+                        <button type="submit" className="auth-submit-btn" disabled={loading}>
+                          {loading ? 'Creating...' : 'Create Account'}
                         </button>
                       </form>
                     </motion.div>

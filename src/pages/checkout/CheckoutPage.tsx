@@ -1,38 +1,109 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
 import { FooterPage } from '../footer'
 import { useCart } from '../../contexts/CartContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { orderApi, contactApi, type Branch } from '../../services/api'
 import OrderSuccessModal from '../../components/cart/OrderSuccessModal'
 import './CheckoutPage.css'
 
 function CheckoutPage() {
   const navigate = useNavigate()
   const { cartItems, getTotalPrice, getTotalItems, clearCart } = useCart()
-  const { addOrder } = useAuth()
+  const { user, addOrder } = useAuth()
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const handlePlaceOrder = () => {
-    const order = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      items: cartItems.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price
-      })),
-      total: getTotalPrice(),
-      status: 'pending' as const
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        setLoading(true)
+        const response = await contactApi.getBranches()
+        if (response.success && response.data) {
+          const activeBranches = response.data.filter(branch => branch.is_active)
+          setBranches(activeBranches)
+          if (activeBranches.length > 0) {
+            setSelectedBranchId(activeBranches[0].id)
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load branches')
+      } finally {
+        setLoading(false)
+      }
     }
-    addOrder(order)
-    console.log('Order submitted:', { cartItems })
-    setShowSuccessModal(true)
+
+    fetchBranches()
+  }, [])
+
+  const handlePlaceOrder = async () => {
+    if (!user) {
+      setError('Please sign in to place an order')
+      return
+    }
+
+    if (!selectedBranchId) {
+      setError('Please select a branch')
+      return
+    }
+
+    if (cartItems.length === 0) {
+      setError('Your cart is empty')
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      setError(null)
+
+      const orderData = {
+        user_id: user.id,
+        branch_id: selectedBranchId,
+        products: cartItems.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity
+        }))
+      }
+
+      const response = await orderApi.create(orderData)
+
+      if (response.success) {
+        const order = {
+          id: response.data?.id?.toString() || Date.now().toString(),
+          date: new Date().toISOString(),
+          items: cartItems.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          total: getTotalPrice(),
+          status: 'pending' as const
+        }
+        addOrder(order)
+        await clearCart()
+        setShowSuccessModal(true)
+        
+        setTimeout(() => {
+          setShowSuccessModal(false)
+          navigate('/products')
+        }, 2000)
+      } else {
+        throw new Error(response.message || 'Failed to place order')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to place order')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false)
-    clearCart()
     navigate('/products')
   }
 
@@ -105,6 +176,47 @@ function CheckoutPage() {
               </div>
             </div>
 
+            <div className="checkout-branch-selection">
+              <h3 className="checkout-branch-title">Select Pickup Branch</h3>
+              {loading ? (
+                <div className="checkout-branch-loading">
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <span>Loading branches...</span>
+                </div>
+              ) : branches.length > 0 ? (
+                <div className="checkout-branch-list">
+                  {branches.map((branch) => (
+                    <div
+                      key={branch.id}
+                      className={`checkout-branch-item ${selectedBranchId === branch.id ? 'selected' : ''}`}
+                      onClick={() => setSelectedBranchId(branch.id)}
+                    >
+                      <div className="checkout-branch-radio">
+                        <input
+                          type="radio"
+                          name="branch"
+                          value={branch.id}
+                          checked={selectedBranchId === branch.id}
+                          onChange={() => setSelectedBranchId(branch.id)}
+                        />
+                      </div>
+                      <div className="checkout-branch-info">
+                        <h4 className="checkout-branch-name">{branch.branch_name}</h4>
+                        <p className="checkout-branch-address">{branch.address}</p>
+                        <p className="checkout-branch-contact">
+                          <i className="fas fa-phone"></i> {branch.phone_number}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="checkout-branch-error">
+                  <p>No branches available</p>
+                </div>
+              )}
+            </div>
+
             <div className="checkout-pickup-notice">
               <div className="checkout-notice-icon">
                 <i className="fas fa-info-circle"></i>
@@ -112,8 +224,26 @@ function CheckoutPage() {
               <p>Please note: Delivery is not available. You can pay and pick up from the shop directly.</p>
             </div>
 
-            <button onClick={handlePlaceOrder} className="checkout-submit-btn">
-              Place Order
+            {error && (
+              <div className="checkout-error-message">
+                <i className="fas fa-exclamation-circle"></i>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <button
+              onClick={handlePlaceOrder}
+              className="checkout-submit-btn"
+              disabled={submitting || !selectedBranchId || loading}
+            >
+              {submitting ? (
+                <>
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <span>Placing Order...</span>
+                </>
+              ) : (
+                'Place Order'
+              )}
             </button>
           </div>
         </div>
