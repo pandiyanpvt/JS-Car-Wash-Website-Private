@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
+import AuthModal from '../../components/auth/AuthModal'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCart } from '../../contexts/CartContext'
 import { 
@@ -81,6 +82,8 @@ function BookingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCartPopup, setShowCartPopup] = useState(false)
   const [hasShownCartPopup, setHasShownCartPopup] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
 
   // API data
   const [branches, setBranches] = useState<Branch[]>([])
@@ -89,6 +92,21 @@ function BookingPage() {
   const [extras, setExtras] = useState<Extra[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Check authentication on mount - show sign-in modal if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setAuthModalOpen(true)
+      setAuthModalTab('signin')
+    }
+  }, [isAuthenticated])
+
+  // Close auth modal when user becomes authenticated
+  useEffect(() => {
+    if (isAuthenticated && authModalOpen) {
+      setAuthModalOpen(false)
+    }
+  }, [isAuthenticated, authModalOpen])
 
   // Fetch branches
   useEffect(() => {
@@ -592,6 +610,8 @@ function BookingPage() {
         </div>
       </section>
       
+      {/* Show booking content only if authenticated */}
+      {isAuthenticated ? (
       <div className="booking-container">
         <div className="booking-container-inner">
           {/* Right Content Area */}
@@ -1283,6 +1303,22 @@ function BookingPage() {
         </div>
         </div>
       </div>
+      ) : (
+        <div className="booking-container" style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '400px',
+          padding: '40px 20px'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ marginBottom: '20px', color: '#1e3a8a' }}>Please Sign In to Continue</h2>
+            <p style={{ marginBottom: '30px', color: '#666' }}>
+              You need to be signed in to make a booking. Please sign in using the modal above.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Cart Items Popup */}
       <AnimatePresence>
@@ -1386,6 +1422,19 @@ function BookingPage() {
         )}
       </AnimatePresence>
 
+      {/* Sign In Modal - Required for booking */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => {
+          // If user closes without logging in, redirect to home
+          if (!isAuthenticated) {
+            navigate('/')
+          } else {
+            setAuthModalOpen(false)
+          }
+        }}
+        initialTab={authModalTab}
+      />
     </div>
   )
 }
