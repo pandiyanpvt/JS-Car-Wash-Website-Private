@@ -673,6 +673,34 @@
   transform: translateY(-1px);
 }
 
+.booking-input-error {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2;
+}
+
+.booking-input-error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1), 0 4px 16px rgba(220, 38, 38, 0.15) !important;
+}
+
+.booking-error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 8px;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.booking-help-text {
+  color: #6b7280;
+  font-size: 0.8125rem;
+  margin-top: 6px;
+  margin-bottom: 0;
+  font-style: italic;
+}
+
 /* Package Selection */
 .booking-packages-grid {
   display: grid;
@@ -2267,6 +2295,24 @@
 .dark-mode .booking-input:focus {
   border-color: #1e3a8a !important;
   background: #2a2a2a !important;
+}
+
+.dark-mode .booking-input-error {
+  border-color: #ef4444 !important;
+  background-color: #7f1d1d !important;
+}
+
+.dark-mode .booking-input-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2), 0 4px 16px rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark-mode .booking-error-message {
+  color: #fca5a5 !important;
+}
+
+.dark-mode .booking-help-text {
+  color: #9ca3af !important;
 }
 
 .dark-mode .booking-package-card {

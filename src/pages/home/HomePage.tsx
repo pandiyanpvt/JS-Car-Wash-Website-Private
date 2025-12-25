@@ -5,9 +5,18 @@ import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
 import AuthModal from '../../components/auth/AuthModal'
 import { useAuth } from '../../contexts/AuthContext'
+import { contactApi } from '../../services/api'
 import './HomePage.css'
 
 interface HomePageProps {}
+
+interface Branch {
+  id: number
+  name: string
+  subtitle: string
+  address: string
+  mapUrl?: string
+}
 
 function HomePage({}: HomePageProps) {
   const { isAuthenticated } = useAuth()
@@ -29,13 +38,19 @@ function HomePage({}: HomePageProps) {
       return 'SUV'
     }
   })
-  const [selectedBranch, setSelectedBranch] = useState<{ name: string; subtitle: string } | null>(() => {
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(() => {
     // Load selected branch from localStorage on mount
     try {
       const stored = localStorage.getItem('selectedBranch')
       if (stored) {
         const branch = JSON.parse(stored)
-        return { name: branch.name || branch.subtitle || '', subtitle: branch.subtitle || '' }
+        return { 
+          id: branch.id ?? 0,
+          name: branch.name || branch.subtitle || '',
+          subtitle: branch.subtitle || branch.name || '',
+          address: branch.address || '',
+          mapUrl: branch.mapUrl
+        }
       }
     } catch (error) {
       console.error('Failed to load selected branch from localStorage:', error)
@@ -48,6 +63,7 @@ function HomePage({}: HomePageProps) {
   const [containerPosition, setContainerPosition] = useState({ top: 0, left: 0, width: 0, height: 0 })
   const location = useLocation()
   const navigate = useNavigate()
+  const [branches, setBranches] = useState<Branch[]>([])
 
   // Car models array for pagination
   const carModels = useMemo(() => [
@@ -59,29 +75,37 @@ function HomePage({}: HomePageProps) {
     'SPORT'
   ], [])
 
-  // Branches data - memoized
-  const branches = useMemo(() => [
-    {
-      name: 'JS CAR WASH',
-      subtitle: 'SERVICE DUBBO',
-      address: '66-72 Windsor parade, Dubbo, 2830, NSW',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
-    },
-    {
-      name: 'JS CAR WASH',
-      subtitle: 'SERVICE SYDNEY',
-      address: '123 Main Street, Sydney, 2000, NSW',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d431895.0726953198!2d148.631!3d-32.253232!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2sus!4v1763647268513!5m2!1sen!2sus'
+  // Load branches from backend
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await contactApi.getBranches()
+        if (response.success && response.data) {
+          const activeBranches = response.data
+            .filter((branch: any) => branch.is_active)
+            .map((branch: any) => ({
+              id: branch.id,
+              name: branch.branch_name,
+              subtitle: branch.branch_name,
+              address: branch.address,
+              mapUrl: branch.map_url || branch.mapUrl
+            }))
+          setBranches(activeBranches)
+        }
+      } catch (error) {
+        console.error('Error fetching branches:', error)
+      }
     }
-  ], [])
+    fetchBranches()
+  }, [])
 
   // Combined map URL showing both branches with markers
   const combinedMapUrl = useMemo(() => {
-    const address1 = encodeURIComponent(branches[0].address)
-    const address2 = encodeURIComponent(branches[1].address)
-    // Create a Google Maps URL that shows both locations with markers
-    // Format: using place parameter to show multiple locations
-    return `https://www.google.com/maps?q=${address1}|${address2}&hl=en&z=8&output=embed`
+    if (!branches.length) return ''
+    const addresses = branches
+      .map(branch => encodeURIComponent(branch.address))
+      .join('|')
+    return `https://www.google.com/maps?q=${addresses}&hl=en&z=8&output=embed`
   }, [branches])
 
   const navItems = useMemo(() => [
@@ -231,7 +255,7 @@ function HomePage({}: HomePageProps) {
   }, [navigate])
 
   // Handle branch selection with authentication check
-  const handleBranchSelection = useCallback((branch: { name: string; subtitle: string }) => {
+  const handleBranchSelection = useCallback((branch: Branch) => {
     if (!isAuthenticated) {
       // User not authenticated, show sign-in popup
       setDealersShow(false)

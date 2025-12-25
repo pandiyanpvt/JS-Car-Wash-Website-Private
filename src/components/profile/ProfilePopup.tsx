@@ -249,7 +249,7 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps): ReactPortal | nul
 
   if (!user) return null
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>

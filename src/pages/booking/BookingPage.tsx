@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
@@ -10,11 +10,7 @@ import {
   packageApi, 
   productApi, 
   extraWorkApi, 
-  orderApi,
-  type Branch as ApiBranch,
-  type ServicePackage,
-  type Product as ApiProduct,
-  type ExtraWork
+    orderApi
 } from '../../services/api'
 import './BookingPage.css'
 import '../home/HomePage.css'
@@ -73,6 +69,7 @@ function BookingPage() {
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(null)
   const [carNumber, setCarNumber] = useState('')
+  const [carNumberError, setCarNumberError] = useState('')
   const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
   const [selectedExtras, setSelectedExtras] = useState<number[]>([])
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
@@ -84,6 +81,7 @@ function BookingPage() {
   const [hasShownCartPopup, setHasShownCartPopup] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
+  const [packagesLoading, setPackagesLoading] = useState(true)
 
   // API data
   const [branches, setBranches] = useState<Branch[]>([])
@@ -91,7 +89,6 @@ function BookingPage() {
   const [carDetailingPackages, setCarDetailingPackages] = useState<Package[]>([])
   const [extras, setExtras] = useState<Extra[]>([])
   const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
 
   // Check authentication on mount - show sign-in modal if not authenticated
   useEffect(() => {
@@ -133,8 +130,8 @@ function BookingPage() {
   // Fetch packages
   useEffect(() => {
     const fetchPackages = async () => {
+      setPackagesLoading(true)
       try {
-        setLoading(true)
         // Fetch Car Wash packages (service_type_id = 1)
         const carWashResponse = await packageApi.getByType(1)
         if (carWashResponse.success && carWashResponse.data) {
@@ -171,7 +168,7 @@ function BookingPage() {
       } catch (error) {
         console.error('Error fetching packages:', error)
       } finally {
-        setLoading(false)
+        setPackagesLoading(false)
       }
     }
     fetchPackages()
@@ -250,6 +247,18 @@ function BookingPage() {
         )
         if (matchedBranch) {
           setSelectedBranch(matchedBranch)
+          return
+        }
+      }
+
+      // If user is logged in but has no stored branch, default to first available branch
+      if (branches.length > 0) {
+        const defaultBranch = branches[0]
+        setSelectedBranch(defaultBranch)
+        try {
+          localStorage.setItem('selectedBranch', JSON.stringify(defaultBranch))
+        } catch (error) {
+          console.error('Failed to save default selected branch to localStorage:', error)
         }
       }
     } catch (error) {
@@ -273,16 +282,29 @@ function BookingPage() {
     if (selectedVehicleModel) return // Already selected, don't override
     
     try {
-      const stored = localStorage.getItem('selectedVehicleModel')
-      if (stored) {
-        const vehicleModel = JSON.parse(stored)
-        // Find matching vehicle model
-        const matchedModel = vehicleModels.find(model => 
-          model.id === vehicleModel.id || 
+      // First, try the detailed object saved by BookingPage itself
+      const storedDetailed = localStorage.getItem('selectedVehicleModel')
+      if (storedDetailed) {
+        const vehicleModel = JSON.parse(storedDetailed)
+        const matchedFromDetailed = vehicleModels.find(model =>
+          model.id === vehicleModel.id ||
           model.name.toLowerCase() === vehicleModel.name?.toLowerCase()
         )
-        if (matchedModel) {
-          setSelectedVehicleModel(matchedModel)
+        if (matchedFromDetailed) {
+          setSelectedVehicleModel(matchedFromDetailed)
+          return
+        }
+      }
+
+      // Fallback: try the simple string value saved by HomePage (`selectedCarModel`)
+      const storedSimple = localStorage.getItem('selectedCarModel')
+      if (storedSimple) {
+        const normalized = storedSimple.toLowerCase()
+        const matchedFromSimple = vehicleModels.find(model =>
+          model.name.toLowerCase() === normalized
+        )
+        if (matchedFromSimple) {
+          setSelectedVehicleModel(matchedFromSimple)
         }
       }
     } catch (error) {
@@ -312,7 +334,10 @@ function BookingPage() {
     setSelectedVehicleModel(model)
     // Save selected vehicle model to localStorage
     try {
+      // Detailed object used by BookingPage
       localStorage.setItem('selectedVehicleModel', JSON.stringify(model))
+      // Simple name used by HomePage header/model selection
+      localStorage.setItem('selectedCarModel', model.name.toUpperCase())
     } catch (error) {
       console.error('Failed to save selected vehicle model to localStorage:', error)
     }
@@ -360,6 +385,75 @@ function BookingPage() {
     return []
   }
 
+  // Validate Australian vehicle plate number
+  const validateAustralianPlate = (plate: string): { isValid: boolean; error: string } => {
+    if (!plate || plate.trim() === '') {
+      return { isValid: false, error: 'Car number is required' }
+    }
+
+    // Normalize input: remove spaces, hyphens, and convert to uppercase
+    const normalized = plate.replace(/[\s-]/g, '').toUpperCase()
+
+    // Check length (Australian plates are typically 6-7 characters)
+    if (normalized.length < 6 || normalized.length > 7) {
+      return { isValid: false, error: 'Car number must be 6-7 characters' }
+    }
+
+    // Disallow obvious fake entries
+    const fakePatterns = [
+      /^[A-Z]{6,7}$/, // All letters (e.g., AAAAAA)
+      /^\d{6,7}$/, // All numbers (e.g., 123456)
+      /^[A-Z]{1,2}$/, // Too short
+      /^\d{1,2}$/ // Too short numbers only
+    ]
+
+    for (const pattern of fakePatterns) {
+      if (pattern.test(normalized)) {
+        return { isValid: false, error: 'Invalid car number format' }
+      }
+    }
+
+    // Australian plate format patterns
+    const patterns = [
+      /^[A-HJ-NPR-Z]{3}\d{3}$/, // ABC123 (3 letters + 3 numbers, excluding I, O, Q)
+      /^\d{3}[A-HJ-NPR-Z]{3}$/, // 123ABC (3 numbers + 3 letters)
+      /^[A-HJ-NPR-Z]{2}\d{4}$/, // AB1234 (2 letters + 4 numbers)
+      /^\d{4}[A-HJ-NPR-Z]{2}$/, // 1234AB (4 numbers + 2 letters)
+      /^[A-HJ-NPR-Z]{3}\d{4}$/, // ABC1234 (3 letters + 4 numbers)
+      /^\d{3}[A-HJ-NPR-Z]{4}$/, // 123ABCD (3 numbers + 4 letters)
+      /^[A-HJ-NPR-Z]{2}\d{3}[A-HJ-NPR-Z]{1}$/, // AB123C (2 letters + 3 numbers + 1 letter)
+      /^[A-HJ-NPR-Z]{1}\d{3}[A-HJ-NPR-Z]{2}$/, // A123BC (1 letter + 3 numbers + 2 letters)
+    ]
+
+    // Check if plate matches any valid pattern
+    const isValid = patterns.some(pattern => pattern.test(normalized))
+
+    if (!isValid) {
+      return { 
+        isValid: false, 
+        error: 'Invalid Australian plate format. Examples: ABC123, 123ABC, AB1234' 
+      }
+    }
+
+    return { isValid: true, error: '' }
+  }
+
+  // Handle car number input change
+  const handleCarNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase()
+    setCarNumber(value)
+    
+    // Clear error if field is empty (will validate on submit)
+    if (value.trim() === '') {
+      setCarNumberError('')
+      return
+    }
+
+    // Validate on change
+    const validation = validateAustralianPlate(value)
+    setCarNumberError(validation.error)
+  }
+
   // Handle next step
   const handleNext = () => {
     if (currentStep === 1) {
@@ -368,6 +462,15 @@ function BookingPage() {
         alert('Please fill all required fields')
         return
       }
+
+      // Validate car number format
+      const plateValidation = validateAustralianPlate(carNumber)
+      if (!plateValidation.isValid) {
+        setCarNumberError(plateValidation.error)
+        return
+      }
+
+      setCarNumberError('')
       setCurrentStep(2)
       setPackageStep(0)
     } else if (currentStep === 2) {
@@ -499,18 +602,6 @@ function BookingPage() {
       if (product) total += product.price * selectedProduct.quantity
     })
     return total
-  }
-
-  // Get service text
-  const getServiceText = () => {
-    if (selectedServices.includes('carwash') && selectedServices.includes('cardetailing')) {
-      return 'Car Wash, Car Detailing'
-    } else if (selectedServices.includes('carwash')) {
-      return 'Car Wash'
-    } else if (selectedServices.includes('cardetailing')) {
-      return 'Car Detailing'
-    }
-    return ''
   }
 
   // Format time to HH:MM:SS format
@@ -704,11 +795,18 @@ function BookingPage() {
                   <h3>Enter Car Number</h3>
                   <input
                     type="text"
-                    className="booking-input"
-                    placeholder="Enter your car number"
+                    className={`booking-input ${carNumberError ? 'booking-input-error' : ''}`}
+                    placeholder="e.g., ABC123, 123ABC, AB1234"
                     value={carNumber}
-                    onChange={(e) => setCarNumber(e.target.value.toUpperCase())}
+                    onChange={handleCarNumberChange}
+                    maxLength={8}
                   />
+                  {carNumberError && (
+                    <p className="booking-error-message">{carNumberError}</p>
+                  )}
+                  <p className="booking-help-text">
+                    Australian format: ABC-123, 123-ABC, AB-1234 (spaces/hyphens optional)
+                  </p>
                 </div>
 
                 <button className="booking-next-btn" onClick={handleNext}>
@@ -747,45 +845,55 @@ function BookingPage() {
                 </div>
 
                 <div className="booking-packages-grid">
-                  {getCurrentPackageSet().map(pkg => (
-                    <motion.div
-                      key={pkg.id}
-                      className={`booking-package-card ${selectedPackages.find(p => p.id === pkg.id) ? 'selected' : ''}`}
-                      onClick={() => handlePackageSelect(pkg)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <div className="booking-package-card-header">
-                        <div className="booking-package-price">
-                          ${pkg.price} <span className="booking-package-price-suffix">/ start from</span>
+                  {packagesLoading ? (
+                    <div className="booking-packages-empty">
+                      Loading packages...
+                    </div>
+                  ) : getCurrentPackageSet().length === 0 ? (
+                    <div className="booking-packages-empty">
+                      No packages available for the selected services.
+                    </div>
+                  ) : (
+                    getCurrentPackageSet().map(pkg => (
+                      <motion.div
+                        key={pkg.id}
+                        className={`booking-package-card ${selectedPackages.find(p => p.id === pkg.id) ? 'selected' : ''}`}
+                        onClick={() => handlePackageSelect(pkg)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <div className="booking-package-card-header">
+                          <div className="booking-package-price">
+                            ${pkg.price} <span className="booking-package-price-suffix">/ start from</span>
+                          </div>
+                          <h3 className="booking-package-card-title">{pkg.name}</h3>
                         </div>
-                        <h3 className="booking-package-card-title">{pkg.name}</h3>
-                      </div>
-                      <div className="booking-package-check">
-                        {selectedPackages.find(p => p.id === pkg.id) && '✓'}
-                      </div>
-                      <div className="booking-package-features">
-                        <h4 className="booking-package-features-title">Package includes</h4>
-                        <ul className="booking-package-features-list">
-                          {pkg.features.map((feature, index) => (
-                            <li key={index} className="booking-package-feature-item">
-                              <i className="fas fa-check-circle booking-package-check-icon"></i>
-                              <span>{feature}</span>
-                            </li>
-                          ))}
-                          {pkg.excludedFeatures && pkg.excludedFeatures.map((feature, index) => (
-                            <li key={`excluded-${index}`} className="booking-package-feature-item booking-package-feature-excluded">
-                              <i className="fas fa-times-circle booking-package-x-icon"></i>
-                              <span>{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </motion.div>
-                  ))}
+                        <div className="booking-package-check">
+                          {selectedPackages.find(p => p.id === pkg.id) && '✓'}
+                        </div>
+                        <div className="booking-package-features">
+                          <h4 className="booking-package-features-title">Package includes</h4>
+                          <ul className="booking-package-features-list">
+                            {pkg.features.map((feature, index) => (
+                              <li key={index} className="booking-package-feature-item">
+                                <i className="fas fa-check-circle booking-package-check-icon"></i>
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                            {pkg.excludedFeatures && pkg.excludedFeatures.map((feature, index) => (
+                              <li key={`excluded-${index}`} className="booking-package-feature-item booking-package-feature-excluded">
+                                <i className="fas fa-times-circle booking-package-x-icon"></i>
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
                 </div>
 
                 <div className="booking-step-buttons">
