@@ -37,17 +37,40 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
   const [signUpPassword, setSignUpPassword] = useState('')
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('')
   const [signUpPhone, setSignUpPhone] = useState('')
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false)
+  const [showSignUpConfirmPassword, setShowSignUpConfirmPassword] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialTab)
+      // Prevent background scrolling
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
       document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = 'unset'
+      // Restore scrolling
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      document.body.style.overflow = ''
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
+      // Cleanup: restore scrolling
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      document.body.style.overflow = ''
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
   }, [isOpen, initialTab])
 
@@ -60,14 +83,10 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
     }
   }, [isOpen, onClose])
 
@@ -633,67 +652,77 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                            </div>
                          </div>
 
-                         <div className="auth-form-grid">
-                           <div className="auth-form-group">
-                             <label htmlFor="signup-email">Email Address *</label>
-                             <div className="auth-input-wrapper">
-                               <i className="fas fa-envelope auth-input-icon"></i>
-                               <input
-                                 type="email"
-                                 id="signup-email"
-                                 value={signUpEmail}
-                                 onChange={(e) => setSignUpEmail(e.target.value)}
-                                 placeholder="Email Address"
-                                 required
-                               />
-                             </div>
-                           </div>
-
-                           <div className="auth-form-group">
-                             <label htmlFor="signup-phone">Phone Number *</label>
-                             <div className="auth-input-wrapper">
-                               <i className="fas fa-phone auth-input-icon"></i>
-                               <input
-                                 type="tel"
-                                 id="signup-phone"
-                                 value={signUpPhone}
-                                 onChange={(e) => setSignUpPhone(e.target.value)}
-                                 placeholder="Phone Number"
-                                 required
-                               />
-                             </div>
+                         <div className="auth-form-group">
+                           <label htmlFor="signup-email">Email Address *</label>
+                           <div className="auth-input-wrapper">
+                             <i className="fas fa-envelope auth-input-icon"></i>
+                             <input
+                               type="email"
+                               id="signup-email"
+                               value={signUpEmail}
+                               onChange={(e) => setSignUpEmail(e.target.value)}
+                               placeholder="Email Address"
+                               required
+                             />
                            </div>
                          </div>
 
-                         <div className="auth-form-grid">
-                           <div className="auth-form-group">
-                             <label htmlFor="signup-password">Password *</label>
-                             <div className="auth-input-wrapper">
-                               <i className="fas fa-lock auth-input-icon"></i>
-                               <input
-                                 type="password"
-                                 id="signup-password"
-                                 value={signUpPassword}
-                                 onChange={(e) => setSignUpPassword(e.target.value)}
-                                 placeholder="Password"
-                                 required
-                               />
-                             </div>
+                         <div className="auth-form-group">
+                           <label htmlFor="signup-phone">Phone Number *</label>
+                           <div className="auth-input-wrapper">
+                             <i className="fas fa-phone auth-input-icon"></i>
+                             <input
+                               type="tel"
+                               id="signup-phone"
+                               value={signUpPhone}
+                               onChange={(e) => setSignUpPhone(e.target.value)}
+                               placeholder="Phone Number"
+                               required
+                             />
                            </div>
+                         </div>
 
-                           <div className="auth-form-group">
-                             <label htmlFor="signup-confirm-password">Confirm Password *</label>
-                             <div className="auth-input-wrapper">
-                               <i className="fas fa-lock auth-input-icon"></i>
-                               <input
-                                 type="password"
-                                 id="signup-confirm-password"
-                                 value={signUpConfirmPassword}
-                                 onChange={(e) => setSignUpConfirmPassword(e.target.value)}
-                                 placeholder="Confirm Password"
-                                 required
-                               />
-                             </div>
+                         <div className="auth-form-group">
+                           <label htmlFor="signup-password">Password *</label>
+                           <div className="auth-input-wrapper">
+                             <i className="fas fa-lock auth-input-icon"></i>
+                             <input
+                               type={showSignUpPassword ? 'text' : 'password'}
+                               id="signup-password"
+                               value={signUpPassword}
+                               onChange={(e) => setSignUpPassword(e.target.value)}
+                               placeholder="Password"
+                               required
+                             />
+                             <button
+                               type="button"
+                               className="auth-password-toggle"
+                               onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                             >
+                               <i className={`fas ${showSignUpPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                             </button>
+                           </div>
+                         </div>
+
+                         <div className="auth-form-group">
+                           <label htmlFor="signup-confirm-password">Confirm Password *</label>
+                           <div className="auth-input-wrapper">
+                             <i className="fas fa-lock auth-input-icon"></i>
+                             <input
+                               type={showSignUpConfirmPassword ? 'text' : 'password'}
+                               id="signup-confirm-password"
+                               value={signUpConfirmPassword}
+                               onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                               placeholder="Confirm Password"
+                               required
+                             />
+                             <button
+                               type="button"
+                               className="auth-password-toggle"
+                               onClick={() => setShowSignUpConfirmPassword(!showSignUpConfirmPassword)}
+                             >
+                               <i className={`fas ${showSignUpConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                             </button>
                            </div>
                          </div>
 

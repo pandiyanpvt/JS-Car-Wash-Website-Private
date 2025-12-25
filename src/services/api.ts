@@ -197,11 +197,15 @@ export const galleryApi = {
 }
 
 interface ProductCategory {
-  id: number
-  category: string
-  is_active: boolean
-  createdAt: string
-  updatedAt: string
+  id: number | string
+  category?: string
+  name?: string
+  description?: string
+  productCount?: number
+  status?: 'active' | 'inactive'
+  is_active?: boolean
+  createdAt?: string
+  updatedAt?: string
 }
 
 interface Product {

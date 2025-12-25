@@ -59,8 +59,16 @@ function ProductPage() {
 
         if (categoriesResponse.success && categoriesResponse.data) {
           const categoryNames = categoriesResponse.data
-            .filter(c => c.is_active)
-            .map(c => c.category)
+            .filter(c => {
+              // Handle both backend formats: mapped (status) and raw (is_active)
+              const isActive = c.status === 'active' || c.is_active === true || c.status !== 'inactive'
+              return isActive
+            })
+            .map(c => {
+              // Handle both 'name' (from mapped backend format) and 'category' (from raw format)
+              return c.name || c.category || ''
+            })
+            .filter(name => name !== '') // Remove empty strings
             .sort()
           setCategories(categoryNames)
         }

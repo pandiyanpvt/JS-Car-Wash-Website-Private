@@ -41,7 +41,6 @@
   background: rgba(42, 42, 42, 0.85);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-}
 
 .modern-navbar.fixed-navbar .navbar-wrapper {
   pointer-events: auto;
@@ -442,6 +441,11 @@
 .hamburger-icon {
   width: 24px;
   height: 24px;
+  color: #000000;
+  transition: color 0.3s ease;
+}
+
+.dark-mode .hamburger-icon {
   color: #000000;
 }
 
@@ -1132,4 +1136,16 @@
 .dark-mode .navbar-cart-button:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
   color: #fbbf24 !important;
+}
+
+.dark-mode .mobile-hamburger-btn {
+  background-color: rgba(42, 42, 42, 0.95);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .mobile-hamburger-btn:hover {
+  background-color: rgba(42, 42, 42, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  opacity: 1;
 }
