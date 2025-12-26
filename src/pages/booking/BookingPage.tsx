@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
@@ -10,7 +10,9 @@ import {
   packageApi, 
   productApi, 
   extraWorkApi, 
-    orderApi
+  orderApi,
+  type ProductStockEntry,
+  type Product as ApiProduct
 } from '../../services/api'
 import './BookingPage.css'
 import '../home/HomePage.css'
@@ -44,10 +46,12 @@ interface Extra {
   price: number
 }
 
-interface Product {
+interface BookingProduct {
   id: number
   name: string
   price: number
+  stockEntries: ProductStockEntry[]
+  totalStock: number
 }
 
 interface SelectedProduct {
@@ -88,7 +92,37 @@ function BookingPage() {
   const [carWashPackages, setCarWashPackages] = useState<Package[]>([])
   const [carDetailingPackages, setCarDetailingPackages] = useState<Package[]>([])
   const [extras, setExtras] = useState<Extra[]>([])
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<BookingProduct[]>([])
+  const [productError, setProductError] = useState<string | null>(null)
+  const mapApiProductToBookingProduct = useCallback((product: ApiProduct): BookingProduct => {
+    const activeEntries = (product.stock_entries || []).filter(
+      (entry: ProductStockEntry) => entry.is_active !== false
+    )
+    const totalFromEntries = activeEntries.reduce((sum, entry) => sum + (entry.stock || 0), 0)
+    const fallbackStock = typeof product.stock === 'number' ? product.stock : 0
+
+    return {
+      id: product.id,
+      name: product.product_name,
+      price: parseFloat(product.amount),
+      stockEntries: activeEntries,
+      totalStock: activeEntries.length > 0 ? totalFromEntries : fallbackStock,
+    }
+  }, [])
+
+  const getAvailableStockForBranch = useCallback((productId: number) => {
+    const product = products.find(p => p.id === productId)
+    if (!product) return 0
+
+    if (selectedBranch) {
+      const entry = product.stockEntries.find(
+        (stockEntry: ProductStockEntry) => stockEntry.branch_id === selectedBranch.id && stockEntry.is_active !== false
+      )
+      if (entry) return entry.stock || 0
+    }
+
+    return product.totalStock
+  }, [products, selectedBranch])
 
   // Check authentication on mount - show sign-in modal if not authenticated
   useEffect(() => {
@@ -204,11 +238,7 @@ function BookingPage() {
         if (response.success && response.data) {
           const activeProducts = response.data
             .filter(product => product.is_active)
-            .map(product => ({
-              id: product.id,
-              name: product.product_name,
-              price: parseFloat(product.amount),
-            }))
+            .map(mapApiProductToBookingProduct)
           setProducts(activeProducts)
         }
       } catch (error) {
@@ -216,7 +246,7 @@ function BookingPage() {
       }
     }
     fetchProducts()
-  }, [])
+  }, [mapApiProductToBookingProduct])
 
   // Lock body scroll when confirmation popup is open
   useEffect(() => {
@@ -534,10 +564,33 @@ function BookingPage() {
 
   // Handle adding cart items to booking
   const handleAddCartItems = () => {
-    const cartProducts = cartItems.map(item => ({
-      productId: item.id,
-      quantity: item.quantity,
-    }))
+    if (!selectedBranch) {
+      setProductError('Please select a branch before adding cart products.')
+      setShowCartPopup(false)
+      return
+    }
+
+    const availabilityNotes: string[] = []
+
+    const cartProducts = cartItems
+      .map(item => {
+        const available = getAvailableStockForBranch(item.id)
+        if (available <= 0) {
+          availabilityNotes.push(`${item.name} is out of stock`)
+          return null
+        }
+
+        const quantity = Math.min(item.quantity, available)
+        if (item.quantity > available) {
+          availabilityNotes.push(`${item.name} capped at ${available}`)
+        }
+
+        return {
+          productId: item.id,
+          quantity,
+        }
+      })
+      .filter((item): item is SelectedProduct => item !== null)
     
     // Merge with existing selected products, avoiding duplicates
     setSelectedProducts(prev => {
@@ -545,7 +598,8 @@ function BookingPage() {
       const newProducts = cartProducts.filter(p => !existingIds.has(p.productId))
       return [...prev, ...newProducts]
     })
-    
+
+    setProductError(availabilityNotes.length > 0 ? availabilityNotes.join(', ') : null)
     setShowCartPopup(false)
   }
 
@@ -634,6 +688,31 @@ function BookingPage() {
     const token = localStorage.getItem('token')
     if (!token) {
       alert('You are not logged in. Please login to continue.')
+      return
+    }
+
+    setProductError(null)
+
+    const stockIssue = (() => {
+      if (!selectedBranch) return 'Please select a branch to continue.'
+
+      for (const selectedProduct of selectedProducts) {
+        const product = products.find(p => p.id === selectedProduct.productId)
+        if (!product) return 'A selected product is no longer available.'
+
+        const available = getAvailableStockForBranch(selectedProduct.productId)
+        if (available <= 0) return `${product.name} is out of stock at ${selectedBranch.name}.`
+        if (selectedProduct.quantity > available) {
+          return `Only ${available} of ${product.name} available at ${selectedBranch.name}.`
+        }
+      }
+
+      return null
+    })()
+
+    if (stockIssue) {
+      setProductError(stockIssue)
+      alert(stockIssue)
       return
     }
 
@@ -958,19 +1037,38 @@ function BookingPage() {
                 {/* Products */}
                 <div className="booking-form-section">
                   <h3>Products (Optional)</h3>
+                  {productError && (
+                    <div className="booking-error-message" style={{ marginBottom: '12px' }}>
+                      {productError}
+                    </div>
+                  )}
                   <div className="booking-products-grid">
                     {products.map(product => {
                       const selectedProduct = selectedProducts.find(sp => sp.productId === product.id)
                       const isSelected = !!selectedProduct
+                      const availableStock = getAvailableStockForBranch(product.id)
+
                       return (
                         <div key={product.id} className={`booking-product-item-wrapper ${isSelected ? 'selected' : ''}`}>
                           <label className="booking-product-item">
                             <input
                               type="checkbox"
                               checked={isSelected}
+                              disabled={availableStock <= 0 || !selectedBranch}
                               onChange={(e) => {
                                 if (e.target.checked) {
+                                  if (!selectedBranch) {
+                                    setProductError('Please select a branch to add products.')
+                                    return
+                                  }
+
+                                  if (availableStock <= 0) {
+                                    setProductError(`${product.name} is out of stock at ${selectedBranch.name}.`)
+                                    return
+                                  }
+
                                   setSelectedProducts([...selectedProducts, { productId: product.id, quantity: 1 }])
+                                  setProductError(null)
                                 } else {
                                   setSelectedProducts(selectedProducts.filter(sp => sp.productId !== product.id))
                                 }
@@ -979,6 +1077,11 @@ function BookingPage() {
                             <div>
                               <span>{product.name}</span>
                               <span className="booking-product-price">+${product.price}</span>
+                              <span className={`booking-product-stock ${availableStock <= 0 ? 'out' : ''}`}>
+                                {selectedBranch
+                                  ? `Available: ${availableStock} at ${selectedBranch.name}`
+                                  : `Available: ${product.totalStock}`}
+                              </span>
                             </div>
                           </label>
                           {isSelected && (
@@ -990,9 +1093,17 @@ function BookingPage() {
                                 value={selectedProduct.quantity}
                                 onChange={(e) => {
                                   const quantity = parseInt(e.target.value) || 1
+                                  const safeQuantity = Math.max(1, Math.min(quantity, availableStock || 1))
+
+                                  if (availableStock > 0 && quantity > availableStock) {
+                                    setProductError(`Only ${availableStock} of ${product.name} available at ${selectedBranch?.name || 'this branch'}.`)
+                                  } else {
+                                    setProductError(null)
+                                  }
+
                                   setSelectedProducts(selectedProducts.map(sp => 
                                     sp.productId === product.id 
-                                      ? { ...sp, quantity: Math.max(1, quantity) }
+                                      ? { ...sp, quantity: safeQuantity }
                                       : sp
                                   ))
                                 }}
@@ -1079,22 +1190,28 @@ function BookingPage() {
                               month: 'long' 
                             })}
                           </h4>
-                          <div className="booking-time-grid">
-                            {timeSlots.map(time => (
-                              <button
-                                key={time}
-                                className={`booking-time-btn ${selectedTime === time ? 'selected' : ''}`}
-                                onClick={() => setSelectedTime(time)}
-                              >
-                                {time}
-                              </button>
-                            ))}
+                          <div className="booking-time-dropdown">
+                            <label htmlFor="booking-time-select">Select a time</label>
+                            <select
+                              id="booking-time-select"
+                              value={selectedTime}
+                              onChange={(e) => setSelectedTime(e.target.value)}
+                            >
+                              <option value="">Choose a time</option>
+                              {timeSlots.map(time => (
+                                <option key={time} value={time}>
+                                  {time}
+                                </option>
+                              ))}
+                            </select>
                           </div>
-                          {selectedTime && (
-                            <button className="booking-continue-btn" onClick={handleNext}>
-                              Continue
-                            </button>
-                          )}
+                          <button
+                            className="booking-continue-btn"
+                            onClick={handleNext}
+                            disabled={!selectedTime}
+                          >
+                            Continue
+                          </button>
                         </>
                       ) : (
                         <div className="booking-time-placeholder">
@@ -1190,7 +1307,7 @@ function BookingPage() {
                               const product = products.find(p => p.id === selectedProduct.productId)
                               return product ? { product, selectedProduct } : null
                             })
-                            .filter((item): item is { product: Product; selectedProduct: SelectedProduct } => item !== null)
+                            .filter((item): item is { product: BookingProduct; selectedProduct: SelectedProduct } => item !== null)
                             .map(({ product, selectedProduct }) => (
                               <div key={product.id} className="booking-summary-item">
                                 <span>{product.name} {selectedProduct.quantity > 1 ? `(x${selectedProduct.quantity})` : ''}</span>
@@ -1363,7 +1480,7 @@ function BookingPage() {
                             const product = products.find(p => p.id === selectedProduct.productId)
                             return product ? { product, selectedProduct } : null
                           })
-                          .filter((item): item is { product: Product; selectedProduct: SelectedProduct } => item !== null)
+                          .filter((item): item is { product: BookingProduct; selectedProduct: SelectedProduct } => item !== null)
                           .map(({ product, selectedProduct }) => (
                             <div key={product.id} className="booking-total-summary-package-item">
                               <span className="booking-total-summary-product-name-text">{product.name}</span>
@@ -1385,7 +1502,7 @@ function BookingPage() {
                             const product = products.find(p => p.id === selectedProduct.productId)
                             return product ? { product, selectedProduct } : null
                           })
-                          .filter((item): item is { product: Product; selectedProduct: SelectedProduct } => item !== null)
+                          .filter((item): item is { product: BookingProduct; selectedProduct: SelectedProduct } => item !== null)
                           .map(({ product, selectedProduct }) => (
                             <div key={product.id} className="booking-total-summary-package-price">
                               $ {(product.price * selectedProduct.quantity).toFixed(2)}

@@ -4,13 +4,13 @@ import Navbar from '../../components/navbar/Navbar'
 import { FooterPage } from '../footer'
 import { useCart } from '../../contexts/CartContext'
 import { useAuth } from '../../contexts/AuthContext'
-import { orderApi, contactApi, type Branch } from '../../services/api'
+import { orderApi, contactApi, productApi, type Branch, type Product as ApiProduct, type ProductStockEntry } from '../../services/api'
 import OrderSuccessModal from '../../components/cart/OrderSuccessModal'
 import './CheckoutPage.css'
 
 function CheckoutPage() {
   const navigate = useNavigate()
-  const { cartItems, getTotalPrice, getTotalItems, clearCart } = useCart()
+  const { cartItems, getTotalPrice, getTotalItems, clearCart, updateQuantity, removeFromCart } = useCart()
   const { user, addOrder } = useAuth()
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [branches, setBranches] = useState<Branch[]>([])
@@ -18,6 +18,18 @@ function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  const getAvailableBranchStock = (product: ApiProduct, branchId: number) => {
+    const activeEntries = (product.stock_entries || []).filter(
+      (entry: ProductStockEntry) => entry.is_active !== false
+    )
+    const branchEntry = activeEntries.find(entry => entry.branch_id === branchId)
+
+    if (branchEntry) return branchEntry.stock || 0
+
+    // Fallback to legacy stock field if branch-specific data is missing
+    return typeof product.stock === 'number' ? product.stock : 0
+  }
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -60,6 +72,36 @@ function CheckoutPage() {
     try {
       setSubmitting(true)
       setError(null)
+
+      const productsResponse = await productApi.getAll()
+      if (!productsResponse.success || !productsResponse.data) {
+        throw new Error('Failed to check product stock')
+      }
+
+      const productMap = new Map<number, ApiProduct>(
+        productsResponse.data
+          .filter(product => product.is_active)
+          .map(product => [product.id, product])
+      )
+
+      for (const item of cartItems) {
+        const product = productMap.get(item.id)
+        if (!product) {
+          setError(`${item.name} is unavailable right now.`)
+          return
+        }
+
+        const availableStock = getAvailableBranchStock(product, selectedBranchId)
+        if (availableStock <= 0) {
+          setError(`${item.name} is out of stock at the selected branch.`)
+          return
+        }
+
+        if (availableStock < item.quantity) {
+          setError(`Only ${availableStock} of ${item.name} available at the selected branch.`)
+          return
+        }
+      }
 
       const orderData = {
         user_id: user.id,
@@ -154,10 +196,36 @@ function CheckoutPage() {
                   <div className="checkout-item-info">
                     <h3 className="checkout-item-name">{item.name}</h3>
                     <div className="checkout-item-details">
-                      <span className="checkout-item-quantity">Qty: {item.quantity}</span>
+                      <div className="checkout-item-quantity-controls">
+                        <button
+                          className="checkout-quantity-btn"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          disabled={submitting}
+                          aria-label="Decrease quantity"
+                        >
+                          <i className="fas fa-minus"></i>
+                        </button>
+                        <span className="checkout-item-quantity">Qty: {item.quantity}</span>
+                        <button
+                          className="checkout-quantity-btn"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          disabled={submitting}
+                          aria-label="Increase quantity"
+                        >
+                          <i className="fas fa-plus"></i>
+                        </button>
+                      </div>
                       <span className="checkout-item-price">${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   </div>
+                  <button
+                    className="checkout-item-remove"
+                    onClick={() => removeFromCart(item.id)}
+                    disabled={submitting}
+                    aria-label={`Remove ${item.name}`}
+                  >
+                    <i className="fas fa-trash"></i>
+                  </button>
                 </div>
               ))}
             </div>

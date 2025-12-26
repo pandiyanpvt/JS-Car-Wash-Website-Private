@@ -4,10 +4,16 @@ import { FooterPage } from '../footer'
 import { useCart } from '../../contexts/CartContext'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthModal from '../../components/auth/AuthModal'
-import { productApi, productCategoryApi } from '../../services/api'
+import { productApi, productCategoryApi, type Product as ApiProduct, type ProductStockEntry } from '../../services/api'
 import './ProductPage.css'
 
-interface Product {
+interface BranchStock {
+  branchId: number
+  branchName: string
+  stock: number
+}
+
+interface ProductItem {
   id: number
   name: string
   description: string
@@ -16,6 +22,7 @@ interface Product {
   image: string
   category: string
   rating?: number
+  branchStocks: BranchStock[]
 }
 
 function ProductPage() {
@@ -26,11 +33,37 @@ function ProductPage() {
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'stock'>('name')
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<ProductItem[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchLoading, setSearchLoading] = useState(false)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
+
+  const mapApiProductToProductItem = useCallback((p: ApiProduct): ProductItem => {
+    const branchStocks: BranchStock[] = (p.stock_entries || [])
+      .filter((entry: ProductStockEntry) => entry.is_active !== false)
+      .map((entry: ProductStockEntry) => ({
+        branchId: entry.branch_id,
+        branchName: entry.branch?.branch_name || `Branch ${entry.branch_id}`,
+        stock: entry.stock || 0
+      }))
+
+    const totalBranchStock = branchStocks.reduce((sum, entry) => sum + entry.stock, 0)
+    const fallbackStock = typeof p.stock === 'number' ? p.stock : 0
+    const totalStock = branchStocks.length > 0 ? totalBranchStock : fallbackStock
+
+    return {
+      id: p.id,
+      name: p.product_name,
+      description: p.description,
+      price: parseFloat(p.amount),
+      stock: totalStock,
+      image: p.img_url,
+      category: p.category?.category || 'Uncategorized',
+      branchStocks,
+    }
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,17 +76,9 @@ function ProductPage() {
         ])
 
         if (productsResponse.success && productsResponse.data) {
-          const mappedProducts: Product[] = productsResponse.data
+          const mappedProducts: ProductItem[] = productsResponse.data
             .filter(p => p.is_active)
-            .map(p => ({
-              id: p.id,
-              name: p.product_name,
-              description: p.description,
-              price: parseFloat(p.amount),
-              stock: p.stock,
-              image: p.img_url,
-              category: p.category.category
-            }))
+            .map(mapApiProductToProductItem)
           setProducts(mappedProducts)
         }
 
@@ -80,24 +105,16 @@ function ProductPage() {
     }
 
     fetchData()
-  }, [])
+  }, [mapApiProductToProductItem])
 
   useEffect(() => {
     const searchProducts = async () => {
       if (!searchQuery.trim()) {
         const response = await productApi.getAll()
         if (response.success && response.data) {
-          const mappedProducts: Product[] = response.data
+          const mappedProducts: ProductItem[] = response.data
             .filter(p => p.is_active)
-            .map(p => ({
-              id: p.id,
-              name: p.product_name,
-              description: p.description,
-              price: parseFloat(p.amount),
-              stock: p.stock,
-              image: p.img_url,
-              category: p.category.category
-            }))
+            .map(mapApiProductToProductItem)
           setProducts(mappedProducts)
         }
         return
@@ -107,17 +124,9 @@ function ProductPage() {
         setSearchLoading(true)
         const response = await productApi.search(searchQuery)
         if (response.success && response.data) {
-          const mappedProducts: Product[] = response.data
+          const mappedProducts: ProductItem[] = response.data
             .filter(p => p.is_active)
-            .map(p => ({
-              id: p.id,
-              name: p.product_name,
-              description: p.description,
-              price: parseFloat(p.amount),
-              stock: p.stock,
-              image: p.img_url,
-              category: p.category.category
-            }))
+            .map(mapApiProductToProductItem)
           setProducts(mappedProducts)
         }
       } catch (err) {
@@ -129,7 +138,7 @@ function ProductPage() {
 
     const timeoutId = setTimeout(searchProducts, 300)
     return () => clearTimeout(timeoutId)
-  }, [searchQuery])
+  }, [searchQuery, mapApiProductToProductItem])
 
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(product => {
@@ -154,7 +163,14 @@ function ProductPage() {
     return filtered
   }, [products, searchQuery, selectedCategory, sortBy])
 
-  const handleAddToCart = useCallback(async (product: Product) => {
+  const handleAddToCart = useCallback(async (product: ProductItem) => {
+    setActionMessage(null)
+
+    if (product.stock <= 0) {
+      setActionMessage(`${product.name} is out of stock.`)
+      return
+    }
+
     if (!isAuthenticated) {
       setAuthModalTab('signin')
       setAuthModalOpen(true)
@@ -168,6 +184,7 @@ function ProductPage() {
       quantity: 1,
       category: product.category
     })
+    setActionMessage(`${product.name} added to cart.`)
   }, [addToCart, isAuthenticated])
 
   return (
@@ -243,6 +260,13 @@ function ProductPage() {
             </div>
           )}
 
+          {actionMessage && (
+            <div className="product-action-message">
+              <i className="fas fa-info-circle"></i>
+              <span>{actionMessage}</span>
+            </div>
+          )}
+
           {loading || searchLoading ? (
             <div className="product-empty-state">
               <div className="product-empty-icon">
@@ -276,7 +300,9 @@ function ProductPage() {
                     <div className="product-card-details">
                       <div className="product-stock">
                         <span className="product-stock-label">Available Stock:</span>
-                        <span className="product-stock-value">{product.stock}</span>
+                        <span className={`product-stock-value ${product.stock <= 0 ? 'product-stock-out' : ''}`}>
+                          {product.stock}
+                        </span>
                       </div>
                       <div className="product-price">
                         ${product.price.toFixed(2)}
@@ -285,8 +311,9 @@ function ProductPage() {
                     <button
                       className="product-add-to-cart-btn"
                       onClick={() => handleAddToCart(product)}
+                      disabled={product.stock <= 0}
                     >
-                      Add to Cart
+                      {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                     </button>
                   </div>
                 </div>
