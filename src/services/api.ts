@@ -208,18 +208,30 @@ interface ProductCategory {
   updatedAt?: string
 }
 
-interface Product {
+export interface ProductStockEntry {
+  id: number
+  product_id: number
+  branch_id: number
+  stock: number
+  is_active: boolean
+  createdAt: string
+  updatedAt: string
+  branch?: Branch
+}
+
+export interface Product {
   id: number
   product_name: string
   description: string
   amount: string
-  stock: number
+  stock?: number
   img_url: string
   product_category_id: number
   is_active: boolean
   createdAt: string
   updatedAt: string
   category: ProductCategory
+  stock_entries?: ProductStockEntry[]
 }
 
 export const productCategoryApi = {
@@ -284,7 +296,7 @@ interface CartItem {
     product_name: string
     description: string
     amount: string
-    stock: number
+    stock?: number
     img_url: string
     product_category_id: number
     is_active: boolean
@@ -382,7 +394,7 @@ interface OrderProductDetail {
     product_name: string
     description: string
     amount: string
-    stock: number
+    stock?: number
     img_url: string
     product_category_id: number
     is_active: boolean
