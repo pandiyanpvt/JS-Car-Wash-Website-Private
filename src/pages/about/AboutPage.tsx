@@ -1,9 +1,74 @@
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
+import type { ApiReview } from '../../services/api'
+import { reviewApi } from '../../services/api'
 import './AboutPage.css'
 
 function AboutPage() {
+  const [reviews, setReviews] = useState<ApiReview[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [loadingReviews, setLoadingReviews] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchReviews = async () => {
+      try {
+        const response = await reviewApi.getAll()
+        if (!isMounted) return
+
+        const visibleReviews = (response.data || []).filter(
+          (review) => review.is_active && review.is_show_others
+        )
+
+        setReviews(visibleReviews)
+        setCurrentIndex(0)
+      } catch (error) {
+        console.error('Failed to load reviews:', error)
+      } finally {
+        if (isMounted) {
+          setLoadingReviews(false)
+        }
+      }
+    }
+
+    fetchReviews()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!reviews.length) return
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % reviews.length)
+    }, 6000)
+
+    return () => clearInterval(interval)
+  }, [reviews.length])
+
+  useEffect(() => {
+    if (currentIndex >= reviews.length && reviews.length > 0) {
+      setCurrentIndex(0)
+    }
+  }, [reviews.length, currentIndex])
+
+  const slides = useMemo(() => reviews, [reviews])
+
+  const handlePrevious = () => {
+    if (!slides.length) return
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length)
+  }
+
+  const handleNext = () => {
+    if (!slides.length) return
+    setCurrentIndex((prev) => (prev + 1) % slides.length)
+  }
+
   return (
     <div className="about-page" id="about">
       <Navbar className="fixed-navbar" hideLogo={true} />
@@ -129,6 +194,113 @@ function AboutPage() {
               </p>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="about-testimonials-section">
+        <div className="container">
+          <div className="about-testimonials-header">
+            <p className="about-testimonials-subtitle">JS CAR WASH</p>
+            <h2 className="about-testimonials-title">
+              What our <span className="about-testimonials-accent">customers</span> say
+            </h2>
+            <div className="about-testimonials-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+
+          <div className="about-testimonials-wrapper">
+            <button
+              className="about-testimonials-nav about-testimonials-nav-prev"
+              type="button"
+              onClick={handlePrevious}
+              aria-label="Previous testimonial"
+              disabled={!slides.length}
+            >
+              ‹
+            </button>
+
+            <div className="about-testimonials-window">
+              <div
+                className="about-testimonials-track"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              >
+                {slides.length === 0 && !loadingReviews ? (
+                  <div className="about-testimonials-empty">
+                    <p>No testimonials to show yet.</p>
+                  </div>
+                ) : (
+                  slides.map((review) => {
+                    const reviewerName =
+                      review.order?.user_full_name ||
+                      [review.order?.user?.first_name, review.order?.user?.last_name]
+                        .filter(Boolean)
+                        .join(' ') ||
+                      'Customer'
+                    const reviewerEmail = review.order?.user_email_address || review.order?.user?.email_address
+
+                    return (
+                      <div className="about-testimonial-card" key={review.id}>
+                        <div className="about-testimonial-rating">
+                          {Array.from({ length: 5 }).map((_, index) => (
+                            <span
+                              key={index}
+                              className={index < review.rating ? 'star filled' : 'star'}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                        <p className="about-testimonial-text">{review.review}</p>
+                        <div className="about-testimonial-author">
+                          <div className="about-testimonial-avatar" aria-hidden>
+                            {reviewerName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="about-testimonial-name">{reviewerName}</p>
+                            {reviewerEmail && (
+                              <p className="about-testimonial-email">{reviewerEmail}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+
+            <button
+              className="about-testimonials-nav about-testimonials-nav-next"
+              type="button"
+              onClick={handleNext}
+              aria-label="Next testimonial"
+              disabled={!slides.length}
+            >
+              ›
+            </button>
+          </div>
+
+          <div className="about-testimonials-dots">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                className={`about-testimonials-dot ${index === currentIndex ? 'active' : ''}`}
+                onClick={() => setCurrentIndex(index)}
+                aria-label={`Show testimonial ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          {loadingReviews && (
+            <div className="about-testimonials-loading">
+              <p>Loading testimonials...</p>
+            </div>
+          )}
         </div>
       </section>
 

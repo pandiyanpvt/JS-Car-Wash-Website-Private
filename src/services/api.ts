@@ -524,13 +524,35 @@ export interface ApiReview {
     total_amount: string
     status: string
     order_at: string
+    started_at?: string
+    completed_at?: string
     is_active: boolean
     createdAt: string
     updatedAt: string
+    user?: {
+      id: number
+      email_address: string
+      phone_number: string
+      first_name: string
+      last_name: string
+      user_name: string
+      is_verified: boolean
+      verified_at: string | null
+      user_role_id: number
+      is_active: boolean
+      createdAt: string
+      updatedAt: string
+    }
   }
 }
 
 export const reviewApi = {
+  getAll: async (): Promise<ApiResponse<ApiReview[]>> => {
+    return apiRequest<ApiReview[]>('/api/reviews', {
+      method: 'GET',
+    })
+  },
+
   create: async (data: ReviewRequest): Promise<ApiResponse<ApiReview>> => {
     return apiRequest<ApiReview>('/api/reviews', {
       method: 'POST',
