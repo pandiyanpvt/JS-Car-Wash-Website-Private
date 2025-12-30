@@ -137,8 +137,122 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: #000000;
-  margin: 0;
+  margin: 0 0 12px 0;
   text-transform: uppercase;
+}
+
+.pricing-branch-prices {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pricing-branch-price-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.pricing-branch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pricing-branch-header:hover {
+  background-color: #f1f5f9;
+}
+
+.pricing-branch-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pricing-branch-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.pricing-branch-name {
+  font-weight: 600;
+  color: #374151;
+}
+
+.pricing-branch-price-value {
+  font-weight: 700;
+  color: #1e3a8a;
+  font-size: 1rem;
+}
+
+.pricing-dropdown-arrow {
+  transition: transform 0.3s ease;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.pricing-dropdown-arrow.expanded {
+  transform: rotate(180deg);
+}
+
+.pricing-vehicle-types-list {
+  border-top: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+.pricing-vehicle-type-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.pricing-vehicle-type-item:last-child {
+  border-bottom: none;
+}
+
+.pricing-vehicle-type-item:hover {
+  background-color: #f9fafb;
+}
+
+.pricing-vehicle-type-name {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.pricing-vehicle-type-price {
+  font-size: 0.875rem;
+  color: #1e3a8a;
+  font-weight: 600;
 }
 
 .pricing-book-btn {
@@ -366,6 +480,57 @@
 
 .dark-mode .pricing-price-suffix {
   color: #b0b0b0 !important;
+}
+
+
+.dark-mode .pricing-branch-price-wrapper {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .pricing-branch-price {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .pricing-branch-name {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .pricing-branch-price-value {
+  color: #60a5fa !important;
+}
+
+.dark-mode .pricing-branch-price-wrapper {
+  background-color: #1a1a1a !important;
+  border-color: #3a3a3a !important;
+}
+
+.dark-mode .pricing-branch-header:hover {
+  background-color: #2a2a2a !important;
+}
+
+.dark-mode .pricing-dropdown-arrow {
+  color: #9ca3af !important;
+}
+
+.dark-mode .pricing-vehicle-types-list {
+  background-color: #1a1a1a !important;
+  border-top-color: #3a3a3a !important;
+}
+
+.dark-mode .pricing-vehicle-type-item {
+  border-bottom-color: #2a2a2a !important;
+}
+
+.dark-mode .pricing-vehicle-type-item:hover {
+  background-color: #2a2a2a !important;
+}
+
+.dark-mode .pricing-vehicle-type-name {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .pricing-vehicle-type-price {
+  color: #60a5fa !important;
 }
 
 .dark-mode .pricing-feature-item {

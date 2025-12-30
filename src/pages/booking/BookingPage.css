@@ -759,6 +759,34 @@
   text-transform: uppercase;
 }
 
+.booking-package-branch-prices {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.booking-package-branch-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.booking-package-branch-name {
+  font-weight: 600;
+  color: #374151;
+}
+
+.booking-package-branch-price-value {
+  font-weight: 700;
+  color: #1e3a8a;
+  font-size: 1rem;
+}
+
 .booking-package-check {
   position: absolute;
   top: 12px;
@@ -2335,6 +2363,19 @@
 
 .dark-mode .booking-package-x-icon {
   color: #e5e5e5 !important;
+}
+
+
+.dark-mode .booking-package-branch-price {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .booking-package-branch-name {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .booking-package-branch-price-value {
+  color: #60a5fa !important;
 }
 
 .dark-mode .booking-extra-item,

@@ -33,16 +33,65 @@ function CarDetailing() {
     fetchPackages()
   }, [])
 
-  const formatPrice = (amount: string) => {
-    const numAmount = parseFloat(amount)
-    return numAmount.toFixed(0)
-  }
-
   const getPackageFeatures = (pkg: ServicePackage) => {
     if (!pkg.details || pkg.details.length === 0) return []
     return pkg.details
       .filter(detail => detail.is_active && detail.package_includes)
       .map(detail => detail.package_includes!.includes_details)
+  }
+
+  const getPackagePricesByBranch = (pkg: ServicePackage) => {
+    if (!pkg.prices || pkg.prices.length === 0) return []
+    
+    // Group prices by branch
+    const branchMap = new Map<number, { branchName: string; prices: { vehicleType: string; price: number }[] }>()
+    
+    pkg.prices
+      .filter(price => price && price.is_active && price.price)
+      .forEach(price => {
+        const priceStr = String(price.price || '0').trim()
+        const parsedPrice = parseFloat(priceStr)
+        if (isNaN(parsedPrice) || parsedPrice <= 0) return
+        
+        const branchId = price.branch_id
+        const branchName = price.branch?.branch_name || `Branch ${branchId}`
+        const vehicleType = price.vehicle_type || ''
+        
+        if (!branchMap.has(branchId)) {
+          branchMap.set(branchId, { branchName, prices: [] })
+        }
+        
+        branchMap.get(branchId)!.prices.push({
+          vehicleType,
+          price: parsedPrice
+        })
+      })
+    
+    // Convert map to array
+    return Array.from(branchMap.entries()).map(([branchId, data]) => ({
+      branchId,
+      branchName: data.branchName,
+      prices: data.prices.sort((a, b) => {
+        // Sort by vehicle type order: Sedan, SUV, Hatchback, Wagon, Sports, X-Large
+        const order = ['Sedan', 'SUV', 'Hatchback', 'Wagon', 'Sports', 'X-Large']
+        const aIndex = order.indexOf(a.vehicleType)
+        const bIndex = order.indexOf(b.vehicleType)
+        if (aIndex === -1 && bIndex === -1) return 0
+        if (aIndex === -1) return 1
+        if (bIndex === -1) return -1
+        return aIndex - bIndex
+      })
+    }))
+  }
+
+  const [expandedDropdowns, setExpandedDropdowns] = useState<{ [key: string]: boolean }>({})
+  
+  const toggleDropdown = (packageId: number, branchId: number) => {
+    const key = `${packageId}-${branchId}`
+    setExpandedDropdowns(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }))
   }
 
   return (
@@ -79,6 +128,7 @@ function CarDetailing() {
             ) : (
               packages.map((pkg, index) => {
                 const features = getPackageFeatures(pkg)
+                const branchPrices = getPackagePricesByBranch(pkg)
                 return (
                   <motion.div
                     key={pkg.id}
@@ -88,10 +138,53 @@ function CarDetailing() {
                     transition={{ duration: 0.6, delay: 0.1 * (index + 1) }}
                   >
                     <div className="pricing-card-header">
-                      <div className="pricing-price">
-                        ${formatPrice(pkg.total_amount)} <span className="pricing-price-suffix">/ start from</span>
-                      </div>
                       <h3 className="pricing-card-title">{pkg.package_name}</h3>
+                      {branchPrices.length > 0 ? (
+                        <div className="pricing-branch-prices">
+                          {branchPrices.map(branchPrice => {
+                            const dropdownKey = `${pkg.id}-${branchPrice.branchId}`
+                            const isExpanded = expandedDropdowns[dropdownKey] || false
+                            const minPrice = Math.min(...branchPrice.prices.map(p => p.price))
+                            
+                            return (
+                              <div key={branchPrice.branchId} className="pricing-branch-price-wrapper">
+                                <div 
+                                  className="pricing-branch-header"
+                                  onClick={() => toggleDropdown(pkg.id, branchPrice.branchId)}
+                                >
+                                  <span className="pricing-branch-name">{branchPrice.branchName}</span>
+                                  <div className="pricing-branch-header-right">
+                                    <span className="pricing-branch-price-value">start from ${minPrice.toFixed(2)}</span>
+                                    <svg 
+                                      className={`pricing-dropdown-arrow ${isExpanded ? 'expanded' : ''}`}
+                                      width="16" 
+                                      height="16" 
+                                      viewBox="0 0 16 16" 
+                                      fill="none"
+                                    >
+                                      <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                  </div>
+                                </div>
+                                {isExpanded && (
+                                  <div className="pricing-vehicle-types-list">
+                                    {branchPrice.prices.map((price, idx) => (
+                                      <div key={idx} className="pricing-vehicle-type-item">
+                                        <span className="pricing-vehicle-type-name">{price.vehicleType}</span>
+                                        <span className="pricing-vehicle-type-price">start from ${price.price.toFixed(2)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div className="pricing-price">
+                          <span className="pricing-price-suffix">Price unavailable</span>
+                        </div>
+                      )}
                     </div>
                     <button className="pricing-book-btn" onClick={() => navigate('/booking')}>Book Now</button>
                     <div className="pricing-features">

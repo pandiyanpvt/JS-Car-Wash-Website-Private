@@ -97,7 +97,6 @@ function FooterPage() {
               <h3 className="footer-nav-title">Support</h3>
               <ul className="footer-nav-list">
                 <li><a href="/faq" onClick={(e) => handleFooterLinkClick('/faq', true, e)}>FAQ</a></li>
-                <li><a href="/testimonial" onClick={(e) => handleFooterLinkClick('/testimonial', true, e)}>Testimonials</a></li>
                 <li><a href="/aboutus" onClick={(e) => handleFooterLinkClick('/aboutus', true, e)}>About Us</a></li>
                 <li><a href="/contact" onClick={(e) => handleFooterLinkClick('/contact', true, e)}>Contact</a></li>
               </ul>

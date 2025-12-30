@@ -31,10 +31,17 @@ interface VehicleModel {
   image: string
 }
 
+interface PackagePrice {
+  branchId: number
+  branchName: string
+  vehicleType: string
+  price: number
+}
+
 interface Package {
   id: number
   name: string
-  price: number
+  prices: PackagePrice[]
   serviceType: 'carwash' | 'cardetailing'
   features: string[]
   excludedFeatures?: string[]
@@ -73,7 +80,6 @@ function BookingPage() {
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(null)
   const [carNumber, setCarNumber] = useState('')
-  const [carNumberError, setCarNumberError] = useState('')
   const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
   const [selectedExtras, setSelectedExtras] = useState<number[]>([])
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
@@ -174,7 +180,19 @@ function BookingPage() {
             .map(pkg => ({
               id: pkg.id,
               name: pkg.package_name,
-              price: parseFloat(pkg.total_amount),
+              prices: (pkg.prices || [])
+                .filter(price => price && price.is_active && price.price)
+                .map(price => {
+                  const priceStr = String(price.price || '0').trim()
+                  const parsedPrice = parseFloat(priceStr)
+                  return {
+                    branchId: price.branch_id,
+                    branchName: price.branch?.branch_name || `Branch ${price.branch_id}`,
+                    vehicleType: price.vehicle_type || '',
+                    price: isNaN(parsedPrice) || parsedPrice <= 0 ? 0 : parsedPrice
+                  }
+                })
+                .filter(price => price.price > 0),
               serviceType: 'carwash' as const,
               features: pkg.details
                 ?.filter(detail => detail.is_active && detail.package_includes)
@@ -191,7 +209,19 @@ function BookingPage() {
             .map(pkg => ({
               id: pkg.id,
               name: pkg.package_name,
-              price: parseFloat(pkg.total_amount),
+              prices: (pkg.prices || [])
+                .filter(price => price && price.is_active && price.price)
+                .map(price => {
+                  const priceStr = String(price.price || '0').trim()
+                  const parsedPrice = parseFloat(priceStr)
+                  return {
+                    branchId: price.branch_id,
+                    branchName: price.branch?.branch_name || `Branch ${price.branch_id}`,
+                    vehicleType: price.vehicle_type || '',
+                    price: isNaN(parsedPrice) || parsedPrice <= 0 ? 0 : parsedPrice
+                  }
+                })
+                .filter(price => price.price > 0),
               serviceType: 'cardetailing' as const,
               features: pkg.details
                 ?.filter(detail => detail.is_active && detail.package_includes)
@@ -472,16 +502,6 @@ function BookingPage() {
   const handleCarNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase()
     setCarNumber(value)
-    
-    // Clear error if field is empty (will validate on submit)
-    if (value.trim() === '') {
-      setCarNumberError('')
-      return
-    }
-
-    // Validate on change
-    const validation = validateAustralianPlate(value)
-    setCarNumberError(validation.error)
   }
 
   // Handle next step
@@ -493,14 +513,6 @@ function BookingPage() {
         return
       }
 
-      // Validate car number format
-      const plateValidation = validateAustralianPlate(carNumber)
-      if (!plateValidation.isValid) {
-        setCarNumberError(plateValidation.error)
-        return
-      }
-
-      setCarNumberError('')
       setCurrentStep(2)
       setPackageStep(0)
     } else if (currentStep === 2) {
@@ -643,10 +655,20 @@ function BookingPage() {
     setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))
   }
 
+  // Get package price for selected branch and vehicle type
+  const getPackagePrice = useCallback((pkg: Package) => {
+    if (!selectedBranch || !selectedVehicleModel) return 0
+    const branchPrice = pkg.prices.find(p => 
+      p.branchId === selectedBranch.id && 
+      p.vehicleType.toLowerCase() === selectedVehicleModel.name.toLowerCase()
+    )
+    return branchPrice ? branchPrice.price : 0
+  }, [selectedBranch, selectedVehicleModel])
+
   // Calculate total
   const calculateTotal = () => {
     let total = 0
-    selectedPackages.forEach(pkg => total += pkg.price)
+    selectedPackages.forEach(pkg => total += getPackagePrice(pkg))
     selectedExtras.forEach(extraId => {
       const extra = extras.find(e => e.id === extraId)
       if (extra) total += extra.price
@@ -871,21 +893,15 @@ function BookingPage() {
 
                 {/* Car Number */}
                 <div className="booking-form-section">
-                  <h3>Enter Car Number</h3>
+                  <h3>Enter Rego Number</h3>
                   <input
                     type="text"
-                    className={`booking-input ${carNumberError ? 'booking-input-error' : ''}`}
-                    placeholder="e.g., ABC123, 123ABC, AB1234"
+                    className="booking-input"
+                    placeholder="Enter your rego number..."
                     value={carNumber}
                     onChange={handleCarNumberChange}
                     maxLength={8}
                   />
-                  {carNumberError && (
-                    <p className="booking-error-message">{carNumberError}</p>
-                  )}
-                  <p className="booking-help-text">
-                    Australian format: ABC-123, 123-ABC, AB-1234 (spaces/hyphens optional)
-                  </p>
                 </div>
 
                 <button className="booking-next-btn" onClick={handleNext}>
@@ -945,10 +961,31 @@ function BookingPage() {
                         transition={{ duration: 0.6 }}
                       >
                         <div className="booking-package-card-header">
-                          <div className="booking-package-price">
-                            ${pkg.price} <span className="booking-package-price-suffix">/ start from</span>
-                          </div>
                           <h3 className="booking-package-card-title">{pkg.name}</h3>
+                          {selectedBranch && selectedVehicleModel ? (
+                            (() => {
+                              const matchingPrice = pkg.prices.find(p => 
+                                p.branchId === selectedBranch.id && 
+                                p.vehicleType.toLowerCase() === selectedVehicleModel.name.toLowerCase()
+                              )
+                              const priceNum = matchingPrice ? matchingPrice.price : 0
+                              
+                              return priceNum > 0 ? (
+                                <div className="booking-package-price">
+                                  <span className="booking-package-price-suffix">Start from /</span>
+                                  <span className="booking-package-price-value">${priceNum.toFixed(2)}</span>
+                                </div>
+                              ) : (
+                                <div className="booking-package-price">
+                                  <span className="booking-package-price-suffix">Price unavailable</span>
+                                </div>
+                              )
+                            })()
+                          ) : (
+                            <div className="booking-package-price">
+                              <span className="booking-package-price-suffix">Select branch and vehicle type</span>
+                            </div>
+                          )}
                         </div>
                         <div className="booking-package-check">
                           {selectedPackages.find(p => p.id === pkg.id) && '✓'}
@@ -1275,7 +1312,7 @@ function BookingPage() {
                       {selectedPackages.map(pkg => (
                         <div key={pkg.id} className="booking-summary-item">
                           <span>{pkg.name}</span>
-                          <span>${pkg.price}</span>
+                          <span>${getPackagePrice(pkg).toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
@@ -1407,12 +1444,12 @@ function BookingPage() {
                   {selectedPackages.length > 0 ? (
                     <>
                       <span className="booking-total-summary-total">
-                        From $ {selectedPackages.reduce((sum, pkg) => sum + pkg.price, 0).toFixed(2)}
+                        From $ {selectedPackages.reduce((sum, pkg) => sum + getPackagePrice(pkg), 0).toFixed(2)}
                       </span>
                       <div className="booking-total-summary-package-price-list">
                         {selectedPackages.map(pkg => (
                           <div key={pkg.id} className="booking-total-summary-package-price">
-                            $ {pkg.price.toFixed(2)}
+                            $ {getPackagePrice(pkg).toFixed(2)}
                           </div>
                         ))}
                       </div>

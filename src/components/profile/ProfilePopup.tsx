@@ -71,7 +71,7 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps): ReactPortal | nul
       }
     }
 
-    if (isOpen && activeTab === 'orders') {
+    if (isOpen && (activeTab === 'orders' || activeTab === 'reviews')) {
       fetchOrders()
     }
   }, [user, isOpen, activeTab])
@@ -830,7 +830,7 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps): ReactPortal | nul
                                       order_id: apiOrder.id,
                                       rating: reviewRating,
                                       review: reviewComment.trim(),
-                                      is_show_others: true,
+                                      is_show_others: false,
                                       is_active: true
                                     })
 
@@ -921,15 +921,71 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps): ReactPortal | nul
                         ) : (
                           <>
                             {(() => {
-                              const completedOrders = orders.filter(o => o.status === 'completed')
-                              const reviewedOrderIds = reviews.map(r => r.orderId)
-                              const availableOrdersToReview = completedOrders.filter(o => !reviewedOrderIds.includes(o.id))
+                              // Get completed orders from API
+                              const completedApiOrders = apiOrders.filter(o => o.status === 'completed')
                               
-                              const hasCompletedOrders = completedOrders.length > 0
+                              // Get order IDs that have been reviewed
+                              const reviewedOrderIds = apiReviews.map(r => r.order_id)
+                              
+                              // Filter to get only completed orders that haven't been reviewed
+                              const availableOrdersToReview = completedApiOrders.filter(
+                                apiOrder => !reviewedOrderIds.includes(apiOrder.id)
+                              )
+                              
+                              // Convert to display format
+                              const availableOrdersToReviewDisplay = availableOrdersToReview.map((apiOrder): import('../../contexts/AuthContext').Order => {
+                                const items: Array<{ name: string; quantity: number; price: number }> = []
+
+                                apiOrder.product_details.forEach(pd => {
+                                  if (pd.product) {
+                                    items.push({
+                                      name: pd.product.product_name,
+                                      quantity: pd.quantity,
+                                      price: parseFloat(pd.amount)
+                                    })
+                                  }
+                                })
+
+                                apiOrder.service_details.forEach(sd => {
+                                  if (sd.package) {
+                                    items.push({
+                                      name: sd.package.package_name,
+                                      quantity: 1,
+                                      price: parseFloat(sd.package.total_amount)
+                                    })
+                                  }
+                                })
+
+                                apiOrder.extra_work_details.forEach(ewd => {
+                                  if (ewd.extra_work) {
+                                    items.push({
+                                      name: ewd.extra_work.name,
+                                      quantity: 1,
+                                      price: parseFloat(ewd.extra_work.amount)
+                                    })
+                                  }
+                                })
+
+                                return {
+                                  id: apiOrder.id.toString(),
+                                  date: apiOrder.order_at || apiOrder.createdAt,
+                                  items,
+                                  total: parseFloat(apiOrder.total_amount),
+                                  status: apiOrder.status as 'pending' | 'completed' | 'cancelled'
+                                }
+                              })
+                              
+                              const hasCompletedOrders = completedApiOrders.length > 0
                               
                               return (
                                 <>
-                                  {!hasCompletedOrders && (
+                                  {ordersLoading && (
+                                    <div className="profile-no-reviews">
+                                      <i className="fas fa-spinner fa-spin"></i>
+                                      <p>Loading orders...</p>
+                                    </div>
+                                  )}
+                                  {!ordersLoading && !hasCompletedOrders && (
                                     <div className="profile-no-reviews">
                                       <i className="fas fa-info-circle"></i>
                                       <p>No completed orders yet</p>
@@ -938,11 +994,11 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps): ReactPortal | nul
                                       </p>
                                     </div>
                                   )}
-                                  {hasCompletedOrders && availableOrdersToReview.length > 0 && (
+                                  {!ordersLoading && hasCompletedOrders && availableOrdersToReviewDisplay.length > 0 && (
                                     <div className="profile-reviews-section">
                                       <h4 className="profile-reviews-section-title">Available Orders to Review</h4>
                                       <div className="profile-orders-to-review">
-                                        {availableOrdersToReview.map((order) => (
+                                        {availableOrdersToReviewDisplay.map((order) => (
                                           <div key={order.id} className="profile-order-to-review">
                                             <div className="profile-order-to-review-info">
                                               <div>
@@ -986,7 +1042,7 @@ function ProfilePopup({ isOpen, onClose }: ProfilePopupProps): ReactPortal | nul
                                         <i className="fas fa-star"></i>
                                         <p>You haven't left any reviews yet.</p>
                                         <p className="profile-no-reviews-subtitle">
-                                          {availableOrdersToReview.length > 0
+                                          {availableOrdersToReviewDisplay.length > 0
                                             ? 'Review your completed orders above'
                                             : 'Complete an order to leave a review'}
                                         </p>

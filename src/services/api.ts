@@ -597,16 +597,37 @@ export interface PackageInclude {
   service_type?: ServiceType
 }
 
+export type PackagePrice = {
+  id: number
+  package_id: number
+  branch_id: number
+  vehicle_type: string
+  price: string
+  is_active: boolean
+  createdAt: string
+  updatedAt: string
+  branch?: {
+    id: number
+    branch_name: string
+    address: string
+    phone_number: string
+    email_address: string
+    is_active: boolean
+    createdAt: string
+    updatedAt: string
+  }
+}
+
 export type ServicePackage = {
   id: number
   package_name: string
-  total_amount: string
   service_type_id: number
   is_active: boolean
   createdAt: string
   updatedAt: string
   details?: PackageDetail[]
   service_type?: ServiceType
+  prices?: PackagePrice[]
 }
 
 export interface PackageDetail {
