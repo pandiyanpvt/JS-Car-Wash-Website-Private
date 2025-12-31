@@ -4,7 +4,7 @@ import { FooterPage } from '../footer'
 import { useCart } from '../../contexts/CartContext'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthModal from '../../components/auth/AuthModal'
-import { productApi, productCategoryApi, type Product as ApiProduct, type ProductStockEntry } from '../../services/api'
+import { productApi, productCategoryApi, type Product as ApiProduct, type ProductStockEntry, type PaginatedProductsResponse, type PaginationInfo } from '../../services/api'
 import './ProductPage.css'
 
 interface BranchStock {
@@ -35,6 +35,14 @@ function ProductPage() {
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
   const [products, setProducts] = useState<ProductItem[]>([])
   const [categories, setCategories] = useState<string[]>([])
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: 1,
+    pageSize: 10,
+    totalItems: 0,
+    totalPages: 0,
+  })
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchLoading, setSearchLoading] = useState(false)
@@ -71,15 +79,33 @@ function ProductPage() {
         setLoading(true)
         setError(null)
         const [productsResponse, categoriesResponse] = await Promise.all([
-          productApi.getAll(),
+          productApi.getAll(currentPage, pageSize),
           productCategoryApi.getAll()
         ])
 
         if (productsResponse.success && productsResponse.data) {
-          const mappedProducts: ProductItem[] = productsResponse.data
-            .filter(p => p.is_active)
-            .map(mapApiProductToProductItem)
-          setProducts(mappedProducts)
+          // Handle paginated response
+          if ('items' in productsResponse.data && 'pagination' in productsResponse.data) {
+            const paginatedData = productsResponse.data as PaginatedProductsResponse
+            const mappedProducts: ProductItem[] = paginatedData.items
+              .filter(p => p.is_active)
+              .map(mapApiProductToProductItem)
+            setProducts(mappedProducts)
+            setPagination(paginatedData.pagination)
+          } else {
+            // Fallback for non-paginated response (backward compatibility)
+            const productsArray = productsResponse.data as ApiProduct[]
+            const mappedProducts: ProductItem[] = productsArray
+              .filter(p => p.is_active)
+              .map(mapApiProductToProductItem)
+            setProducts(mappedProducts)
+            setPagination({
+              page: 1,
+              pageSize: mappedProducts.length,
+              totalItems: mappedProducts.length,
+              totalPages: 1,
+            })
+          }
         }
 
         if (categoriesResponse.success && categoriesResponse.data) {
@@ -105,17 +131,37 @@ function ProductPage() {
     }
 
     fetchData()
-  }, [mapApiProductToProductItem])
+  }, [mapApiProductToProductItem, currentPage, pageSize])
 
   useEffect(() => {
     const searchProducts = async () => {
       if (!searchQuery.trim()) {
-        const response = await productApi.getAll()
+        // Reset to first page when clearing search
+        setCurrentPage(1)
+        const response = await productApi.getAll(1, pageSize)
         if (response.success && response.data) {
-          const mappedProducts: ProductItem[] = response.data
-            .filter(p => p.is_active)
-            .map(mapApiProductToProductItem)
-          setProducts(mappedProducts)
+          // Handle paginated response
+          if ('items' in response.data && 'pagination' in response.data) {
+            const paginatedData = response.data as PaginatedProductsResponse
+            const mappedProducts: ProductItem[] = paginatedData.items
+              .filter(p => p.is_active)
+              .map(mapApiProductToProductItem)
+            setProducts(mappedProducts)
+            setPagination(paginatedData.pagination)
+          } else {
+            // Fallback for non-paginated response
+            const productsArray = response.data as ApiProduct[]
+            const mappedProducts: ProductItem[] = productsArray
+              .filter(p => p.is_active)
+              .map(mapApiProductToProductItem)
+            setProducts(mappedProducts)
+            setPagination({
+              page: 1,
+              pageSize: mappedProducts.length,
+              totalItems: mappedProducts.length,
+              totalPages: 1,
+            })
+          }
         }
         return
       }
@@ -325,6 +371,49 @@ function ProductPage() {
                 <i className="fas fa-search"></i>
               </div>
               <p>No products found matching your search.</p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && !searchLoading && !searchQuery && pagination.totalPages > 1 && (
+            <div className="product-pagination">
+              <div className="product-pagination-info">
+                Showing{' '}
+                <span className="product-pagination-number">
+                  {((pagination.page - 1) * pagination.pageSize) + 1}
+                </span>{' '}
+                to{' '}
+                <span className="product-pagination-number">
+                  {Math.min(pagination.page * pagination.pageSize, pagination.totalItems)}
+                </span>{' '}
+                of{' '}
+                <span className="product-pagination-number">
+                  {pagination.totalItems}
+                </span>{' '}
+                products
+              </div>
+              <div className="product-pagination-controls">
+                <button
+                  className="product-pagination-btn"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={pagination.page === 1 || loading}
+                >
+                  <i className="fas fa-chevron-left"></i>
+                  Previous
+                </button>
+                <div className="product-pagination-page-info">
+                  Page <span className="product-pagination-number">{pagination.page}</span> of{' '}
+                  <span className="product-pagination-number">{pagination.totalPages}</span>
+                </div>
+                <button
+                  className="product-pagination-btn"
+                  onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                  disabled={pagination.page === pagination.totalPages || loading}
+                >
+                  Next
+                  <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
             </div>
           )}
         </div>

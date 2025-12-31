@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://js-car-wash-backend-production.up.railway.app'
 
 interface ApiResponse<T> {
   success: boolean
@@ -248,11 +248,35 @@ export const productCategoryApi = {
   },
 }
 
+export interface PaginationInfo {
+  page: number
+  pageSize: number
+  totalItems: number
+  totalPages: number
+}
+
+export interface PaginatedProductsResponse {
+  items: Product[]
+  pagination: PaginationInfo
+}
+
 export const productApi = {
-  getAll: async (): Promise<ApiResponse<Product[]>> => {
-    return apiRequest<Product[]>('/api/products', {
+  getAll: async (page: number = 1, pageSize: number = 10): Promise<ApiResponse<Product[] | PaginatedProductsResponse>> => {
+    const queryParams = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+    })
+    const response = await apiRequest<Product[] | PaginatedProductsResponse>(`/api/products?${queryParams.toString()}`, {
       method: 'GET',
     })
+    
+    // Handle paginated response
+    if (response.success && response.data && typeof response.data === 'object' && 'items' in response.data && 'pagination' in response.data) {
+      return response as ApiResponse<PaginatedProductsResponse>
+    }
+    
+    // Fallback for non-paginated response (backward compatibility)
+    return response as ApiResponse<Product[]>
   },
 
   getById: async (id: number): Promise<ApiResponse<Product>> => {
