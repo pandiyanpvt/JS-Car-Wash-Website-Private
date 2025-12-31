@@ -1271,7 +1271,7 @@ function HomePage({}: HomePageProps) {
                   <div
                     key={index}
                     className={`dealersshow-map-marker ${index === 0 ? 'marker-dubbo' : 'marker-sydney'}`}
-                    onClick={() => handleBranchSelection({ name: branch.name, subtitle: branch.subtitle })}
+                    onClick={() => handleBranchSelection(branch)}
                   >
                     <img
                       src="/JS Car Wash Images/cropped-fghfthgf.png"
@@ -1289,7 +1289,7 @@ function HomePage({}: HomePageProps) {
                   <button
                     key={index}
                     className={`dealersshow-branch-name-btn ${selectedBranch?.subtitle === branch.subtitle ? 'selected' : ''}`}
-                    onClick={() => handleBranchSelection({ name: branch.name, subtitle: branch.subtitle })}
+                    onClick={() => handleBranchSelection(branch)}
                   >
                     {branch.subtitle}
                   </button>

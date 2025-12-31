@@ -42,7 +42,7 @@ function ProductPage() {
     totalPages: 0,
   })
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, _setPageSize] = useState(10)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchLoading, setSearchLoading] = useState(false)

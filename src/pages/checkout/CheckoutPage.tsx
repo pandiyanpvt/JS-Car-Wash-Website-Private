@@ -78,10 +78,17 @@ function CheckoutPage() {
         throw new Error('Failed to check product stock')
       }
 
+      // Handle paginated response
+      const productsArray = 'items' in productsResponse.data && 'pagination' in productsResponse.data
+        ? productsResponse.data.items
+        : Array.isArray(productsResponse.data)
+        ? productsResponse.data
+        : []
+
       const productMap = new Map<number, ApiProduct>(
-        productsResponse.data
-          .filter(product => product.is_active)
-          .map(product => [product.id, product])
+        productsArray
+          .filter((product: ApiProduct) => product.is_active)
+          .map((product: ApiProduct) => [product.id, product])
       )
 
       for (const item of cartItems) {
@@ -106,10 +113,12 @@ function CheckoutPage() {
       const orderData = {
         user_id: user.id,
         branch_id: selectedBranchId,
+        services: [],
         products: cartItems.map(item => ({
           product_id: item.id,
           quantity: item.quantity
-        }))
+        })),
+        extra_works: []
       }
 
       const response = await orderApi.create(orderData)

@@ -266,8 +266,15 @@ function BookingPage() {
       try {
         const response = await productApi.getAll()
         if (response.success && response.data) {
-          const activeProducts = response.data
-            .filter(product => product.is_active)
+          // Handle paginated response
+          const productsArray = 'items' in response.data && 'pagination' in response.data
+            ? response.data.items
+            : Array.isArray(response.data)
+            ? response.data
+            : []
+          
+          const activeProducts = productsArray
+            .filter((product: ApiProduct) => product.is_active)
             .map(mapApiProductToBookingProduct)
           setProducts(activeProducts)
         }
@@ -443,59 +450,6 @@ function BookingPage() {
       return carDetailingPackages
     }
     return []
-  }
-
-  // Validate Australian vehicle plate number
-  const validateAustralianPlate = (plate: string): { isValid: boolean; error: string } => {
-    if (!plate || plate.trim() === '') {
-      return { isValid: false, error: 'Car number is required' }
-    }
-
-    // Normalize input: remove spaces, hyphens, and convert to uppercase
-    const normalized = plate.replace(/[\s-]/g, '').toUpperCase()
-
-    // Check length (Australian plates are typically 6-7 characters)
-    if (normalized.length < 6 || normalized.length > 7) {
-      return { isValid: false, error: 'Car number must be 6-7 characters' }
-    }
-
-    // Disallow obvious fake entries
-    const fakePatterns = [
-      /^[A-Z]{6,7}$/, // All letters (e.g., AAAAAA)
-      /^\d{6,7}$/, // All numbers (e.g., 123456)
-      /^[A-Z]{1,2}$/, // Too short
-      /^\d{1,2}$/ // Too short numbers only
-    ]
-
-    for (const pattern of fakePatterns) {
-      if (pattern.test(normalized)) {
-        return { isValid: false, error: 'Invalid car number format' }
-      }
-    }
-
-    // Australian plate format patterns
-    const patterns = [
-      /^[A-HJ-NPR-Z]{3}\d{3}$/, // ABC123 (3 letters + 3 numbers, excluding I, O, Q)
-      /^\d{3}[A-HJ-NPR-Z]{3}$/, // 123ABC (3 numbers + 3 letters)
-      /^[A-HJ-NPR-Z]{2}\d{4}$/, // AB1234 (2 letters + 4 numbers)
-      /^\d{4}[A-HJ-NPR-Z]{2}$/, // 1234AB (4 numbers + 2 letters)
-      /^[A-HJ-NPR-Z]{3}\d{4}$/, // ABC1234 (3 letters + 4 numbers)
-      /^\d{3}[A-HJ-NPR-Z]{4}$/, // 123ABCD (3 numbers + 4 letters)
-      /^[A-HJ-NPR-Z]{2}\d{3}[A-HJ-NPR-Z]{1}$/, // AB123C (2 letters + 3 numbers + 1 letter)
-      /^[A-HJ-NPR-Z]{1}\d{3}[A-HJ-NPR-Z]{2}$/, // A123BC (1 letter + 3 numbers + 2 letters)
-    ]
-
-    // Check if plate matches any valid pattern
-    const isValid = patterns.some(pattern => pattern.test(normalized))
-
-    if (!isValid) {
-      return { 
-        isValid: false, 
-        error: 'Invalid Australian plate format. Examples: ABC123, 123ABC, AB1234' 
-      }
-    }
-
-    return { isValid: true, error: '' }
   }
 
   // Handle car number input change
