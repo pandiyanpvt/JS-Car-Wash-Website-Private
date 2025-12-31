@@ -1,4 +1,5 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://js-car-wash-backend-production.up.railway.app'
+// const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://js-car-wash-backend-production.up.railway.app'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 interface ApiResponse<T> {
   success: boolean
@@ -733,12 +734,21 @@ export const packageDetailApi = {
   },
 }
 
+export type ExtraWorkBranchPrice = {
+  id: number
+  extra_works_id: number
+  branch_id: number
+  amount: string
+  is_active: boolean
+  branch?: Branch
+}
+
 export type ExtraWork = {
   id: number
   name: string
-  amount: string
   description: string
   is_active: boolean
+  branch_prices?: ExtraWorkBranchPrice[]
   createdAt: string
   updatedAt: string
 }

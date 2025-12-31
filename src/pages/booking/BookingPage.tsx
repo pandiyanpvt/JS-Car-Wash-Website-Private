@@ -246,11 +246,31 @@ function BookingPage() {
         if (response.success && response.data) {
           const activeExtras = response.data
             .filter(extra => extra.is_active)
-            .map(extra => ({
-              id: extra.id,
-              name: extra.name,
-              price: parseFloat(extra.amount),
-            }))
+            .map(extra => {
+              // Get branch-specific price if branch is selected
+              let price = 0
+              if (selectedBranch && extra.branch_prices) {
+                const branchPrice = extra.branch_prices.find(
+                  bp => bp.branch_id === selectedBranch.id && bp.is_active
+                )
+                if (branchPrice) {
+                  price = parseFloat(branchPrice.amount)
+                }
+              } else if (extra.branch_prices && extra.branch_prices.length > 0) {
+                // Fallback to first available price if no branch selected
+                const firstActivePrice = extra.branch_prices.find(bp => bp.is_active)
+                if (firstActivePrice) {
+                  price = parseFloat(firstActivePrice.amount)
+                }
+              }
+              
+              return {
+                id: extra.id,
+                name: extra.name,
+                price,
+              }
+            })
+          // Show all extra works, even if price is 0 (will show as $0.00)
           setExtras(activeExtras)
         }
       } catch (error) {
@@ -258,7 +278,7 @@ function BookingPage() {
       }
     }
     fetchExtraWorks()
-  }, [])
+  }, [selectedBranch])
 
   // Fetch products
   useEffect(() => {
