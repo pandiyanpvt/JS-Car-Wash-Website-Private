@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
+import SEO from '../../components/SEO'
 import './ServicePage.css'
 
 function ServicePage() {
@@ -12,10 +13,10 @@ function ServicePage() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
-    
+
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
@@ -84,6 +85,11 @@ function ServicePage() {
 
   return (
     <div className="service-page" id="services">
+      <SEO
+        title="Our Services | Professional Hand Wash & Detailing | JS Car Wash"
+        description="Comprehensive car care services: Hand Polish, Clay Bar, Headlight Restoration, Carpet Steam Clean, Interior Detailing and more. Experience the best car wash in Australia."
+        canonical="https://www.jscarwash.com/services"
+      />
       <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">

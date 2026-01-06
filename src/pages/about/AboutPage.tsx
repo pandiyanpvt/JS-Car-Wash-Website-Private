@@ -4,6 +4,7 @@ import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
 import type { ApiReview } from '../../services/api'
 import { reviewApi } from '../../services/api'
+import SEO from '../../components/SEO'
 import './AboutPage.css'
 
 function AboutPage() {
@@ -71,6 +72,11 @@ function AboutPage() {
 
   return (
     <div className="about-page" id="about">
+      <SEO
+        title="About Us | JS Car Wash & Detailing"
+        description="Learn more about JS Car Wash & Detailing. A family-owned business providing professional hand wash and car detailing in Australia for over 10 years."
+        canonical="https://www.jscarwash.com/aboutus"
+      />
       <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
@@ -103,10 +109,10 @@ function AboutPage() {
               </div>
               <div className="about-js-description">
                 <p>
-                  JS Car Wash is Australia's premier professional hand wash and detailing provider. 
-                  For over 10 years, JS Car Wash has been a family-owned, private company that thrives 
-                  in an atmosphere of determination and innovation. We take pride in offering unparalleled service, 
-                  ensuring that every customer leaves with that new car feeling. JS Car Wash is dedicated to making 
+                  JS Car Wash is Australia's premier professional hand wash and detailing provider.
+                  For over 10 years, JS Car Wash has been a family-owned, private company that thrives
+                  in an atmosphere of determination and innovation. We take pride in offering unparalleled service,
+                  ensuring that every customer leaves with that new car feeling. JS Car Wash is dedicated to making
                   car cleaning an affordable and convenient experience.
                 </p>
               </div>
@@ -114,7 +120,7 @@ function AboutPage() {
               <div className="about-js-contact">
                 <div className="about-js-contact-icon">
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor" />
                   </svg>
                 </div>
                 <div className="about-js-contact-info">

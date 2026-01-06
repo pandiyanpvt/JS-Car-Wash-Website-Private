@@ -4,6 +4,7 @@ import { FooterPage } from '../footer'
 import { useCart } from '../../contexts/CartContext'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthModal from '../../components/auth/AuthModal'
+import SEO from '../../components/SEO'
 import { productApi, productCategoryApi, type Product as ApiProduct, type ProductStockEntry, type PaginatedProductsResponse, type PaginationInfo } from '../../services/api'
 import './ProductPage.css'
 
@@ -235,8 +236,13 @@ function ProductPage() {
 
   return (
     <div className="product-page">
+      <SEO
+        title="Car Care Products | JS Car Wash Shop"
+        description="Shop for premium car care products. High-quality soaps, waxes, towels, and detailing supplies to keep your car looking new."
+        canonical="https://www.jscarwash.com/products"
+      />
       <Navbar className="fixed-navbar" hideLogo={true} />
-      
+
       {/* Page Heading Section */}
       <section className="page-heading-section">
         <div className="page-heading-overlay"></div>
@@ -244,7 +250,7 @@ function ProductPage() {
           <h1 className="page-heading-title">Products</h1>
         </div>
       </section>
-      
+
       {/* Search Bar Section - Below Navbar */}
       <div className="product-search-section">
         <div className="product-search-wrapper">
@@ -261,7 +267,7 @@ function ProductPage() {
                 <i className="fas fa-search"></i>
               </button>
             </div>
-            
+
             <div className="product-category-filter">
               <button
                 className={`category-filter-btn ${selectedCategory === 'All' ? 'active' : ''}`}
