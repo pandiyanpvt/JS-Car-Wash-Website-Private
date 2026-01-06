@@ -1481,7 +1481,7 @@ function HomePage({ }: HomePageProps) {
               },
               {
                 question: 'What should I do if I\'m not satisfied with the service I received?',
-                answer: 'Please ensure you check your car before you leave. If any area of the vehicle has been missed, please highlight this to the onsite manager and it will be rectified on the spot. Alternatively, please contact our Customer Service team on 02 5804 5720 or info@jscarwash.com.au',
+                answer: 'Please ensure you check your car before you leave. If any area of the vehicle has been missed, please highlight this to the onsite manager and it will be rectified on the spot. Alternatively, please contact our Customer Service team on 02 5804 5720 or info@jscarwash.com',
                 hasHighlight: true
               },
               {
@@ -1502,7 +1502,7 @@ function HomePage({ }: HomePageProps) {
                 hasBulletPoints: true,
                 bulletPoints: [
                   { label: 'Phone', value: '02 5804 5720' },
-                  { label: 'Email', value: 'info@jscarwash.com.au' }
+                  { label: 'Email', value: 'info@jscarwash.com' }
                 ]
               },
               {
@@ -1570,7 +1570,7 @@ function HomePage({ }: HomePageProps) {
                           {item.hasHighlight ? (
                             <>
                               {item.answer.split(/(02 5804 5720|info@jscarwash\.com\.au)/).map((part, idx) =>
-                                part === '02 5804 5720' || part === 'info@jscarwash.com.au' ? (
+                                part === '02 5804 5720' || part === 'info@jscarwash.com' ? (
                                   <span key={idx} className="home-faq-highlight">{part}</span>
                                 ) : (
                                   <span key={idx}>{part}</span>
