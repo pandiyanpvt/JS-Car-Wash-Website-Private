@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
 import { galleryApi } from '../../services/api'
+import SEO from '../../components/SEO'
 import './GalleryPage.css'
 
 interface GalleryImage {
@@ -106,6 +107,11 @@ function GalleryPage() {
 
   return (
     <div className="gallery-page">
+      <SEO
+        title="Photo Gallery | JS Car Wash Results"
+        description="Browse through our gallery of professional car wash and detailing results. See the premium finish we provide to every vehicle."
+        canonical="https://www.jscarwash.com/gallery"
+      />
       <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
@@ -185,7 +191,7 @@ function GalleryPage() {
                 aria-label="Close lightbox"
               >
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
               <button
@@ -197,7 +203,7 @@ function GalleryPage() {
                 aria-label="Previous image"
               >
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
               <button
@@ -209,7 +215,7 @@ function GalleryPage() {
                 aria-label="Next image"
               >
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
               <img

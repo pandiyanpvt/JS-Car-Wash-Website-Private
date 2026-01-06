@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
+import SEO from '../../components/SEO'
 import './FAQPage.css'
 
 function FAQPage() {
@@ -81,6 +82,11 @@ function FAQPage() {
 
   return (
     <div className="faq-page" id="faq">
+      <SEO
+        title="Frequently Asked Questions | JS Car Wash & Detailing"
+        description="Find answers to common questions about our car wash services, preparation, pricing, and timing. Everything you need to know before visiting JS Car Wash."
+        canonical="https://www.jscarwash.com/faq"
+      />
       <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
@@ -142,7 +148,7 @@ function FAQPage() {
                       <p>
                         {item.hasHighlight ? (
                           <>
-                            {item.answer.split(/(02 5804 5720|info@jscarwash\.com\.au)/).map((part, idx) => 
+                            {item.answer.split(/(02 5804 5720|info@jscarwash\.com\.au)/).map((part, idx) =>
                               part === '02 5804 5720' || part === 'info@jscarwash.com.au' ? (
                                 <span key={idx} className="faq-highlight">{part}</span>
                               ) : (

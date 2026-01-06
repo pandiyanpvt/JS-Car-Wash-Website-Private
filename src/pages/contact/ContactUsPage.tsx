@@ -4,6 +4,7 @@ import Navbar from '../../components/navbar/Navbar'
 import { useAuth } from '../../contexts/AuthContext'
 import { contactApi } from '../../services/api'
 import ContactSuccessModal from '../../components/contact/ContactSuccessModal'
+import SEO from '../../components/SEO'
 import './ContactUsPage.css'
 
 interface Branch {
@@ -103,6 +104,11 @@ function ContactUsPage() {
 
   return (
     <div className="contact-page" id="contact">
+      <SEO
+        title="Contact Us | JS Car Wash Toongabbie & Dubbo"
+        description="Get in touch with JS Car Wash & Detailing. Contact our Toongabbie or Dubbo branches for bookings, pricing, and inquiries. Professional hand wash and detailing near you."
+        canonical="https://www.jscarwash.com/contact"
+      />
       <Navbar className="fixed-navbar" hideLogo={true} />
       {/* Page Heading Section */}
       <section className="page-heading-section">
@@ -128,10 +134,10 @@ function ContactUsPage() {
               {branches.map((branch) => {
                 const isDubbo = branch.branch_name.toLowerCase().includes('dubbo')
                 const isToongabbie = branch.branch_name.toLowerCase().includes('toongabbie')
-                
+
                 let mapUrl = ''
                 let directionsUrl = ''
-                
+
                 if (isDubbo) {
                   mapUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3374.180424993968!2d148.6284251755715!3d-32.253227437203996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b0f734ad0c1d615%3A0xe2dddee3b54e4e93!2sJS%20Car%20Wash%20and%20Detailing!5e0!3m2!1sen!2slk!4v1764846725165!5m2!1sen!2slk'
                   directionsUrl = 'https://maps.app.goo.gl/o8hPg2ap39zBX77H7'

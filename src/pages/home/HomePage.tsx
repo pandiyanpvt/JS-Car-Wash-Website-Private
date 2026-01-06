@@ -6,9 +6,10 @@ import Navbar from '../../components/navbar/Navbar'
 import AuthModal from '../../components/auth/AuthModal'
 import { useAuth } from '../../contexts/AuthContext'
 import { contactApi } from '../../services/api'
+import SEO from '../../components/SEO'
 import './HomePage.css'
 
-interface HomePageProps {}
+interface HomePageProps { }
 
 interface Branch {
   id: number
@@ -18,7 +19,7 @@ interface Branch {
   mapUrl?: string
 }
 
-function HomePage({}: HomePageProps) {
+function HomePage({ }: HomePageProps) {
   const { isAuthenticated } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
@@ -44,7 +45,7 @@ function HomePage({}: HomePageProps) {
       const stored = localStorage.getItem('selectedBranch')
       if (stored) {
         const branch = JSON.parse(stored)
-        return { 
+        return {
           id: branch.id ?? 0,
           name: branch.name || branch.subtitle || '',
           subtitle: branch.subtitle || branch.name || '',
@@ -131,9 +132,9 @@ function HomePage({}: HomePageProps) {
   }, [location.pathname])
 
   const isServicesActive = useCallback(() => {
-    return location.pathname === '/services' || 
-           location.pathname === '/carwash' || 
-           location.pathname === '/cardetailing'
+    return location.pathname === '/services' ||
+      location.pathname === '/carwash' ||
+      location.pathname === '/cardetailing'
   }, [location.pathname])
 
   const isDropdownItemActive = useCallback((href: string) => {
@@ -152,38 +153,38 @@ function HomePage({}: HomePageProps) {
 
   // Model to video mapping - using local MP4 files
   const modelVideoMap: { [key: string]: { url: string; title: string; coverImage: string; isLocal: boolean } } = useMemo(() => ({
-    'SEDAN': { 
-      url: '/header/Sedan.mp4', 
+    'SEDAN': {
+      url: '/header/Sedan.mp4',
       title: 'Sedan Car Wash Video',
       coverImage: '/JS Car Wash Images/Sedan.png',
       isLocal: true
     },
-    'X-LARGE': { 
-      url: '/header/X-Large.mp4', 
+    'X-LARGE': {
+      url: '/header/X-Large.mp4',
       title: 'X-Large Car Wash Video',
       coverImage: '/JS Car Wash Images/X-Large.png',
       isLocal: true
     },
-    'SUV': { 
-      url: '/header/SUV.mp4', 
+    'SUV': {
+      url: '/header/SUV.mp4',
       title: 'SUV Car Wash Video',
       coverImage: '/JS Car Wash Images/Suv.png',
       isLocal: true
     },
-    'HATCHBACK': { 
-      url: '/header/Hatchback.mp4', 
+    'HATCHBACK': {
+      url: '/header/Hatchback.mp4',
       title: 'Hatchback Car Wash Video',
       coverImage: '/JS Car Wash Images/Hatchback.png',
       isLocal: true
     },
-    'WAGON': { 
-      url: '/header/wagon.mp4', 
+    'WAGON': {
+      url: '/header/wagon.mp4',
       title: 'Wagon Car Wash Video',
       coverImage: '/JS Car Wash Images/Wagon.png',
       isLocal: true
     },
-    'SPORT': { 
-      url: '/header/sports.mp4', 
+    'SPORT': {
+      url: '/header/sports.mp4',
       title: 'Sport Car Wash Video',
       coverImage: '/JS Car Wash Images/Sports.png',
       isLocal: true
@@ -263,7 +264,7 @@ function HomePage({}: HomePageProps) {
       setAuthModalOpen(true)
       return
     }
-    
+
     // User is authenticated, allow branch selection
     setSelectedBranch(branch)
     try {
@@ -292,19 +293,19 @@ function HomePage({}: HomePageProps) {
     const checkProfilePopup = () => {
       return !!document.querySelector('.profile-popup')
     }
-    
+
     const hasOpenPopup = menuOpen || dealersShow || modelsShow || authModalOpen || showVideo || checkProfilePopup()
     if (hasOpenPopup) {
       // Lock scroll on body
       const originalOverflow = document.body.style.overflow
       const originalPosition = document.body.style.position
       const scrollY = window.scrollY
-      
+
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.top = `-${scrollY}px`
       document.body.style.width = '100%'
-      
+
       return () => {
         document.body.style.overflow = originalOverflow
         document.body.style.position = originalPosition
@@ -353,17 +354,17 @@ function HomePage({}: HomePageProps) {
       // Don't handle scroll if any popup is open (check if body is locked)
       const bodyStyle = window.getComputedStyle(document.body)
       const isBodyLocked = bodyStyle.position === 'fixed' || bodyStyle.overflow === 'hidden'
-      
+
       // Also check if profile popup is open
       const profilePopupExists = document.querySelector('.profile-popup')
-      
+
       if (isBodyLocked || profilePopupExists) {
         return // Don't change navbar visibility when popups are open
       }
-      
+
       const scrollY = window.scrollY
       const headerHeight = headerContainerRef.current?.offsetHeight || 0
-      
+
       // Show navbar when scrolled past the header section
       if (scrollY > headerHeight * 0.5) {
         setShowNavbar(true)
@@ -373,7 +374,7 @@ function HomePage({}: HomePageProps) {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
@@ -452,7 +453,7 @@ function HomePage({}: HomePageProps) {
       // Throttle updates to ~60fps
       if (currentTime - lastUpdateTimeRef.current >= throttleDelay) {
         scrollPositionRef.current += scrollSpeed
-        
+
         // Reset position when we've scrolled through one full set
         if (scrollPositionRef.current >= totalWidth) {
           scrollPositionRef.current = 0
@@ -462,10 +463,10 @@ function HomePage({}: HomePageProps) {
         if (carouselRef.current) {
           carouselRef.current.style.transform = `translateX(-${scrollPositionRef.current}px)`
         }
-        
+
         lastUpdateTimeRef.current = currentTime
       }
-      
+
       animationFrameRef.current = requestAnimationFrame(animate)
     }
 
@@ -549,16 +550,16 @@ function HomePage({}: HomePageProps) {
     if (showVideo) {
       // Prevent body scroll when video is open
       document.body.style.overflow = 'hidden'
-      
+
       // Handle ESC key to close video
       const handleEscape = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           setShowVideo(false)
         }
       }
-      
+
       window.addEventListener('keydown', handleEscape)
-      
+
       return () => {
         document.body.style.overflow = 'unset'
         window.removeEventListener('keydown', handleEscape)
@@ -573,14 +574,14 @@ function HomePage({}: HomePageProps) {
       const rect = headerContainerRef.current.getBoundingClientRect()
       // Check if container is fully visible in viewport
       const isVisible = rect.top >= 0 && rect.top < window.innerHeight && rect.bottom <= window.innerHeight
-      
+
       if (!isVisible) {
         // Scroll to the header container quickly
-        headerContainerRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
+        headerContainerRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
         })
-        
+
         // Reduced wait time for faster response
         setTimeout(() => {
           setModelsShow(true)
@@ -609,11 +610,11 @@ function HomePage({}: HomePageProps) {
     }
     // Save to localStorage
     try {
-      const newModel = currentIndex === -1 
+      const newModel = currentIndex === -1
         ? carModels[carModels.length - 1]
-        : currentIndex === 0 
-        ? carModels[carModels.length - 1]
-        : carModels[currentIndex - 1]
+        : currentIndex === 0
+          ? carModels[carModels.length - 1]
+          : carModels[currentIndex - 1]
       localStorage.setItem('selectedCarModel', newModel)
     } catch (error) {
       console.error('Failed to save selected model to localStorage:', error)
@@ -634,11 +635,11 @@ function HomePage({}: HomePageProps) {
     }
     // Save to localStorage
     try {
-      const newModel = currentIndex === -1 
+      const newModel = currentIndex === -1
         ? carModels[0]
-        : currentIndex === carModels.length - 1 
-        ? carModels[0]
-        : carModels[currentIndex + 1]
+        : currentIndex === carModels.length - 1
+          ? carModels[0]
+          : carModels[currentIndex + 1]
       localStorage.setItem('selectedCarModel', newModel)
     } catch (error) {
       console.error('Failed to save selected model to localStorage:', error)
@@ -665,6 +666,10 @@ function HomePage({}: HomePageProps) {
 
   return (
     <div className="home-page">
+      <SEO
+        title="JS Car Wash & Detailing | Australia's Premier Hand Wash"
+        description="Experience premium professional hand wash and car detailing. Australia's best car wash with locations in Toongabbie & Dubbo. Quality guaranteed."
+      />
       {/* Mobile Menu Overlay - HomePage Navigation */}
       <AnimatePresence>
         {menuOpen && (
@@ -704,7 +709,7 @@ function HomePage({}: HomePageProps) {
                   aria-label="Close menu"
                 >
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               </div>
@@ -715,8 +720,8 @@ function HomePage({}: HomePageProps) {
                   if (item.hasDropdown) {
                     const servicesActive = isServicesActive()
                     return (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="mobile-menu-item"
                       >
                         <div className="mobile-menu-link-with-dropdown">
@@ -742,7 +747,7 @@ function HomePage({}: HomePageProps) {
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </button>
                         </div>
@@ -807,7 +812,7 @@ function HomePage({}: HomePageProps) {
       </AnimatePresence>
 
       {/* Main Container */}
-      <motion.div 
+      <motion.div
         ref={(el) => {
           headerContainerRef.current = el
           pageContainerRef.current = el
@@ -840,9 +845,9 @@ function HomePage({}: HomePageProps) {
         >
           <svg className="hamburger-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             {(menuOpen || showNavbar) ? (
-              <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             ) : (
-              <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             )}
           </svg>
         </button>
@@ -851,92 +856,94 @@ function HomePage({}: HomePageProps) {
         <div className="home-page-content-wrapper">
           {/* Left Section - White Background (2/3) */}
           <div className="home-left-section">
-          {/* Vertical Bar on Left Edge - Dark Panel */}
-          <motion.div 
-            className="vertical-bar"
-            animate={{ 
-              x: modelsShow ? '-100%' : 0 
-            }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-          >
-            <div className="vertical-bar-content" onClick={handleDiscoverModels} style={{ cursor: 'pointer' }}>
-              <div className="vertical-bar-text-wrapper">
-                <p className="vertical-bar-text">DISCOVER MODELS</p>
-                <motion.div
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="vertical-bar-arrow-wrapper"
-                >
-                  <span className="icon-chevron">{'>'}</span>
-                </motion.div>
+            {/* Vertical Bar on Left Edge - Dark Panel */}
+            <motion.div
+              className="vertical-bar"
+              animate={{
+                x: modelsShow ? '-100%' : 0
+              }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+            >
+              <div className="vertical-bar-content" onClick={handleDiscoverModels} style={{ cursor: 'pointer' }}>
+                <div className="vertical-bar-text-wrapper">
+                  <p className="vertical-bar-text">DISCOVER MODELS</p>
+                  <motion.div
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="vertical-bar-arrow-wrapper"
+                  >
+                    <span className="icon-chevron">{'>'}</span>
+                  </motion.div>
+                </div>
               </div>
-            </div>
-          </motion.div>
-
-          {/* Main Content */}
-          <div className="home-main-content">
-            {/* Logo */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="home-main-logo"
-            >
-              <img
-                src="/JS Car Wash Images/cropped-fghfthgf.png"
-                alt="JS Car Wash Logo"
-                className="home-main-logo-img"
-              />
-              <h1 className="home-main-js-text">JS</h1>
-              <h2 className="home-main-car-wash-text">CAR WASH & DETAILING</h2>
             </motion.div>
 
-            {/* Car Image */}
-            <motion.div
-              key={selectedModel || 'default'}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="home-main-car-image-wrapper"
-            >
-              <img
-                src={carImageSrc}
-                alt="Car"
-                className="home-main-car-image"
-                loading="lazy"
-              />
-            </motion.div>
-
-            {/* BOOK NOW Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              <button className="book-now-btn" onClick={() => {
-                if (!isAuthenticated) {
-                  setAuthModalTab('signin')
-                  setAuthModalOpen(true)
-                } else {
-                  navigate('/booking')
-                }
-              }}>BOOK NOW</button>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Right Section - Dark Blue Background (1/3) */}
-        <div className="home-right-section">
-          <div className="right-section-wrapper">
-            <div className="right-section-content">
-              <button 
-                className="header-dealers-btn right-section-dealers-btn"
-                onClick={() => setDealersShow(true)}
+            {/* Main Content */}
+            <div className="home-main-content">
+              {/* Logo */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="home-main-logo"
               >
-                DEALERS
-              </button>
-              {/* Top Content */}
-              <div className="right-top-content">
+                <img
+                  src="/JS Car Wash Images/cropped-fghfthgf.png"
+                  alt="JS Car Wash Logo"
+                  className="home-main-logo-img"
+                />
+                <h1 className="home-main-title">
+                  <span className="home-main-js-text">JS</span>
+                  <span className="home-main-car-wash-text">CAR WASH & DETAILING</span>
+                </h1>
+              </motion.div>
+
+              {/* Car Image */}
+              <motion.div
+                key={selectedModel || 'default'}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="home-main-car-image-wrapper"
+              >
+                <img
+                  src={carImageSrc}
+                  alt="Car"
+                  className="home-main-car-image"
+                  loading="lazy"
+                />
+              </motion.div>
+
+              {/* BOOK NOW Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+              >
+                <button className="book-now-btn" onClick={() => {
+                  if (!isAuthenticated) {
+                    setAuthModalTab('signin')
+                    setAuthModalOpen(true)
+                  } else {
+                    navigate('/booking')
+                  }
+                }}>BOOK NOW</button>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Right Section - Dark Blue Background (1/3) */}
+          <div className="home-right-section">
+            <div className="right-section-wrapper">
+              <div className="right-section-content">
+                <button
+                  className="header-dealers-btn right-section-dealers-btn"
+                  onClick={() => setDealersShow(true)}
+                >
+                  DEALERS
+                </button>
+                {/* Top Content */}
+                <div className="right-top-content">
                   {/* Headline */}
                   <motion.div
                     key={`headline-${selectedModel || 'default'}`}
@@ -973,7 +980,7 @@ function HomePage({}: HomePageProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
                   >
-                    <div 
+                    <div
                       className="video-player"
                       onClick={() => setShowVideo(true)}
                     >
@@ -1019,10 +1026,10 @@ function HomePage({}: HomePageProps) {
                   >
                     <div className="selected-branch-content">
                       <svg className="selected-branch-location-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
                       </svg>
                       <p className="selected-branch-text">
-                        {isAuthenticated && selectedBranch 
+                        {isAuthenticated && selectedBranch
                           ? (selectedBranch.subtitle || selectedBranch.name)
                           : 'Select your branch'
                         }
@@ -1115,8 +1122,8 @@ function HomePage({}: HomePageProps) {
                     className="modelshow-model-card"
                     initial={{ opacity: 0 }}
                     animate={isClosing ? { opacity: 0 } : { opacity: 1 }}
-                    transition={{ 
-                      duration: 0.3, 
+                    transition={{
+                      duration: 0.3,
                       delay: 0
                     }}
                     onClick={() => {
@@ -1131,12 +1138,12 @@ function HomePage({}: HomePageProps) {
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    <motion.div 
+                    <motion.div
                       className="modelshow-model-image"
                       initial={{ opacity: 0, x: '100vw' }}
                       animate={isClosing ? { opacity: 0, x: '-100%' } : { opacity: 1, x: 0 }}
-                      transition={{ 
-                        duration: 0.8, 
+                      transition={{
+                        duration: 0.8,
                         delay: 0,
                         ease: [0.25, 0.1, 0.25, 1]
                       }}
@@ -1170,7 +1177,7 @@ function HomePage({}: HomePageProps) {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ 
+              transition={{
                 duration: 0.4,
                 ease: [0.25, 0.1, 0.25, 1]
               }}
@@ -1181,7 +1188,7 @@ function HomePage({}: HomePageProps) {
                 aria-label="Close video"
               >
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
               <div className="video-fullscreen-wrapper">
@@ -1245,58 +1252,58 @@ function HomePage({}: HomePageProps) {
                     aria-label="Close dealers"
                   >
                     <svg className="dealersshow-close-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </div>
               </div>
 
-            {/* Dealers Content */}
-            <div className="dealersshow-content">
-              {/* Single Map showing both branches with markers */}
-              <div className="dealersshow-map">
-                <iframe
-                  src={combinedMapUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="dealersshow-map-iframe"
-                  title="JS Car Wash - All Branches"
-                ></iframe>
-                {/* Custom JS Car Wash Logo Markers */}
-                {branches.map((branch, index) => (
-                  <div
-                    key={index}
-                    className={`dealersshow-map-marker ${index === 0 ? 'marker-dubbo' : 'marker-sydney'}`}
-                    onClick={() => handleBranchSelection(branch)}
-                  >
-                    <img
-                      src="/JS Car Wash Images/cropped-fghfthgf.png"
-                      alt={`JS Car Wash ${branch.subtitle}`}
-                      className="dealersshow-marker-logo"
-                    />
-                    <div className="dealersshow-marker-pulse"></div>
-                  </div>
-                ))}
-              </div>
+              {/* Dealers Content */}
+              <div className="dealersshow-content">
+                {/* Single Map showing both branches with markers */}
+                <div className="dealersshow-map">
+                  <iframe
+                    src={combinedMapUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="dealersshow-map-iframe"
+                    title="JS Car Wash - All Branches"
+                  ></iframe>
+                  {/* Custom JS Car Wash Logo Markers */}
+                  {branches.map((branch, index) => (
+                    <div
+                      key={index}
+                      className={`dealersshow-map-marker ${index === 0 ? 'marker-dubbo' : 'marker-sydney'}`}
+                      onClick={() => handleBranchSelection(branch)}
+                    >
+                      <img
+                        src="/JS Car Wash Images/cropped-fghfthgf.png"
+                        alt={`JS Car Wash ${branch.subtitle}`}
+                        className="dealersshow-marker-logo"
+                      />
+                      <div className="dealersshow-marker-pulse"></div>
+                    </div>
+                  ))}
+                </div>
 
-              {/* Branch Selection Buttons */}
-              <div className="dealersshow-branch-buttons">
-                {branches.map((branch, index) => (
-                  <button
-                    key={index}
-                    className={`dealersshow-branch-name-btn ${selectedBranch?.subtitle === branch.subtitle ? 'selected' : ''}`}
-                    onClick={() => handleBranchSelection(branch)}
-                  >
-                    {branch.subtitle}
-                  </button>
-                ))}
+                {/* Branch Selection Buttons */}
+                <div className="dealersshow-branch-buttons">
+                  {branches.map((branch, index) => (
+                    <button
+                      key={index}
+                      className={`dealersshow-branch-name-btn ${selectedBranch?.subtitle === branch.subtitle ? 'selected' : ''}`}
+                      onClick={() => handleBranchSelection(branch)}
+                    >
+                      {branch.subtitle}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
@@ -1319,7 +1326,7 @@ function HomePage({}: HomePageProps) {
           </div>
 
           <div className="home-services-cards-wrapper">
-            <div 
+            <div
               className="home-services-cards-carousel"
               ref={carouselRef}
             >
@@ -1537,8 +1544,8 @@ function HomePage({}: HomePageProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.5) }}
                 >
-                  <div 
-                    className="home-faq-question" 
+                  <div
+                    className="home-faq-question"
                     onClick={() => {
                       if (faqClickedIndex === index) {
                         setFaqClickedIndex(null)
@@ -1562,7 +1569,7 @@ function HomePage({}: HomePageProps) {
                         <p>
                           {item.hasHighlight ? (
                             <>
-                              {item.answer.split(/(02 5804 5720|info@jscarwash\.com\.au)/).map((part, idx) => 
+                              {item.answer.split(/(02 5804 5720|info@jscarwash\.com\.au)/).map((part, idx) =>
                                 part === '02 5804 5720' || part === 'info@jscarwash.com.au' ? (
                                   <span key={idx} className="home-faq-highlight">{part}</span>
                                 ) : (
