@@ -281,7 +281,66 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 1200px) {
+/* Keep desktop banner on one line longer */
+@media (max-width: 1280px) {
+  .promo-banner {
+    padding: 8px 58px 8px 12px;
+    gap: 8px 10px;
+  }
+
+  .promo-banner-inner {
+    flex-wrap: nowrap;
+    gap: 8px 10px;
+  }
+
+  .promo-banner-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .promo-banner-text {
+    max-width: 122px;
+  }
+
+  .promo-banner-title {
+    font-size: 0.78rem;
+  }
+
+  .promo-banner-sub {
+    display: none;
+  }
+
+  .promo-banner-bill {
+    max-width: min(180px, 20vw);
+    padding: 6px 8px;
+  }
+
+  .promo-banner-bill-hint {
+    display: none;
+  }
+
+  .promo-timer-label {
+    font-size: 0.6rem;
+  }
+
+  .promo-timer {
+    gap: 4px;
+  }
+
+  .promo-timer-box {
+    min-width: 30px;
+    padding: 6px 6px;
+    font-size: 0.8rem;
+  }
+
+  .promo-cta {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Allow wrapping on smaller tablets/phones */
+@media (max-width: 980px) {
   .promo-banner {
     flex-wrap: wrap;
     padding: 12px 64px 12px 14px;

@@ -801,8 +801,8 @@
   }
 }
 
-/* Hide navigation links and show hamburger menu on narrower tablet widths */
-@media (max-width: 1180px) {
+/* Hide navigation links and show hamburger menu only on tablet/mobile */
+@media (max-width: 992px) {
   .modern-navbar {
     padding: 0;
     background: transparent;
