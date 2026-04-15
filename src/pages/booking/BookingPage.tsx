@@ -1,23 +1,84 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
-import AuthModal from '../../components/auth/AuthModal'
-import { useAuth } from '../../contexts/AuthContext'
-import { useCart } from '../../contexts/CartContext'
 import {
   contactApi,
   packageApi,
   productApi,
   extraWorkApi,
   orderApi,
+  sitePromoApi,
   type ProductStockEntry,
-  type Product as ApiProduct
+  type Product as ApiProduct,
+  type SitePromoSettings
 } from '../../services/api'
+import {
+  computeOfferDiscountAmount,
+  eligiblePackageSubtotalForOffer,
+  normalizeOfferDiscountType,
+  normalizeOfferScope,
+  offerScopeLabel,
+  promoCountdownActive,
+} from '../../utils/sitePromoBill'
 import SEO from '../../components/SEO'
 import './BookingPage.css'
 import '../home/HomePage.css'
 import '../about/AboutPage.css'
+
+type ContactFieldKey = 'fullName' | 'email' | 'phone'
+type ContactErrors = Partial<Record<ContactFieldKey, string>>
+
+function validatePersonalDetails(fullName: string, email: string, phone: string): ContactErrors {
+  const errors: ContactErrors = {}
+  const name = fullName.trim()
+  if (!name) errors.fullName = 'Enter your full name.'
+  else if (name.length < 2) errors.fullName = 'Name must be at least 2 characters.'
+  else if (name.length > 120) errors.fullName = 'Name is too long.'
+
+  const em = email.trim()
+  if (!em) errors.email = 'Enter your email address.'
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) errors.email = 'Enter a valid email address.'
+
+  const ph = phone.trim()
+  const digits = ph.replace(/\D/g, '')
+  if (!ph) errors.phone = 'Enter your phone number.'
+  else if (digits.length < 8) errors.phone = 'Use at least 8 digits (include area code if needed).'
+  else if (digits.length > 15) errors.phone = 'Phone number is too long.'
+
+  return errors
+}
+
+function hasContactErrors(errors: ContactErrors): boolean {
+  return !!(errors.fullName || errors.email || errors.phone)
+}
+
+function isSameCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+function slotToDate(baseDate: Date, slot: string): Date {
+  const [timePart, periodRaw] = slot.split(' ')
+  const [hRaw, mRaw] = (timePart || '').split(':')
+  const period = (periodRaw || '').toUpperCase()
+  let hour = Number(hRaw)
+  const minute = Number(mRaw)
+  if (period === 'PM' && hour !== 12) hour += 12
+  if (period === 'AM' && hour === 12) hour = 0
+  return new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+    Number.isNaN(hour) ? 0 : hour,
+    Number.isNaN(minute) ? 0 : minute,
+    0,
+    0
+  )
+}
 
 interface Branch {
   id: number
@@ -69,8 +130,10 @@ interface SelectedProduct {
 
 function BookingPage() {
   const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
-  const { cartItems } = useCart()
+  const location = useLocation()
+  const [guestFullName, setGuestFullName] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
 
   // Step management
   const [currentStep, setCurrentStep] = useState(1)
@@ -80,7 +143,6 @@ function BookingPage() {
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [selectedVehicleModel, setSelectedVehicleModel] = useState<VehicleModel | null>(null)
-  const [carNumber, setCarNumber] = useState('')
   const [selectedPackages, setSelectedPackages] = useState<Package[]>([])
   const [selectedExtras, setSelectedExtras] = useState<number[]>([])
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
@@ -88,11 +150,9 @@ function BookingPage() {
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [showConfirmationPopup, setShowConfirmationPopup] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showCartPopup, setShowCartPopup] = useState(false)
-  const [hasShownCartPopup, setHasShownCartPopup] = useState(false)
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
   const [packagesLoading, setPackagesLoading] = useState(true)
+  const [contactErrors, setContactErrors] = useState<ContactErrors>({})
+  const [timeNowTick, setTimeNowTick] = useState(() => Date.now())
 
   // API data
   const [branches, setBranches] = useState<Branch[]>([])
@@ -101,6 +161,14 @@ function BookingPage() {
   const [extras, setExtras] = useState<Extra[]>([])
   const [products, setProducts] = useState<BookingProduct[]>([])
   const [productError, setProductError] = useState<string | null>(null)
+  const [sitePromo, setSitePromo] = useState<SitePromoSettings | null>(null)
+  const [prefilledServiceFromPromo, setPrefilledServiceFromPromo] = useState(false)
+  const [prefilledBranchFromPromo, setPrefilledBranchFromPromo] = useState(false)
+  const [promoPrefillNotice, setPromoPrefillNotice] = useState<string | null>(null)
+  const [promoServiceLocked, setPromoServiceLocked] = useState(false)
+  const [promoBranchLocked, setPromoBranchLocked] = useState(false)
+  const [promoSource, setPromoSource] = useState<'banner' | 'popup' | null>(null)
+
   const mapApiProductToBookingProduct = useCallback((product: ApiProduct): BookingProduct => {
     const activeEntries = (product.stock_entries || []).filter(
       (entry: ProductStockEntry) => entry.is_active !== false
@@ -130,21 +198,6 @@ function BookingPage() {
 
     return product.totalStock
   }, [products, selectedBranch])
-
-  // Check authentication on mount - show sign-in modal if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setAuthModalOpen(true)
-      setAuthModalTab('signin')
-    }
-  }, [isAuthenticated])
-
-  // Close auth modal when user becomes authenticated
-  useEffect(() => {
-    if (isAuthenticated && authModalOpen) {
-      setAuthModalOpen(false)
-    }
-  }, [isAuthenticated, authModalOpen])
 
   // Fetch branches
   useEffect(() => {
@@ -239,6 +292,27 @@ function BookingPage() {
     fetchPackages()
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    const loadPromo = async () => {
+      try {
+        const res = await sitePromoApi.get()
+        if (!cancelled && res.success && res.data) setSitePromo(res.data)
+      } catch {
+        if (!cancelled) setSitePromo(null)
+      }
+    }
+    loadPromo()
+    const onFocus = () => {
+      loadPromo()
+    }
+    window.addEventListener('focus', onFocus)
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [])
+
   // Fetch extra works
   useEffect(() => {
     const fetchExtraWorks = async () => {
@@ -319,9 +393,8 @@ function BookingPage() {
     }
   }, [showConfirmationPopup])
 
-  // Auto-select branch from HomePage selection (only if authenticated)
+  // Auto-select branch from HomePage selection
   useEffect(() => {
-    if (!isAuthenticated) return // Don't auto-select if not signed in
     if (selectedBranch) return // Already selected, don't override
 
     try {
@@ -352,7 +425,110 @@ function BookingPage() {
     } catch (error) {
       console.error('Failed to load selected branch from localStorage:', error)
     }
-  }, [branches, selectedBranch, isAuthenticated])
+  }, [branches, selectedBranch])
+
+  // Auto-select service from top-banner promo query params: ?auto_promo=1&service=carwash|cardetailing|both
+  useEffect(() => {
+    if (prefilledServiceFromPromo) return
+    const params = new URLSearchParams(location.search)
+    if (params.get('auto_promo') !== '1') return
+    const s = (params.get('service') || '').toLowerCase()
+    if (s === 'carwash') {
+      setSelectedServices(['carwash'])
+      setPromoServiceLocked(true)
+    } else if (s === 'cardetailing') {
+      setSelectedServices(['cardetailing'])
+      setPromoServiceLocked(true)
+    } else if (s === 'both') {
+      setSelectedServices(['carwash', 'cardetailing'])
+      setPromoServiceLocked(true)
+    } else {
+      setPromoServiceLocked(false)
+    }
+    setPrefilledServiceFromPromo(true)
+  }, [location.search, prefilledServiceFromPromo])
+
+  // Auto-select branch from top-banner promo query param: ?branch_id=#
+  useEffect(() => {
+    if (prefilledBranchFromPromo) return
+    const params = new URLSearchParams(location.search)
+    if (params.get('auto_promo') !== '1') return
+    const branchIdRaw = params.get('branch_id')
+    if (!branchIdRaw) {
+      setPromoBranchLocked(false)
+      setPrefilledBranchFromPromo(true)
+      return
+    }
+    const branchId = Number(branchIdRaw)
+    if (!branchId || Number.isNaN(branchId) || branches.length === 0) return
+    const matched = branches.find((b) => Number(b.id) === branchId)
+    if (matched) {
+      setSelectedBranch(matched)
+      setPromoBranchLocked(true)
+      try {
+        localStorage.setItem('selectedBranch', JSON.stringify(matched))
+      } catch {
+        /* ignore storage quota */
+      }
+    } else {
+      setPromoBranchLocked(false)
+    }
+    setPrefilledBranchFromPromo(true)
+  }, [location.search, branches, prefilledBranchFromPromo])
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const sourceRaw = (params.get('promo_source') || '').toLowerCase()
+    if (sourceRaw === 'banner' || sourceRaw === 'popup') {
+      setPromoSource(sourceRaw)
+    }
+  }, [location.search])
+
+  // Remove one-time auto prefill query once applied, so user can freely switch branch/service.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('auto_promo') !== '1') return
+    if (!prefilledServiceFromPromo || !prefilledBranchFromPromo) return
+    if (!promoPrefillNotice) {
+      const serviceRaw = (params.get('service') || '').toLowerCase()
+      const sourceRaw = (params.get('promo_source') || '').toLowerCase()
+      if (sourceRaw === 'banner' || sourceRaw === 'popup') {
+        setPromoSource(sourceRaw)
+      }
+      const serviceLabel =
+        serviceRaw === 'carwash'
+          ? 'Car Wash'
+          : serviceRaw === 'cardetailing'
+            ? 'Car Detailing'
+            : 'Car Wash and Car Detailing'
+      const hasSpecificBranch = !!params.get('branch_id')
+      const branchNote = hasSpecificBranch
+        ? 'A branch was fixed for this offer and cannot be changed.'
+        : 'You can choose either branch.'
+      setPromoPrefillNotice(
+        `Welcome! We preselected ${serviceLabel} from the top offer. ${branchNote} Branch can be changed, but service is fixed by this offer.`
+      )
+    }
+    params.delete('auto_promo')
+    params.delete('service')
+    params.delete('branch_id')
+    params.delete('promo_source')
+    const nextSearch = params.toString()
+    navigate(
+      {
+        pathname: location.pathname,
+        search: nextSearch ? `?${nextSearch}` : '',
+      },
+      { replace: true }
+    )
+  }, [
+    location.pathname,
+    location.search,
+    navigate,
+    prefilledBranchFromPromo,
+    prefilledServiceFromPromo,
+    promoPrefillNotice,
+  ])
 
   // Vehicle models
   const vehicleModels: VehicleModel[] = [
@@ -364,9 +540,8 @@ function BookingPage() {
     { id: 'xlarge', name: 'X-Large', image: '/Model/X-Large.png' }
   ]
 
-  // Auto-select vehicle model from HomePage selection (only if authenticated)
+  // Auto-select vehicle model from HomePage selection
   useEffect(() => {
-    if (!isAuthenticated) return // Don't auto-select if not signed in
     if (selectedVehicleModel) return // Already selected, don't override
 
     try {
@@ -398,7 +573,7 @@ function BookingPage() {
     } catch (error) {
       console.error('Failed to load selected vehicle model from localStorage:', error)
     }
-  }, [vehicleModels, selectedVehicleModel, isAuthenticated])
+  }, [vehicleModels, selectedVehicleModel])
 
   // Time slots
   const timeSlots = [
@@ -408,8 +583,28 @@ function BookingPage() {
     '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM'
   ]
 
+  useEffect(() => {
+    const id = window.setInterval(() => setTimeNowTick(Date.now()), 30000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  const availableTimeSlots = useMemo(() => {
+    if (!selectedDate) return timeSlots
+    const now = new Date(timeNowTick)
+    if (!isSameCalendarDay(selectedDate, now)) return timeSlots
+    return timeSlots.filter((slot) => slotToDate(selectedDate, slot).getTime() > now.getTime())
+  }, [selectedDate, timeNowTick])
+
+  useEffect(() => {
+    if (!selectedTime) return
+    if (!availableTimeSlots.includes(selectedTime)) {
+      setSelectedTime('')
+    }
+  }, [selectedTime, availableTimeSlots])
+
   // Handle service selection
   const handleServiceToggle = (service: string) => {
+    if (promoServiceLocked) return
     setSelectedServices(prev =>
       prev.includes(service)
         ? prev.filter(s => s !== service)
@@ -473,18 +668,16 @@ function BookingPage() {
     return []
   }
 
-  // Handle car number input change
-  const handleCarNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase()
-    setCarNumber(value)
-  }
-
   // Handle next step
   const handleNext = () => {
     if (currentStep === 1) {
-      // Validate step 1
-      if (!selectedBranch || selectedServices.length === 0 || !selectedVehicleModel || !carNumber) {
-        alert('Please fill all required fields')
+      const personal = validatePersonalDetails(guestFullName, guestEmail, guestPhone)
+      setContactErrors(personal)
+      if (hasContactErrors(personal)) {
+        return
+      }
+      if (!selectedBranch || selectedServices.length === 0 || !selectedVehicleModel) {
+        alert('Please select branch, at least one service, and a vehicle type.')
         return
       }
 
@@ -512,86 +705,12 @@ function BookingPage() {
         alert('Please select date and time')
         return
       }
+      if (!availableTimeSlots.includes(selectedTime)) {
+        alert('Selected time is no longer available. Please choose another time.')
+        return
+      }
       setCurrentStep(4) // Show order summary
     }
-  }
-
-  // Check for cart items when entering step 3
-  useEffect(() => {
-    if (currentStep === 3 && !hasShownCartPopup) {
-      // Check if we have cart items
-      const hasCartItems = cartItems && Array.isArray(cartItems) && cartItems.length > 0
-
-      if (hasCartItems) {
-        // Small delay to ensure the step transition is complete
-        const timer = setTimeout(() => {
-          setShowCartPopup(true)
-          setHasShownCartPopup(true)
-        }, 800)
-
-        return () => clearTimeout(timer)
-      } else {
-        // If no cart items yet, check again after a delay (in case cart is still loading)
-        const checkTimer = setTimeout(() => {
-          const hasCartItemsLater = cartItems && Array.isArray(cartItems) && cartItems.length > 0
-          if (hasCartItemsLater && !hasShownCartPopup) {
-            setShowCartPopup(true)
-            setHasShownCartPopup(true)
-          }
-        }, 2000)
-
-        return () => clearTimeout(checkTimer)
-      }
-    } else if (currentStep < 3) {
-      // Reset the flag when leaving step 3 (going back)
-      setHasShownCartPopup(false)
-      setShowCartPopup(false)
-    }
-  }, [currentStep, cartItems, hasShownCartPopup])
-
-  // Handle adding cart items to booking
-  const handleAddCartItems = () => {
-    if (!selectedBranch) {
-      setProductError('Please select a branch before adding cart products.')
-      setShowCartPopup(false)
-      return
-    }
-
-    const availabilityNotes: string[] = []
-
-    const cartProducts = cartItems
-      .map(item => {
-        const available = getAvailableStockForBranch(item.id)
-        if (available <= 0) {
-          availabilityNotes.push(`${item.name} is out of stock`)
-          return null
-        }
-
-        const quantity = Math.min(item.quantity, available)
-        if (item.quantity > available) {
-          availabilityNotes.push(`${item.name} capped at ${available}`)
-        }
-
-        return {
-          productId: item.id,
-          quantity,
-        }
-      })
-      .filter((item): item is SelectedProduct => item !== null)
-
-    // Merge with existing selected products, avoiding duplicates
-    setSelectedProducts(prev => {
-      const existingIds = new Set(prev.map(p => p.productId))
-      const newProducts = cartProducts.filter(p => !existingIds.has(p.productId))
-      return [...prev, ...newProducts]
-    })
-
-    setProductError(availabilityNotes.length > 0 ? availabilityNotes.join(', ') : null)
-    setShowCartPopup(false)
-  }
-
-  const handleSkipCartItems = () => {
-    setShowCartPopup(false)
   }
 
   // Handle back step
@@ -640,20 +759,97 @@ function BookingPage() {
     return branchPrice ? branchPrice.price : 0
   }, [selectedBranch, selectedVehicleModel])
 
-  // Calculate total
-  const calculateTotal = () => {
-    let total = 0
-    selectedPackages.forEach(pkg => total += getPackagePrice(pkg))
+  const bookingBill = useMemo(() => {
+    let lineSubtotal = 0
+    selectedPackages.forEach(pkg => {
+      lineSubtotal += getPackagePrice(pkg)
+    })
     selectedExtras.forEach(extraId => {
       const extra = extras.find(e => e.id === extraId)
-      if (extra) total += extra.price
+      if (extra) lineSubtotal += extra.price
     })
     selectedProducts.forEach(selectedProduct => {
       const product = products.find(p => p.id === selectedProduct.productId)
-      if (product) total += product.price * selectedProduct.quantity
+      if (product) lineSubtotal += product.price * selectedProduct.quantity
     })
-    return total
-  }
+
+    const bannerWindowActive =
+      !!sitePromo &&
+      Boolean(sitePromo.banner_enabled) &&
+      promoCountdownActive(sitePromo.countdown_ends_at, sitePromo.countdown_starts_at)
+    const popupWindowActive =
+      !!sitePromo &&
+      Boolean(sitePromo.popup_enabled) &&
+      promoCountdownActive(
+        sitePromo.popup_countdown_ends_at || sitePromo.countdown_ends_at,
+        sitePromo.popup_countdown_starts_at || sitePromo.countdown_starts_at
+      )
+    const promoOk = !!sitePromo && (bannerWindowActive || popupWindowActive)
+
+    if (!promoOk) {
+      return {
+        lineSubtotal,
+        eligiblePromoSubtotal: 0,
+        promoDiscount: 0,
+        grandTotal: lineSubtotal,
+        showPromoBreakdown: false,
+        scopeLabel: '',
+      }
+    }
+
+    const packageLines = selectedPackages.map(pkg => ({
+      serviceType: pkg.serviceType,
+      price: getPackagePrice(pkg),
+    }))
+    const serviceSubtotal = packageLines.reduce((sum, p) => sum + p.price, 0)
+
+    let promoDiscount = 0
+    let appliedLabels: string[] = []
+    if (bannerWindowActive) {
+      const bannerScope = normalizeOfferScope(sitePromo?.banner_offer_discount_scope ?? sitePromo?.offer_discount_scope)
+      const bannerType = normalizeOfferDiscountType(sitePromo?.banner_offer_discount_type ?? sitePromo?.offer_discount_type)
+      const bannerRawDisc = sitePromo?.banner_offer_discount_value ?? sitePromo?.offer_discount_value
+      const bannerDiscVal = typeof bannerRawDisc === 'string' ? parseFloat(bannerRawDisc) : Number(bannerRawDisc ?? 0)
+      const bannerDiscValClean = Number.isFinite(bannerDiscVal) && bannerDiscVal > 0 ? bannerDiscVal : 0
+      if (bannerDiscValClean > 0) {
+        const eligible = eligiblePackageSubtotalForOffer(packageLines, bannerScope)
+        promoDiscount += computeOfferDiscountAmount(eligible, bannerType, bannerDiscValClean)
+        appliedLabels.push(`Banner: ${offerScopeLabel(bannerScope)}`)
+      }
+    }
+    if (popupWindowActive) {
+      const popupScope = normalizeOfferScope(sitePromo?.popup_offer_discount_scope ?? sitePromo?.offer_discount_scope)
+      const popupType = normalizeOfferDiscountType(sitePromo?.popup_offer_discount_type ?? sitePromo?.offer_discount_type)
+      const popupRawDisc = sitePromo?.popup_offer_discount_value ?? sitePromo?.offer_discount_value
+      const popupDiscVal = typeof popupRawDisc === 'string' ? parseFloat(popupRawDisc) : Number(popupRawDisc ?? 0)
+      const popupDiscValClean = Number.isFinite(popupDiscVal) && popupDiscVal > 0 ? popupDiscVal : 0
+      if (popupDiscValClean > 0) {
+        const eligible = eligiblePackageSubtotalForOffer(packageLines, popupScope)
+        promoDiscount += computeOfferDiscountAmount(eligible, popupType, popupDiscValClean)
+        appliedLabels.push(`Popup: ${offerScopeLabel(popupScope)}`)
+      }
+    }
+    promoDiscount = Math.min(promoDiscount, serviceSubtotal)
+    const grandTotal = Math.max(0, Math.round((lineSubtotal - promoDiscount) * 100) / 100)
+
+    return {
+      lineSubtotal,
+      eligiblePromoSubtotal: serviceSubtotal,
+      promoDiscount,
+      grandTotal,
+      showPromoBreakdown: promoDiscount > 0,
+      scopeLabel: appliedLabels.join(' + '),
+    }
+  }, [
+    sitePromo,
+    promoSource,
+    selectedPackages,
+    selectedExtras,
+    selectedProducts,
+    extras,
+    products,
+    getPackagePrice,
+  ])
 
   // Format time to HH:MM:SS format
   const formatTimeToAPI = (time: string): string => {
@@ -676,15 +872,17 @@ function BookingPage() {
 
   // Handle confirm booking
   const handleConfirmBooking = async () => {
-    if (!user || !selectedBranch || !selectedDate || !selectedTime || selectedPackages.length === 0) {
-      alert('Please fill all required fields and login to continue')
+    const personal = validatePersonalDetails(guestFullName, guestEmail, guestPhone)
+    setContactErrors(personal)
+    if (hasContactErrors(personal)) {
+      setCurrentStep(1)
       return
     }
-
-    // Check if token exists
-    const token = localStorage.getItem('token')
-    if (!token) {
-      alert('You are not logged in. Please login to continue.')
+    const nameTrim = guestFullName.trim()
+    const emailTrim = guestEmail.trim()
+    const phoneTrim = guestPhone.trim()
+    if (!selectedBranch || !selectedDate || !selectedTime || selectedPackages.length === 0) {
+      alert('Please fill all required fields to continue')
       return
     }
 
@@ -720,7 +918,7 @@ function BookingPage() {
       const services = selectedPackages.map(pkg => ({
         package_id: pkg.id,
         vehicle_type: selectedVehicleModel?.name || '',
-        vehicle_number: carNumber,
+        vehicle_number: null,
         arrival_date: formatDateToAPI(selectedDate),
         arrival_time: formatTimeToAPI(selectedTime),
       }))
@@ -736,16 +934,18 @@ function BookingPage() {
         extra_works_id: extraId,
       }))
 
-      // Create order
       const orderData = {
-        user_id: user.id,
+        user_full_name: nameTrim,
+        user_email_address: emailTrim,
+        user_phone_number: phoneTrim,
         branch_id: selectedBranch.id,
         services: services,
         products: productsRequest,
         extra_works: extraWorksRequest,
+        apply_site_promo_source: promoSource || undefined,
       }
 
-      const response = await orderApi.create(orderData)
+      const response = await orderApi.createGuest(orderData)
 
       if (response.success) {
         setShowConfirmationPopup(true)
@@ -755,12 +955,7 @@ function BookingPage() {
     } catch (error) {
       console.error('Error creating order:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
-        alert('Your session has expired. Please login again to continue.')
-        // Optionally redirect to login
-      } else {
-        alert('Failed to create booking: ' + errorMessage)
-      }
+      alert('Failed to create booking: ' + errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -782,15 +977,13 @@ function BookingPage() {
         </div>
       </section>
 
-      {/* Show booking content only if authenticated */}
-      {isAuthenticated ? (
-        <div className="booking-container">
+      <div className="booking-container">
           <div className="booking-container-inner">
             {/* Right Content Area */}
             <div className="booking-right-content-wrapper">
               <div className="booking-right-content">
                 <AnimatePresence mode="wait">
-                  {/* Step 1: Branch, Service, Vehicle, Car Number */}
+                  {/* Step 1: Personal details, branch, service, vehicle */}
                   {currentStep === 1 && (
                     <motion.div
                       key="step1"
@@ -801,6 +994,98 @@ function BookingPage() {
                       className="booking-step"
                     >
                       <h2 className="booking-step-title booking-step-title-spaced">Select Branch & Service</h2>
+                      {promoPrefillNotice ? (
+                        <p className="booking-prefill-notice" role="status">
+                          {promoPrefillNotice}
+                        </p>
+                      ) : null}
+
+                      <fieldset className="booking-form-section booking-contact-section">
+                        <legend className="booking-contact-legend">Personal details</legend>
+                        <p className="booking-contact-hint" id="booking-contact-hint">
+                          Required to confirm your booking and send your confirmation. We handle your details in line with Australian privacy expectations.
+                        </p>
+                        <div className="booking-field-wrap">
+                          <label className="booking-field-label" htmlFor="booking-full-name">
+                            Full name <span className="booking-required" aria-hidden="true">*</span>
+                          </label>
+                          <input
+                            id="booking-full-name"
+                            type="text"
+                            className={`booking-input ${contactErrors.fullName ? 'booking-input-error' : ''}`}
+                            placeholder="e.g. Jane Smith"
+                            value={guestFullName}
+                            onChange={(e) => {
+                              setGuestFullName(e.target.value)
+                              setContactErrors((prev) => ({ ...prev, fullName: undefined }))
+                            }}
+                            autoComplete="name"
+                            aria-required="true"
+                            aria-invalid={contactErrors.fullName ? 'true' : 'false'}
+                            aria-describedby={contactErrors.fullName ? 'booking-full-name-err booking-contact-hint' : 'booking-contact-hint'}
+                          />
+                          {contactErrors.fullName ? (
+                            <p id="booking-full-name-err" className="booking-error-message" role="alert">
+                              {contactErrors.fullName}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="booking-field-wrap">
+                          <label className="booking-field-label" htmlFor="booking-email">
+                            Email <span className="booking-required" aria-hidden="true">*</span>
+                          </label>
+                          <input
+                            id="booking-email"
+                            type="email"
+                            inputMode="email"
+                            className={`booking-input ${contactErrors.email ? 'booking-input-error' : ''}`}
+                            placeholder="name@example.com"
+                            value={guestEmail}
+                            onChange={(e) => {
+                              setGuestEmail(e.target.value)
+                              setContactErrors((prev) => ({ ...prev, email: undefined }))
+                            }}
+                            autoComplete="email"
+                            aria-required="true"
+                            aria-invalid={contactErrors.email ? 'true' : 'false'}
+                            aria-describedby={contactErrors.email ? 'booking-email-err booking-contact-hint' : 'booking-contact-hint'}
+                          />
+                          {contactErrors.email ? (
+                            <p id="booking-email-err" className="booking-error-message" role="alert">
+                              {contactErrors.email}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="booking-field-wrap">
+                          <label className="booking-field-label" htmlFor="booking-phone">
+                            Phone <span className="booking-required" aria-hidden="true">*</span>
+                          </label>
+                          <input
+                            id="booking-phone"
+                            type="tel"
+                            inputMode="tel"
+                            className={`booking-input ${contactErrors.phone ? 'booking-input-error' : ''}`}
+                            placeholder="e.g. 0412 345 678 or 02 1234 5678"
+                            value={guestPhone}
+                            onChange={(e) => {
+                              setGuestPhone(e.target.value)
+                              setContactErrors((prev) => ({ ...prev, phone: undefined }))
+                            }}
+                            autoComplete="tel"
+                            aria-required="true"
+                            aria-invalid={contactErrors.phone ? 'true' : 'false'}
+                            aria-describedby={contactErrors.phone ? 'booking-phone-err booking-contact-hint booking-phone-format' : 'booking-contact-hint booking-phone-format'}
+                          />
+                          <p id="booking-phone-format" className="booking-help-text">
+                            Australian or international numbers: include area or country code; digits only are counted for length.
+                          </p>
+                          {contactErrors.phone ? (
+                            <p id="booking-phone-err" className="booking-error-message" role="alert">
+                              {contactErrors.phone}
+                            </p>
+                          ) : null}
+                        </div>
+                      </fieldset>
 
                       {/* Branch and Service in One Row */}
                       <div className="booking-branch-service-row">
@@ -812,7 +1097,9 @@ function BookingPage() {
                               <button
                                 key={branch.id}
                                 className={`booking-branch-btn ${selectedBranch?.id === branch.id ? 'active' : ''}`}
+                                disabled={promoBranchLocked}
                                 onClick={() => {
+                                  if (promoBranchLocked) return
                                   setSelectedBranch(branch)
                                   // Save selected branch to localStorage
                                   try {
@@ -826,6 +1113,11 @@ function BookingPage() {
                               </button>
                             ))}
                           </div>
+                          {promoBranchLocked ? (
+                            <p className="booking-branch-lock-note">
+                              Branch is locked by this offer.
+                            </p>
+                          ) : null}
                         </div>
 
                         {/* Service Selection */}
@@ -837,6 +1129,7 @@ function BookingPage() {
                                 type="checkbox"
                                 checked={selectedServices.includes('carwash')}
                                 onChange={() => handleServiceToggle('carwash')}
+                                disabled={promoServiceLocked}
                               />
                               <span>Car Wash</span>
                             </label>
@@ -845,10 +1138,16 @@ function BookingPage() {
                                 type="checkbox"
                                 checked={selectedServices.includes('cardetailing')}
                                 onChange={() => handleServiceToggle('cardetailing')}
+                                disabled={promoServiceLocked}
                               />
                               <span>Car Detailing</span>
                             </label>
                           </div>
+                          {promoServiceLocked ? (
+                            <p className="booking-service-lock-note">
+                              Service is locked by this offer.
+                            </p>
+                          ) : null}
                         </div>
                       </div>
 
@@ -869,19 +1168,6 @@ function BookingPage() {
                             </motion.div>
                           ))}
                         </div>
-                      </div>
-
-                      {/* Car Number */}
-                      <div className="booking-form-section">
-                        <h3>Enter Rego Number</h3>
-                        <input
-                          type="text"
-                          className="booking-input"
-                          placeholder="Enter your rego number..."
-                          value={carNumber}
-                          onChange={handleCarNumberChange}
-                          maxLength={8}
-                        />
                       </div>
 
                       <button className="booking-next-btn" onClick={handleNext}>
@@ -993,6 +1279,9 @@ function BookingPage() {
                       </div>
 
                       <div className="booking-step-buttons">
+                        <button className="booking-back-btn" onClick={handleBack}>
+                          Back
+                        </button>
                         <button className="booking-next-btn" onClick={handleNext}>
                           {selectedServices.includes('carwash') && selectedServices.includes('cardetailing') && packageStep === 0
                             ? 'Next: Car Detailing Packages'
@@ -1215,13 +1504,16 @@ function BookingPage() {
                                     onChange={(e) => setSelectedTime(e.target.value)}
                                   >
                                     <option value="">Choose a time</option>
-                                    {timeSlots.map(time => (
+                                    {availableTimeSlots.map(time => (
                                       <option key={time} value={time}>
                                         {time}
                                       </option>
                                     ))}
                                   </select>
                                 </div>
+                                {availableTimeSlots.length === 0 ? (
+                                  <p className="booking-help-text">No time slots left for today. Please select another date.</p>
+                                ) : null}
                                 <button
                                   className="booking-continue-btn"
                                   onClick={handleNext}
@@ -1261,7 +1553,7 @@ function BookingPage() {
                             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
-                        <h2 className="booking-step-title">Order Summary</h2>
+                        <h2 className="booking-step-title">Final bill &amp; confirm</h2>
                       </div>
 
                       <div className="booking-summary">
@@ -1281,7 +1573,6 @@ function BookingPage() {
                           <div className="booking-summary-section">
                             <h3>Vehicle</h3>
                             <p>{selectedVehicleModel?.name}</p>
-                            <p className="booking-summary-subtext">Car Number: {carNumber}</p>
                           </div>
                         </div>
 
@@ -1352,15 +1643,46 @@ function BookingPage() {
                           </div>
                         </div>
 
+                        <div className="booking-summary-row">
+                          <div className="booking-summary-section booking-summary-section-full">
+                            <h3>Personal details</h3>
+                            <div className="booking-summary-contact-readonly">
+                              <p><strong>Name:</strong> {guestFullName.trim() || '—'}</p>
+                              <p><strong>Email:</strong> {guestEmail.trim() || '—'}</p>
+                              <p><strong>Phone:</strong> {guestPhone.trim() || '—'}</p>
+                              <p className="booking-summary-contact-note">To change these details, go back to step 1.</p>
+                            </div>
+                          </div>
+                        </div>
+
                         <div className="booking-summary-total">
-                          <h3>Total</h3>
-                          <h2>${calculateTotal()}</h2>
+                          <h3>{bookingBill.showPromoBreakdown ? 'Total to pay' : 'Total'}</h3>
+                          {bookingBill.showPromoBreakdown ? (
+                            <div className="booking-summary-total-stack">
+                              <p className="booking-summary-total-line">
+                                <span>Subtotal</span>
+                                <span>${bookingBill.lineSubtotal.toFixed(2)}</span>
+                              </p>
+                              <p className="booking-summary-total-line booking-summary-total-discount">
+                                <span>Offer ({bookingBill.scopeLabel})</span>
+                                <span>-${bookingBill.promoDiscount.toFixed(2)}</span>
+                              </p>
+                              <h2 className="booking-summary-total-final">${bookingBill.grandTotal.toFixed(2)}</h2>
+                            </div>
+                          ) : (
+                            <h2>${bookingBill.lineSubtotal.toFixed(2)}</h2>
+                          )}
                         </div>
 
                         <button
                           className="booking-confirm-btn"
                           onClick={handleConfirmBooking}
-                          disabled={!user || isSubmitting}
+                          disabled={
+                            isSubmitting ||
+                            !guestFullName.trim() ||
+                            !guestEmail.trim() ||
+                            !guestPhone.trim()
+                          }
                         >
                           {isSubmitting ? (
                             <>
@@ -1371,11 +1693,6 @@ function BookingPage() {
                             'Confirm Booking'
                           )}
                         </button>
-                        {!user && (
-                          <p style={{ color: 'red', marginTop: '10px', textAlign: 'center' }}>
-                            Please login to confirm booking
-                          </p>
-                        )}
                       </div>
                     </motion.div>
                   )}
@@ -1533,10 +1850,26 @@ function BookingPage() {
 
                     <div className="booking-total-summary-divider"></div>
 
+                    {bookingBill.showPromoBreakdown ? (
+                      <>
+                        <div className="booking-total-summary-row">
+                          <span className="booking-total-summary-name">Subtotal</span>
+                          <span className="booking-total-summary-total">${bookingBill.lineSubtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="booking-total-summary-row booking-total-summary-row-discount">
+                          <span className="booking-total-summary-name">Offer ({bookingBill.scopeLabel})</span>
+                          <span className="booking-total-summary-total">-${bookingBill.promoDiscount.toFixed(2)}</span>
+                        </div>
+                        <div className="booking-total-summary-divider"></div>
+                      </>
+                    ) : null}
+
                     <div className="booking-total-summary-row booking-total-summary-row-final">
-                      <span className="booking-total-summary-name booking-total-summary-name-final">Total</span>
+                      <span className="booking-total-summary-name booking-total-summary-name-final">
+                        {bookingBill.showPromoBreakdown ? 'Total to pay' : 'Total'}
+                      </span>
                       <span className="booking-total-summary-total booking-total-summary-total-final">
-                        $ {calculateTotal().toFixed(2)}
+                        $ {(bookingBill.showPromoBreakdown ? bookingBill.grandTotal : bookingBill.lineSubtotal).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -1545,81 +1878,6 @@ function BookingPage() {
             </div>
           </div>
         </div>
-      ) : (
-        <div className="booking-container" style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '400px',
-          padding: '40px 20px'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <h2 style={{ marginBottom: '20px', color: '#1e3a8a' }}>Please Sign In to Continue</h2>
-            <p style={{ marginBottom: '30px', color: '#666' }}>
-              You need to be signed in to make a booking. Please sign in using the modal above.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Cart Items Popup */}
-      <AnimatePresence>
-        {showCartPopup && (
-          <>
-            <motion.div
-              className="booking-popup-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={handleSkipCartItems}
-            />
-            <motion.div
-              className="booking-cart-popup"
-              initial={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
-              animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
-              exit={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
-              transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
-            >
-              <div className="booking-cart-popup-icon">
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="32" cy="32" r="32" fill="#1e3a8a" opacity="0.1" />
-                  <path d="M20 24L24 48H40L44 24H20Z" fill="#1e3a8a" opacity="0.3" />
-                  <path d="M24 20V16C24 13.7909 25.7909 12 28 12H36C38.2091 12 40 13.7909 40 16V20" stroke="#1e3a8a" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="28" cy="44" r="2" fill="#1e3a8a" />
-                  <circle cx="36" cy="44" r="2" fill="#1e3a8a" />
-                </svg>
-              </div>
-              <h2 className="booking-cart-popup-title">Add Cart Items to Booking?</h2>
-              <p className="booking-cart-popup-message">
-                You have {cartItems.length} item{cartItems.length > 1 ? 's' : ''} in your cart. Would you like to add {cartItems.length > 1 ? 'them' : 'it'} to this booking?
-              </p>
-              <div className="booking-cart-popup-items">
-                {cartItems.map(item => (
-                  <div key={item.id} className="booking-cart-popup-item">
-                    <span className="booking-cart-popup-item-name">{item.name}</span>
-                    <span className="booking-cart-popup-item-details">Qty: {item.quantity} × ${item.price.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="booking-cart-popup-buttons">
-                <button
-                  className="booking-cart-popup-btn booking-cart-popup-btn-yes"
-                  onClick={handleAddCartItems}
-                >
-                  Yes, Add Items
-                </button>
-                <button
-                  className="booking-cart-popup-btn booking-cart-popup-btn-no"
-                  onClick={handleSkipCartItems}
-                >
-                  No, Skip
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* Confirmation Popup */}
       <AnimatePresence>
@@ -1663,20 +1921,6 @@ function BookingPage() {
           </>
         )}
       </AnimatePresence>
-
-      {/* Sign In Modal - Required for booking */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => {
-          // If user closes without logging in, redirect to home
-          if (!isAuthenticated) {
-            navigate('/')
-          } else {
-            setAuthModalOpen(false)
-          }
-        }}
-        initialTab={authModalTab}
-      />
     </div>
   )
 }

@@ -129,6 +129,55 @@ interface ContactUsRequest {
   is_active: boolean
 }
 
+export interface SitePromoBannerBlock {
+  title: string
+  sub: string
+}
+
+export interface SitePromoSettings {
+  id: number
+  banner_enabled: boolean
+  popup_enabled: boolean
+  countdown_starts_at: string
+  countdown_ends_at: string
+  popup_countdown_starts_at?: string
+  popup_countdown_ends_at?: string
+  banner_blocks: SitePromoBannerBlock[]
+  popup_title: string
+  popup_line1: string | null
+  popup_price_text: string | null
+  popup_image_url?: string | null
+  banner_branch_id?: number | null
+  banner_branch_name?: string | null
+  banner_cta_label?: string
+  banner_cta_path?: string
+  popup_cta_label?: string
+  popup_cta_path?: string
+  cta_label: string
+  cta_path: string
+  /** Which package lines receive the booking discount */
+  offer_discount_scope?: 'carwash' | 'cardetailing' | 'both'
+  offer_discount_type?: 'percent' | 'fixed'
+  offer_discount_value?: number
+  banner_offer_discount_scope?: 'carwash' | 'cardetailing' | 'both'
+  banner_offer_discount_type?: 'percent' | 'fixed'
+  banner_offer_discount_value?: number
+  popup_offer_discount_scope?: 'carwash' | 'cardetailing' | 'both'
+  popup_offer_discount_type?: 'percent' | 'fixed'
+  popup_offer_discount_value?: number
+  /** Changes when admin saves — used to invalidate “dismiss” in the browser */
+  updatedAt?: string
+  updated_at?: string
+}
+
+export const sitePromoApi = {
+  get: async (): Promise<ApiResponse<SitePromoSettings>> => {
+    return apiRequest<SitePromoSettings>('/api/site-promo', {
+      method: 'GET',
+    })
+  },
+}
+
 export const authApi = {
   register: async (data: RegisterRequest): Promise<ApiResponse<null>> => {
     return apiRequest<null>('/api/users/register', {
@@ -373,7 +422,7 @@ export const cartApi = {
 interface OrderService {
   package_id: number
   vehicle_type: string
-  vehicle_number: string
+  vehicle_number: string | null
   arrival_date: string
   arrival_time: string
 }
@@ -393,6 +442,20 @@ interface OrderRequest {
   services: OrderService[]
   products: OrderProductRequest[]
   extra_works: OrderExtraWorkRequest[]
+}
+
+export interface GuestOrderRequest {
+  user_full_name: string
+  user_email_address: string
+  user_phone_number: string
+  branch_id: number
+  services: OrderService[]
+  products: OrderProductRequest[]
+  extra_works: OrderExtraWorkRequest[]
+  order_at?: string
+  /** When true, server applies website promo discount if countdown and settings allow */
+  apply_site_promo?: boolean
+  apply_site_promo_source?: 'banner' | 'popup'
 }
 
 interface Order {
@@ -504,6 +567,13 @@ export interface ApiOrder {
 export const orderApi = {
   create: async (data: OrderRequest): Promise<ApiResponse<Order>> => {
     return apiRequest<Order>('/api/orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  createGuest: async (data: GuestOrderRequest): Promise<ApiResponse<Order>> => {
+    return apiRequest<Order>('/api/orders/guest', {
       method: 'POST',
       body: JSON.stringify(data),
     })

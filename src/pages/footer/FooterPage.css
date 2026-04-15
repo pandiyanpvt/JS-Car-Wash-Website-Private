@@ -326,6 +326,16 @@
   color: #dc2626;
 }
 
+.footer-contact-phone {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer-contact-phone:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
 /* Bottom Section */
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.1);

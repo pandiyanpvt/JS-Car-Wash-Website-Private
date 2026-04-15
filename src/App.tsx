@@ -9,17 +9,16 @@ import FAQPage from './pages/faq/FAQPage'
 import TestimonialsPage from './pages/testimonials/TestimonialsPage'
 import { ProductPage } from './pages/products'
 import { BookingPage } from './pages/booking'
-import { LoginPage } from './pages/login'
-import CheckoutPage from './pages/checkout/CheckoutPage'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
-import CartSidebar from './components/cart/CartSidebar'
+import { PromoOffers } from './components/promo'
 import './styles/index.css'
 
 function App() {
 
   return (
     <BrowserRouter>
+      <PromoOffers>
       <div
         style={{
           margin: 0,
@@ -48,13 +47,13 @@ function App() {
           <Route path="/testimonial" element={<TestimonialsPage />} />
           <Route path="/products" element={<ProductPage />} />
           <Route path="/booking" element={<BookingPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<Navigate to="/login" replace />} />
+          <Route path="/checkout" element={<Navigate to="/products" replace />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/register" element={<Navigate to="/" replace />} />
         </Routes>
         <ScrollToTop />
-        <CartSidebar />
       </div>
+      </PromoOffers>
     </BrowserRouter>
   )
 }

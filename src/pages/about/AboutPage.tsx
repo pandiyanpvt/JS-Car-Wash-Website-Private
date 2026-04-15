@@ -125,7 +125,7 @@ function AboutPage() {
                 </div>
                 <div className="about-js-contact-info">
                   <p className="about-js-contact-label">Contact now</p>
-                  <p className="about-js-contact-phone">02 5804 5720</p>
+                  <p className="about-js-contact-phone">0469 053 683</p>
                 </div>
               </div>
             </motion.div>
