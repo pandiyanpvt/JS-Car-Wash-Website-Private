@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo, type ReactNode } from 'react'
+import { useState, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { sitePromoApi, type SitePromoSettings } from '../../services/api'
 import { formatPromoBannerOfferSummary, normalizeOfferScope, offerScopeLabel, promoCountdownActive } from '../../utils/sitePromoBill'
 import { usePromoCountdown } from './usePromoCountdown'
 import './PromoOffers.css'
 
-const KEY_BANNER = 'js_carwash_promo_banner_off'
 const KEY_POPUP_HIDE_ON_BOOKING = 'js_carwash_popup_hide_on_booking'
 const KEY_PROMO_CACHE = 'js_carwash_site_promo_cache_v2'
 const PROMO_CACHE_TTL_MS = 5 * 60 * 1000
@@ -230,19 +229,6 @@ function readCachedPromo(): SitePromoSettings | null {
   }
 }
 
-/** Versioned dismiss: `{ "v": "<updatedAt or fingerprint>" }` — new admin save changes version → promo shows again */
-function readVersionedDismiss(storageKey: string, version: string): boolean {
-  try {
-    const raw = localStorage.getItem(storageKey)
-    if (!raw) return false
-    if (raw === '1') return true
-    const parsed = JSON.parse(raw) as { v?: string }
-    return parsed.v === version
-  } catch {
-    return false
-  }
-}
-
 interface PromoOffersProps {
   children: ReactNode
 }
@@ -252,6 +238,9 @@ export function PromoOffers({ children }: PromoOffersProps) {
   const [config, setConfig] = useState<SitePromoSettings | null>(() => readCachedPromo())
   const [promoLoaded, setPromoLoaded] = useState<boolean>(() => readCachedPromo() !== null)
   const [popupDismissedForRoute, setPopupDismissedForRoute] = useState(false)
+  const [bannerDismissedForSession, setBannerDismissedForSession] = useState(false)
+  const [bannerHeightPx, setBannerHeightPx] = useState(0)
+  const bannerRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -287,27 +276,12 @@ export function PromoOffers({ children }: PromoOffersProps) {
   }, [])
 
   const version = config ? promoVersion(config) : ''
-  const [dismissTick, setDismissTick] = useState(0)
 
-  /** Clear legacy single-flag dismiss when admin turns promos back on */
+  // Banner dismiss is non-persistent: it reappears after refresh.
+  // Still reset on config version changes while app stays open.
   useEffect(() => {
-    if (!promoLoaded || !config) return
-    let cleared = false
-    try {
-      if (config.banner_enabled && localStorage.getItem(KEY_BANNER) === '1') {
-        localStorage.removeItem(KEY_BANNER)
-        cleared = true
-      }
-    } catch {
-      /* ignore */
-    }
-    if (cleared) setDismissTick((n) => n + 1)
-  }, [promoLoaded, config])
-
-  const bannerDismissed = useMemo(() => {
-    if (!promoLoaded || !config) return false
-    return readVersionedDismiss(KEY_BANNER, version)
-  }, [promoLoaded, config, version, dismissTick])
+    setBannerDismissedForSession(false)
+  }, [version])
 
   useEffect(() => {
     // Popup dismiss is temporary per route; when user returns, show it again.
@@ -366,7 +340,8 @@ export function PromoOffers({ children }: PromoOffersProps) {
       return false
     }
   })()
-  const showBanner = promoLoaded && !!config && bannerActiveNow && config.banner_enabled && !bannerDismissed
+  const showBanner =
+    promoLoaded && !!config && bannerActiveNow && config.banner_enabled && !bannerDismissedForSession
   const showPopup =
     promoLoaded &&
     !!config &&
@@ -376,23 +351,38 @@ export function PromoOffers({ children }: PromoOffersProps) {
     !popupHiddenOnBooking
 
   useEffect(() => {
+    if (!showBanner) {
+      setBannerHeightPx(0)
+      return
+    }
+    const el = bannerRef.current
+    if (!el) return
+    const measure = () => {
+      const h = Math.ceil(el.getBoundingClientRect().height)
+      setBannerHeightPx(h > 0 ? h : 0)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    window.addEventListener('resize', measure)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [showBanner])
+
+  useEffect(() => {
     document.documentElement.style.setProperty(
       '--promo-banner-offset',
-      showBanner ? 'var(--promo-banner-h)' : '0px'
+      showBanner ? `${bannerHeightPx}px` : '0px'
     )
     return () => {
       document.documentElement.style.removeProperty('--promo-banner-offset')
     }
-  }, [showBanner])
+  }, [showBanner, bannerHeightPx])
 
   const dismissBanner = () => {
-    if (!config) return
-    try {
-      localStorage.setItem(KEY_BANNER, JSON.stringify({ v: promoVersion(config) }))
-    } catch {
-      /* ignore */
-    }
-    setDismissTick((n) => n + 1)
+    setBannerDismissedForSession(true)
   }
 
   const dismissPopup = () => {
@@ -458,7 +448,7 @@ export function PromoOffers({ children }: PromoOffersProps) {
   return (
     <div className="promo-offers-root">
       {showBanner && config && (
-        <aside className="promo-banner" role="region" aria-label="Limited time offers">
+        <aside ref={bannerRef} className="promo-banner" role="region" aria-label="Limited time offers">
           <button type="button" className="promo-banner-dismiss" onClick={dismissBanner} aria-label="Dismiss offer banner">
             ×
           </button>
@@ -526,7 +516,7 @@ export function PromoOffers({ children }: PromoOffersProps) {
 
       <div
         className="promo-offers-content-shift"
-        style={{ paddingTop: showBanner ? 'var(--promo-banner-h)' : 0 }}
+        style={{ paddingTop: showBanner ? 'var(--promo-banner-offset)' : 0 }}
       >
         {children}
       </div>
