@@ -1,0 +1,1 @@
+export { PromoOffers } from './PromoOffers'

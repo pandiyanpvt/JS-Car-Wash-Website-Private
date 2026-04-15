@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useCart } from '../../contexts/CartContext'
-import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import AuthModal from '../auth/AuthModal'
-import ProfilePopup from '../profile/ProfilePopup'
 import './Navbar.css'
 
 interface NavbarProps {
@@ -17,16 +13,10 @@ interface NavbarProps {
 function Navbar({ onNavigate, className = '' }: NavbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { openCart, getTotalItems } = useCart()
-  const { isAuthenticated } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [servicesHover, setServicesHover] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
-  const [profilePopupOpen, setProfilePopupOpen] = useState(false)
-  const cartItemCount = getTotalItems()
 
   const navItems = [
     { label: 'Home', href: '/', route: true },
@@ -65,57 +55,40 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
     setMobileMenuOpen(false)
     setMobileServicesOpen(false)
     
-    // Check if user is trying to access booking page without authentication
-    if (href === '/booking' && !isAuthenticated) {
-      setAuthModalTab('signin')
-      setAuthModalOpen(true)
-      return
-    }
-    
     if (onNavigate) {
       onNavigate()
     }
     navigate(href)
   }
 
-  // Close mobile menu when clicking outside (but not when profile popup is open)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
-      // Don't close if profile popup is open
-      if (profilePopupOpen) {
-        return
-      }
       if (mobileMenuOpen && 
           !target.closest('.modern-navbar') && 
-          !target.closest('.mobile-menu-overlay') &&
-          !target.closest('.profile-popup') &&
-          !target.closest('.profile-popup-backdrop')) {
+          !target.closest('.mobile-menu-overlay')) {
         setMobileMenuOpen(false)
         setMobileServicesOpen(false)
       }
     }
 
-    if (mobileMenuOpen && !profilePopupOpen) {
+    if (mobileMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       document.body.style.overflow = 'hidden'
-    } else if (!profilePopupOpen) {
+    } else {
       document.body.style.overflow = 'unset'
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      if (!profilePopupOpen) {
-        document.body.style.overflow = 'unset'
-      }
+      document.body.style.overflow = 'unset'
     }
-  }, [mobileMenuOpen, profilePopupOpen])
+  }, [mobileMenuOpen])
 
   return (
     <>
       <nav className={`modern-navbar ${className}`}>
         <div className="navbar-wrapper">
-          {/* Logo Section */}
           <div className="navbar-logo-section">
             <Link to="/" onClick={(e) => {
               handleClick('/', e)
@@ -137,7 +110,6 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
             </Link>
           </div>
 
-          {/* Desktop Navigation Links */}
           <div className="navbar-links desktop-nav-links">
             {navItems.map((item, index) => {
               const active = isActive(item.href)
@@ -193,21 +165,6 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
             })}
           </div>
 
-          {/* Desktop Cart Icon - Only show when authenticated */}
-          {isAuthenticated && (
-            <button
-              className="navbar-cart-button desktop-cta-button"
-              aria-label="Shopping Cart"
-              onClick={openCart}
-            >
-              <i className="fas fa-shopping-cart"></i>
-              {cartItemCount > 0 && (
-                <span className="cart-badge">{cartItemCount}</span>
-              )}
-            </button>
-          )}
-
-          {/* Desktop Theme Toggle */}
           <button
             className="navbar-theme-toggle desktop-cta-button"
             onClick={toggleTheme}
@@ -220,32 +177,6 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
             )}
           </button>
 
-          {/* Desktop Profile Icon or Sign In Button */}
-          {isAuthenticated ? (
-            <button
-              className="navbar-profile-button desktop-cta-button"
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                setProfilePopupOpen(true)
-              }}
-              aria-label="Profile"
-            >
-              <i className="fas fa-user-circle"></i>
-            </button>
-          ) : (
-            <button
-              className="navbar-cta-button desktop-cta-button"
-              onClick={() => {
-                setAuthModalTab('signin')
-                setAuthModalOpen(true)
-              }}
-            >
-              Sign In
-            </button>
-          )}
-
-          {/* Mobile Hamburger Button */}
           <button
             className="mobile-hamburger-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -262,7 +193,6 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
@@ -383,24 +313,6 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
                   )
                 })}
 
-                {/* Mobile Cart Icon - Only show when authenticated */}
-                {isAuthenticated && (
-                  <button
-                    className="mobile-cta-button mobile-cart-button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setMobileMenuOpen(false)
-                      openCart()
-                    }}
-                  >
-                    <i className="fas fa-shopping-cart"></i> Cart
-                    {cartItemCount > 0 && (
-                      <span className="mobile-cart-badge">{cartItemCount}</span>
-                    )}
-                  </button>
-                )}
-
-                {/* Mobile Theme Toggle */}
                 <button
                   className="mobile-cta-button mobile-theme-toggle"
                   onClick={(e) => {
@@ -418,49 +330,11 @@ function Navbar({ onNavigate, className = '' }: NavbarProps) {
                     </>
                   )}
                 </button>
-
-                {isAuthenticated ? (
-                  <button
-                    className="mobile-cta-button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      setMobileMenuOpen(false)
-                      setProfilePopupOpen(true)
-                    }}
-                  >
-                    <i className="fas fa-user-circle"></i> Profile
-                  </button>
-                ) : (
-                  <button
-                    className="mobile-cta-button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setMobileMenuOpen(false)
-                      setAuthModalTab('signin')
-                      setAuthModalOpen(true)
-                    }}
-                  >
-                    Sign In
-                  </button>
-                )}
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
-
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialTab={authModalTab}
-      />
-      <ProfilePopup
-        isOpen={profilePopupOpen}
-        onClose={() => {
-          setProfilePopupOpen(false)
-        }}
-      />
     </>
   )
 }

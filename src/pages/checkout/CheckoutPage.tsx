@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar/Navbar'
 import { FooterPage } from '../footer'
 import { useCart } from '../../contexts/CartContext'
-import { useAuth } from '../../contexts/AuthContext'
 import { orderApi, contactApi, productApi, type Branch, type Product as ApiProduct, type ProductStockEntry } from '../../services/api'
 import OrderSuccessModal from '../../components/cart/OrderSuccessModal'
 import './CheckoutPage.css'
@@ -11,8 +10,10 @@ import './CheckoutPage.css'
 function CheckoutPage() {
   const navigate = useNavigate()
   const { cartItems, getTotalPrice, getTotalItems, clearCart, updateQuantity, removeFromCart } = useCart()
-  const { user, addOrder } = useAuth()
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [guestName, setGuestName] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
   const [branches, setBranches] = useState<Branch[]>([])
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
@@ -54,8 +55,11 @@ function CheckoutPage() {
   }, [])
 
   const handlePlaceOrder = async () => {
-    if (!user) {
-      setError('Please sign in to place an order')
+    const nameTrim = guestName.trim()
+    const emailTrim = guestEmail.trim()
+    const phoneTrim = guestPhone.trim()
+    if (!nameTrim || !emailTrim || !phoneTrim) {
+      setError('Please enter your full name, email, and phone number')
       return
     }
 
@@ -111,7 +115,9 @@ function CheckoutPage() {
       }
 
       const orderData = {
-        user_id: user.id,
+        user_full_name: nameTrim,
+        user_email_address: emailTrim,
+        user_phone_number: phoneTrim,
         branch_id: selectedBranchId,
         services: [],
         products: cartItems.map(item => ({
@@ -121,21 +127,9 @@ function CheckoutPage() {
         extra_works: []
       }
 
-      const response = await orderApi.create(orderData)
+      const response = await orderApi.createGuest(orderData)
 
       if (response.success) {
-        const order = {
-          id: response.data?.id?.toString() || Date.now().toString(),
-          date: new Date().toISOString(),
-          items: cartItems.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price
-          })),
-          total: getTotalPrice(),
-          status: 'pending' as const
-        }
-        addOrder(order)
         await clearCart()
         setShowSuccessModal(true)
         
@@ -301,6 +295,63 @@ function CheckoutPage() {
               <p>Please note: Delivery is not available. You can pay and pick up from the shop directly.</p>
             </div>
 
+            <div className="checkout-guest-details" style={{ marginTop: '1.25rem' }}>
+              <h3 className="checkout-branch-title">Your details</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <input
+                  type="text"
+                  className="checkout-branch-title"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    fontSize: '1rem',
+                    boxSizing: 'border-box',
+                  }}
+                  placeholder="Full name"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  disabled={submitting}
+                  autoComplete="name"
+                />
+                <input
+                  type="email"
+                  className="checkout-branch-title"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    fontSize: '1rem',
+                    boxSizing: 'border-box',
+                  }}
+                  placeholder="Email"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  disabled={submitting}
+                  autoComplete="email"
+                />
+                <input
+                  type="tel"
+                  className="checkout-branch-title"
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    fontSize: '1rem',
+                    boxSizing: 'border-box',
+                  }}
+                  placeholder="Phone"
+                  value={guestPhone}
+                  onChange={(e) => setGuestPhone(e.target.value)}
+                  disabled={submitting}
+                  autoComplete="tel"
+                />
+              </div>
+            </div>
+
             {error && (
               <div className="checkout-error-message">
                 <i className="fas fa-exclamation-circle"></i>
@@ -311,7 +362,14 @@ function CheckoutPage() {
             <button
               onClick={handlePlaceOrder}
               className="checkout-submit-btn"
-              disabled={submitting || !selectedBranchId || loading}
+              disabled={
+                submitting ||
+                !selectedBranchId ||
+                loading ||
+                !guestName.trim() ||
+                !guestEmail.trim() ||
+                !guestPhone.trim()
+              }
             >
               {submitting ? (
                 <>

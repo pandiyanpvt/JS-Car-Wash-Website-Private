@@ -1,9 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import Navbar from '../../components/navbar/Navbar'
 import { FooterPage } from '../footer'
-import { useCart } from '../../contexts/CartContext'
-import { useAuth } from '../../contexts/AuthContext'
-import AuthModal from '../../components/auth/AuthModal'
 import SEO from '../../components/SEO'
 import { productApi, productCategoryApi, type Product as ApiProduct, type ProductStockEntry, type PaginatedProductsResponse, type PaginationInfo } from '../../services/api'
 import './ProductPage.css'
@@ -27,13 +24,9 @@ interface ProductItem {
 }
 
 function ProductPage() {
-  const { addToCart } = useCart()
-  const { isAuthenticated } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'stock'>('name')
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
   const [products, setProducts] = useState<ProductItem[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -47,7 +40,6 @@ function ProductPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchLoading, setSearchLoading] = useState(false)
-  const [actionMessage, setActionMessage] = useState<string | null>(null)
 
   const mapApiProductToProductItem = useCallback((p: ApiProduct): ProductItem => {
     const branchStocks: BranchStock[] = (p.stock_entries || [])
@@ -210,30 +202,6 @@ function ProductPage() {
     return filtered
   }, [products, searchQuery, selectedCategory, sortBy])
 
-  const handleAddToCart = useCallback(async (product: ProductItem) => {
-    setActionMessage(null)
-
-    if (product.stock <= 0) {
-      setActionMessage(`${product.name} is out of stock.`)
-      return
-    }
-
-    if (!isAuthenticated) {
-      setAuthModalTab('signin')
-      setAuthModalOpen(true)
-      return
-    }
-    await addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1,
-      category: product.category
-    })
-    setActionMessage(`${product.name} added to cart.`)
-  }, [addToCart, isAuthenticated])
-
   return (
     <div className="product-page">
       <SEO
@@ -312,13 +280,6 @@ function ProductPage() {
             </div>
           )}
 
-          {actionMessage && (
-            <div className="product-action-message">
-              <i className="fas fa-info-circle"></i>
-              <span>{actionMessage}</span>
-            </div>
-          )}
-
           {loading || searchLoading ? (
             <div className="product-empty-state">
               <div className="product-empty-icon">
@@ -360,13 +321,6 @@ function ProductPage() {
                         ${product.price.toFixed(2)}
                       </div>
                     </div>
-                    <button
-                      className="product-add-to-cart-btn"
-                      onClick={() => handleAddToCart(product)}
-                      disabled={product.stock <= 0}
-                    >
-                      {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                    </button>
                   </div>
                 </div>
               ))}
@@ -425,11 +379,6 @@ function ProductPage() {
         </div>
       </div>
       <FooterPage />
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialTab={authModalTab}
-      />
     </div>
   )
 }

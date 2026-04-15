@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
-import AuthModal from '../../components/auth/AuthModal'
-import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '../../contexts/ThemeContext'
 import { contactApi } from '../../services/api'
 import SEO from '../../components/SEO'
 import './HomePage.css'
@@ -20,7 +19,6 @@ interface Branch {
 }
 
 function HomePage({ }: HomePageProps) {
-  const { isAuthenticated } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
   const [modelsShow, setModelsShow] = useState(false)
@@ -28,8 +26,6 @@ function HomePage({ }: HomePageProps) {
   const [isClosing, setIsClosing] = useState(false)
   const [faqClickedIndex, setFaqClickedIndex] = useState<number | null>(null)
   const [showNavbar, setShowNavbar] = useState(false)
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
   const [selectedModel, setSelectedModel] = useState<string | null>(() => {
     // Load selected model from localStorage on mount
     try {
@@ -64,6 +60,7 @@ function HomePage({ }: HomePageProps) {
   const [containerPosition, setContainerPosition] = useState({ top: 0, left: 0, width: 0, height: 0 })
   const location = useLocation()
   const navigate = useNavigate()
+  const { theme, toggleTheme } = useTheme()
   const [branches, setBranches] = useState<Branch[]>([])
 
   // Car models array for pagination
@@ -255,17 +252,7 @@ function HomePage({ }: HomePageProps) {
     navigate(href)
   }, [navigate])
 
-  // Handle branch selection with authentication check
   const handleBranchSelection = useCallback((branch: Branch) => {
-    if (!isAuthenticated) {
-      // User not authenticated, show sign-in popup
-      setDealersShow(false)
-      setAuthModalTab('signin')
-      setAuthModalOpen(true)
-      return
-    }
-
-    // User is authenticated, allow branch selection
     setSelectedBranch(branch)
     try {
       localStorage.setItem('selectedBranch', JSON.stringify(branch))
@@ -273,7 +260,7 @@ function HomePage({ }: HomePageProps) {
       console.error('Failed to save selected branch to localStorage:', error)
     }
     setDealersShow(false)
-  }, [isAuthenticated])
+  }, [])
 
   // Ensure default model (SUV) is set on first visit
   useEffect(() => {
@@ -294,7 +281,7 @@ function HomePage({ }: HomePageProps) {
       return !!document.querySelector('.profile-popup')
     }
 
-    const hasOpenPopup = menuOpen || dealersShow || modelsShow || authModalOpen || showVideo || checkProfilePopup()
+    const hasOpenPopup = menuOpen || dealersShow || modelsShow || showVideo || checkProfilePopup()
     if (hasOpenPopup) {
       // Lock scroll on body
       const originalOverflow = document.body.style.overflow
@@ -319,7 +306,7 @@ function HomePage({ }: HomePageProps) {
       document.body.style.top = ''
       document.body.style.width = ''
     }
-  }, [menuOpen, dealersShow, modelsShow, authModalOpen, showVideo])
+  }, [menuOpen, dealersShow, modelsShow, showVideo])
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -784,26 +771,22 @@ function HomePage({ }: HomePageProps) {
                 })}
 
                 <button
-                  className="mobile-cta-button"
+                  type="button"
+                  className="mobile-cta-button mobile-theme-toggle"
                   onClick={(e) => {
                     e.preventDefault()
-                    setMenuOpen(false)
-                    setAuthModalTab('signup')
-                    setAuthModalOpen(true)
+                    toggleTheme()
                   }}
                 >
-                  Create an Account
-                </button>
-                <button
-                  className="mobile-cta-button"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setMenuOpen(false)
-                    setAuthModalTab('signin')
-                    setAuthModalOpen(true)
-                  }}
-                >
-                  Sign In
+                  {theme === 'light' ? (
+                    <>
+                      <i className="fas fa-moon"></i> Dark Mode
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-sun"></i> Light Mode
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>
@@ -920,14 +903,7 @@ function HomePage({ }: HomePageProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
               >
-                <button className="book-now-btn" onClick={() => {
-                  if (!isAuthenticated) {
-                    setAuthModalTab('signin')
-                    setAuthModalOpen(true)
-                  } else {
-                    navigate('/booking')
-                  }
-                }}>BOOK NOW</button>
+                <button className="book-now-btn" onClick={() => navigate('/booking')}>BOOK NOW</button>
               </motion.div>
             </div>
           </div>
@@ -1029,10 +1005,9 @@ function HomePage({ }: HomePageProps) {
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
                       </svg>
                       <p className="selected-branch-text">
-                        {isAuthenticated && selectedBranch
+                        {selectedBranch
                           ? (selectedBranch.subtitle || selectedBranch.name)
-                          : 'Select your branch'
-                        }
+                          : 'Select your branch'}
                       </p>
                     </div>
                   </motion.div>
@@ -1605,13 +1580,6 @@ function HomePage({ }: HomePageProps) {
       </section>
 
       <FooterPage />
-
-      {/* Sign In Popup Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialTab={authModalTab}
-      />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { FooterPage } from '../footer'
 import Navbar from '../../components/navbar/Navbar'
-import { useAuth } from '../../contexts/AuthContext'
 import { contactApi } from '../../services/api'
 import ContactSuccessModal from '../../components/contact/ContactSuccessModal'
 import SEO from '../../components/SEO'
@@ -19,7 +18,6 @@ interface Branch {
 }
 
 function ContactUsPage() {
-  const { user } = useAuth()
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -50,16 +48,6 @@ function ContactUsPage() {
     fetchBranches()
   }, [])
 
-  useEffect(() => {
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        fullname: `${user.firstName} ${user.lastName}`,
-        email: user.email
-      }))
-    }
-  }, [user])
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -86,8 +74,8 @@ function ContactUsPage() {
       if (response.success) {
         setSubmitSuccess(true)
         setFormData({
-          fullname: user ? `${user.firstName} ${user.lastName}` : '',
-          email: user ? user.email : '',
+          fullname: '',
+          email: '',
           subject: '',
           message: ''
         })
@@ -252,7 +240,7 @@ function ContactUsPage() {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="fullname" className="form-label">Fullname</label>
+                <label htmlFor="fullname" className="form-label">Full Name</label>
                 <input
                   type="text"
                   id="fullname"
@@ -261,7 +249,6 @@ function ContactUsPage() {
                   onChange={handleChange}
                   className="form-input"
                   required
-                  disabled={!!user}
                 />
               </div>
 
@@ -275,7 +262,6 @@ function ContactUsPage() {
                   onChange={handleChange}
                   className="form-input"
                   required
-                  disabled={!!user}
                 />
               </div>
             </div>

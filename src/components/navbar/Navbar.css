@@ -16,7 +16,7 @@
 /* When used as fixed navbar (on other pages) */
 .modern-navbar.fixed-navbar {
   position: fixed;
-  top: 0;
+  top: var(--promo-banner-offset, 0px);
   left: 0;
   right: 0;
   width: 100%;
@@ -413,7 +413,7 @@
 .mobile-hamburger-btn {
   display: none;
   position: fixed;
-  top: 20px;
+  top: calc(20px + var(--promo-banner-offset, 0px));
   left: 20px;
   background: none;
   border: none;
@@ -836,7 +836,7 @@
   .mobile-hamburger-btn {
     display: flex !important;
     position: fixed !important;
-    top: 20px !important;
+    top: calc(20px + var(--promo-banner-offset, 0px)) !important;
     left: 20px !important;
     pointer-events: auto !important;
     z-index: 1002 !important;
@@ -852,7 +852,7 @@
 @media (max-width: 768px) {
   .modern-navbar.fixed-navbar {
     position: fixed;
-    top: 0;
+    top: var(--promo-banner-offset, 0px);
     left: 0;
     right: 0;
     width: 100%;
@@ -901,7 +901,7 @@
   .mobile-hamburger-btn {
     display: flex !important;
     position: fixed;
-    top: 20px;
+    top: calc(20px + var(--promo-banner-offset, 0px));
     left: 20px;
     pointer-events: auto;
     z-index: 1002;
@@ -911,7 +911,7 @@
 @media (max-width: 480px) {
   .modern-navbar.fixed-navbar {
     position: fixed;
-    top: 0;
+    top: var(--promo-banner-offset, 0px);
     left: 0;
     right: 0;
     width: 100%;

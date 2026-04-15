@@ -39,6 +39,32 @@ body {
   padding: 0;
 }
 
+/* Promo banner height + offset for fixed headers (set by PromoOffers when banner visible) */
+:root {
+  /* Room for three columns + booking bill + timer + CTA */
+  --promo-banner-h: 92px;
+  --promo-banner-offset: 0px;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --promo-banner-h: 110px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    /* Taller when blocks wrap + booking bill row */
+    --promo-banner-h: 152px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --promo-banner-h: 168px;
+  }
+}
+
 /* Modern Scrollbar Styling - Red and Light Gray Design */
 /* Webkit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {

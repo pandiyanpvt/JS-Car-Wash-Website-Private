@@ -21,7 +21,7 @@
 /* Navbar Wrapper - Full Width - Fixed with Glass Effect - Desktop Only */
 .header-navbar-wrapper {
   position: fixed;
-  top: 0;
+  top: var(--promo-banner-offset, 0px);
   left: 0;
   right: 0;
   width: 100%;
@@ -284,7 +284,7 @@
 /* Header Hamburger Button - Mobile: Opens Sidebar, Desktop: Shows Navbar */
 .header-hamburger-btn {
   position: fixed;
-  top: 12px;
+  top: calc(12px + var(--promo-banner-offset, 0px));
   right: 20px;
   background: none;
   border: none;
